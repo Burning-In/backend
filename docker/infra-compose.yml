@@ -1,0 +1,22 @@
+services:
+  mysql:
+    container_name: mysql-local
+    image: mysql:8.0
+    ports:
+      - "${DB_PORT}:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_CHARACTER_SET=utf8mb4
+      - MYSQL_COLLATE=utf8mb4_general_ci
+    volumes:
+      - mysql-8-data:/var/lib/mysql
+
+volumes:
+  mysql-8-data:
+
+networks:
+  default:
+    driver: bridge
