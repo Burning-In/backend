@@ -1,6 +1,5 @@
 package com.momentum.domain.example;
 
-import com.momentum.infrastructure.example.ExampleJpaRepository;
 import com.momentum.support.error.CoreException;
 import com.momentum.support.error.ErrorType;
 import com.momentum.utils.DatabaseCleanUp;
