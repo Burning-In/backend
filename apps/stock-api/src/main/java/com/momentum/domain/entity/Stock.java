@@ -1,10 +1,11 @@
-package com.momentum.domain.quant;
+package com.momentum.domain.entity;
 
 import com.momentum.domain.BaseEntity;
 import jakarta.persistence.Entity;
 
 @Entity
-public class Factor extends BaseEntity {
+public class Stock extends BaseEntity {
 
   private String name;
+  private String code;
 }

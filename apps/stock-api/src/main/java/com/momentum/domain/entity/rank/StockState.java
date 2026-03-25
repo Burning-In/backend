@@ -1,4 +1,4 @@
-package com.momentum.domain.rank;
+package com.momentum.domain.entity.rank;
 
 import com.momentum.domain.BaseEntity;
 import jakarta.persistence.Entity;

@@ -1,7 +1,7 @@
-package com.momentum.domain.rank;
+package com.momentum.domain.entity.rank;
 
 import com.momentum.domain.BaseEntity;
-import com.momentum.domain.Stock;
+import com.momentum.domain.entity.Stock;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 

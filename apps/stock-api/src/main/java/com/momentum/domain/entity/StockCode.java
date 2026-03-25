@@ -1,4 +1,4 @@
-package com.momentum.domain;
+package com.momentum.domain.entity;
 
 import lombok.Getter;
 

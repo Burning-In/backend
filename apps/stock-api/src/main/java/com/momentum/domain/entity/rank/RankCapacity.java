@@ -1,4 +1,4 @@
-package com.momentum.domain.rank;
+package com.momentum.domain.entity.rank;
 
 public final class RankCapacity {
 

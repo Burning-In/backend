@@ -1,5 +1,6 @@
-package com.momentum.domain;
+package com.momentum.domain.entity;
 
+import com.momentum.domain.BaseEntity;
 import jakarta.persistence.Entity;
 
 @Entity

@@ -1,8 +1,8 @@
-package com.momentum.domain;
+package com.momentum.domain.entity;
 
+import com.momentum.domain.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 
 @Entity
 public class StockDailyCandle extends BaseEntity {
