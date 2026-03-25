@@ -1,8 +1,6 @@
 package com.momentum.interfaces.api;
 
 import com.momentum.domain.example.ExampleModel;
-import com.momentum.infrastructure.example.ExampleJpaRepository;
-import com.momentum.interfaces.api.example.ExampleV1Dto;
 import com.momentum.utils.DatabaseCleanUp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
