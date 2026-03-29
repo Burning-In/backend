@@ -1,7 +1,7 @@
 package com.momentum.domain.service.impl;
 
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockDailyCandle;
+import com.momentum.domain.entity.StockCandle;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,7 +22,7 @@ public class StockPivotServiceImpl {
   // 확실한 고점 -> 양옆이 +- 4%여야하나?
   // 낮 높 낮(만약에 4%하락이 아니라면) 낮
   // 낮 높 낮(만약에 4%하락이라면)
-  public StockDailyCandle determinePivot(Stock stock) {
+  public StockCandle determinePivot(Stock stock) {
 
     return null;
   }

@@ -1,5 +1,6 @@
 package com.momentum.infrastructure;
 
+import com.momentum.application.StockCandleRequest;
 import com.momentum.infrastructure.dto.StockChartInfoRequest;
 import com.momentum.infrastructure.dto.StockChartInfoResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +18,10 @@ public class LsStockChartClient {
   private String authToken;
 
   public StockChartInfoResponse getDailyCandles(
-      String stockCode,
-      int count,
-      String startDate,
-      String endDate
+      StockCandleRequest stockCandleRequest
   ) {
     StockChartInfoRequest request = StockChartInfoRequest.daily(
-        stockCode, count, startDate, endDate
+        stockCandleRequest.stockCode(), stockCandleRequest.count(), stockCandleRequest.startDate(), stockCandleRequest.endDate()
     );
 
     StockChartInfoResponse response = restClient.post()
@@ -35,7 +33,7 @@ public class LsStockChartClient {
         .retrieve()
         .body(StockChartInfoResponse.class);
 
-    if (response == null || response.candles() == null) {
+    if (response == null || response.candleResponses() == null) {
       throw new IllegalStateException("LS API 응답이 null입니다");
     }
 

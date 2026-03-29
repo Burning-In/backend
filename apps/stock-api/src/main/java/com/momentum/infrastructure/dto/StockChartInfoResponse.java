@@ -6,11 +6,11 @@ import java.util.List;
 public record StockChartInfoResponse(
 
     @JsonProperty("t8451OutBlock1")
-    List<Candle> candles
+    List<CandleResponse> candleResponses
 
 ) {
 
-  public record Candle(
+  public record CandleResponse(
 
       @JsonProperty("date")
       String date,
