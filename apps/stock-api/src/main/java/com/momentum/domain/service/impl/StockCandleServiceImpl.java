@@ -5,7 +5,7 @@ import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.domain.service.StockCandleService;
-import com.momentum.infrastructure.dto.StockChartInfoResponse;
+import com.momentum.infrastructure.api.dto.StockChartInfoResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

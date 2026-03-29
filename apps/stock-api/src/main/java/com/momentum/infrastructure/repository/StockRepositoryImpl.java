@@ -1,4 +1,4 @@
-package com.momentum.infrastructure;
+package com.momentum.infrastructure.repository;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.respository.StockRepository;

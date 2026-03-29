@@ -3,7 +3,7 @@ package com.momentum.domain.entity;
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.entity.indicator.StockPivotType;
 import com.momentum.domain.entity.indicator.StockPriceTrend;
-import com.momentum.infrastructure.dto.StockChartInfoResponse.CandleResponse;
+import com.momentum.infrastructure.api.dto.StockChartInfoResponse.CandleResponse;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

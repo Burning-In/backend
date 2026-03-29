@@ -1,8 +1,8 @@
 package com.momentum.application;
 
 import com.momentum.domain.service.StockCandleService;
-import com.momentum.infrastructure.LsStockChartClient;
-import com.momentum.infrastructure.dto.StockChartInfoResponse;
+import com.momentum.infrastructure.api.LsStockChartClient;
+import com.momentum.infrastructure.api.dto.StockChartInfoResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
