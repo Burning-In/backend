@@ -1,5 +1,5 @@
 package com.momentum.domain.service;
 
-public class StockStateService {
+public interface StockPivotService {
 
 }
