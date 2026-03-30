@@ -8,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockCandle extends BaseEntity {
 
-  private String tradeDate;
+  private LocalDate tradeDate;
   private Long openPrice;
   private Long highPrice;
   private Long lowPrice;
@@ -36,7 +38,7 @@ public class StockCandle extends BaseEntity {
   @ManyToOne
   private Stock stock;
 
-  private StockCandle(String tradeDate, Long openPrice, Long highPrice, Long lowPrice, Long closePrice, Long volume,
+  private StockCandle(LocalDate tradeDate, Long openPrice, Long highPrice, Long lowPrice, Long closePrice, Long volume,
       StockPriceTrend stockPriceTrend, StockPivotType stockPivotType,
       StockCandlePeriod candlePeriod, Stock stock) {
     this.tradeDate = tradeDate;
@@ -51,18 +53,32 @@ public class StockCandle extends BaseEntity {
     this.stock = stock;
   }
 
-  public static StockCandle daily(Stock stock, CandleResponse candleResponse) {
+  public static StockCandle daily(
+      Stock stock,
+      String rawDate,
+      long openPrice,
+      long highPrice,
+      long lowPrice,
+      long closePrice,
+      long volume,
+      String priceChangeSign) {
     return new StockCandle(
-        candleResponse.date(),
-        candleResponse.openPrice(),
-        candleResponse.highPrice(),
-        candleResponse.lowPrice(),
-        candleResponse.closePrice(),
-        candleResponse.volume(),
-        StockPriceTrend.getValue(candleResponse.priceChangeSign()),
+        LocalDate.parse(rawDate, DateTimeFormatter.BASIC_ISO_DATE),
+        openPrice,
+        highPrice,
+        lowPrice,
+        closePrice,
+        volume,
+        StockPriceTrend.getValue(priceChangeSign),
         StockPivotType.UNDEFINED,
         StockCandlePeriod.DAY,
         stock
     );
+  }
+
+  public void updatePivotType(StockPivotType stockPivotType) {
+    if (this.stockPivotType != stockPivotType) {
+      this.stockPivotType = stockPivotType;
+    }
   }
 }

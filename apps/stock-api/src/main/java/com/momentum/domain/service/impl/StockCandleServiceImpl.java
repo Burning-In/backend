@@ -6,6 +6,7 @@ import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.domain.service.StockCandleService;
 import com.momentum.infrastructure.api.dto.StockChartInfoResponse;
+import com.momentum.infrastructure.api.dto.StockChartInfoResponse.CandleResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,9 +27,22 @@ public class StockCandleServiceImpl implements StockCandleService {
 
     List<StockCandle> dailyCandles = stockChartInfoResponse.candleResponses()
         .stream()
-        .map(candle -> StockCandle.daily(stock, candle))
+        .map(candle -> fromCandle(stock, candle))
         .toList();
 
-    return stockCandleRepository.save(dailyCandles);
+    return stockCandleRepository.saveAll(dailyCandles);
+  }
+
+  private StockCandle fromCandle(Stock stock, CandleResponse candle) {
+    return StockCandle.daily(
+        stock,
+        candle.date(),
+        candle.openPrice(),
+        candle.highPrice(),
+        candle.lowPrice(),
+        candle.closePrice(),
+        candle.volume(),
+        candle.priceChangeSign()
+    );
   }
 }

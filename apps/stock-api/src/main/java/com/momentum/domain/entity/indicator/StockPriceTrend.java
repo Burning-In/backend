@@ -28,4 +28,12 @@ public enum StockPriceTrend {
     }
     return NONE;
   }
+
+  public boolean isUpper(){
+    return this == UPPER_LIMIT || this == UP;
+  }
+
+  public boolean isLower(){
+    return this == LOWER_LIMIT || this == DOWN;
+  }
 }
