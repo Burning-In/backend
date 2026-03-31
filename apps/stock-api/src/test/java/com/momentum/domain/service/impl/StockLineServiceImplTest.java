@@ -53,7 +53,7 @@ class StockLineServiceImplTest {
     // then
     assertThat(result).extracting(
             StockLine::getPrice,
-            StockLine::getTouchCount)
+            StockLine::getResistanceTouchCount)
         .containsExactlyInAnyOrder(100_000L, 1L);
   }
 
@@ -84,7 +84,69 @@ class StockLineServiceImplTest {
     // then
     assertThat(result).extracting(
             StockLine::getPrice,
-            StockLine::getTouchCount)
+            StockLine::getResistanceTouchCount)
         .containsExactlyInAnyOrder(existingHigh.getPrice(), 2L);
+  }
+
+  @Test
+  @DisplayName("유사지지선이 범위안에 없으면, 새로 생성한다")
+  void determineSupport_createNew() {
+    // given
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930"));
+    StockLine existing = StockLine.support(99_000L, stock);
+    stockLineRepository.save(existing);
+
+    StockCandle candle = StockCandle.daily(
+        stock,
+        "20250801",
+        100_000L,
+        100_000L,
+        100_000L,
+        100_000L,
+        100_000L,
+        "1"
+    );
+    stockCandleRepository.save(candle);
+
+    // when
+    StockLine result = stockLineService.determineSupport(stock, candle, 0.7);
+
+    // then
+    assertThat(result).extracting(
+            StockLine::getPrice,
+            StockLine::getSupportTouchCount)
+        .containsExactlyInAnyOrder(100_000L, 1L);
+  }
+
+  @Test
+  @DisplayName("유사지지선 범위안에 있으면, 범위안의 값중 최저값을 반환한다")
+  void determineSupport_haveSupport() {
+    // given
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930"));
+    StockLine existingHigh = StockLine.support(100_600L, stock);
+    StockLine existingLow = StockLine.support(99_400L, stock);
+    stockLineRepository.save(existingHigh);
+    stockLineRepository.save(existingLow);
+
+    StockCandle candle = StockCandle.daily(
+        stock,
+        "20250801",
+        100_000L,
+        100_000L,
+        100_000L,
+        100_000L,
+        100_000L,
+        "1"
+    );
+    stockCandleRepository.save(candle);
+
+    // when
+    StockLine result = stockLineService.determineSupport(stock, candle, 0.7);
+
+    // then
+    assertThat(result).extracting(
+            StockLine::getPrice,
+            StockLine::getSupportTouchCount)
+        .containsExactlyInAnyOrder(existingLow.getPrice(), 2L);
   }
 }

@@ -17,7 +17,8 @@ import lombok.NoArgsConstructor;
 public class StockLine extends BaseEntity {
 
   private Long price;
-  private Long touchCount;
+  private Long resistanceTouchCount;
+  private Long supportTouchCount;
 
   @Enumerated(EnumType.STRING)
   private StockLineType lineType;
@@ -25,9 +26,11 @@ public class StockLine extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   private Stock stock;
 
-  public StockLine(Long price, Long touchCount, StockLineType lineType, Stock stock) {
+  public StockLine(Long price, Long resistanceTouchCount, Long supportTouchCount,
+      StockLineType lineType, Stock stock) {
     this.price = price;
-    this.touchCount = touchCount;
+    this.resistanceTouchCount = resistanceTouchCount;
+    this.supportTouchCount = supportTouchCount;
     this.lineType = lineType;
     this.stock = stock;
   }
@@ -36,6 +39,7 @@ public class StockLine extends BaseEntity {
     return new StockLine(
         closePrice,
         1L,
+        0L,
         StockLineType.RESISTANCE,
         stock
     );
@@ -44,6 +48,7 @@ public class StockLine extends BaseEntity {
   public static StockLine support(long closePrice, Stock stock) {
     return new StockLine(
         closePrice,
+        0L,
         1L,
         StockLineType.SUPPORT,
         stock
@@ -51,7 +56,11 @@ public class StockLine extends BaseEntity {
   }
 
   // 동시성 문제 해결 필요
-  public void increaseTouchCount() {
-    this.touchCount++;
+  public void increaseResistanceTouch() {
+    this.resistanceTouchCount++;
+  }
+
+  public void increaseSupportTouch() {
+    this.supportTouchCount++;
   }
 }

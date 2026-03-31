@@ -36,6 +36,25 @@ public class StockLineRepositoryImpl implements StockLineRepository {
   }
 
   @Override
+  public Optional<StockLine> findLowestSupportInRange(Long stockId, long lowPivotPointClosePrice,
+      double thresholdPercent) {
+    double lowerBound = lowPivotPointClosePrice * ((100 - thresholdPercent) / 100);
+    double upperBound = lowPivotPointClosePrice * ((100 + thresholdPercent) / 100);
+
+    StockLine result = jpaQueryFactory
+        .selectFrom(stockLine)
+        .where(
+            stockLine.stock.id.eq(stockId),
+            stockLine.lineType.eq(StockLineType.SUPPORT),
+            stockLine.price.gt(lowerBound).and(stockLine.price.lt(upperBound))
+        )
+        .orderBy(stockLine.price.asc())
+        .fetchFirst();
+
+    return Optional.ofNullable(result);
+  }
+
+  @Override
   public StockLine save(StockLine stockLine) {
     return stockLineJpaRepository.save(stockLine);
   }

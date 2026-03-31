@@ -15,7 +15,6 @@ public class StockLineServiceImpl implements StockLineService {
 
   private final StockLineRepository stockLineRepository;
 
-  // # 고점이 새로 생겼을떄, 새로운 저항선인지 판단
   @Override
   public StockLine determineResistance(Stock stock, StockCandle highPivotPoint, double thresholdPercent) {
     Optional<StockLine> matchedResistance = stockLineRepository.findTopResistanceInRange(stock.getId(),
@@ -25,7 +24,20 @@ public class StockLineServiceImpl implements StockLineService {
       return stockLineRepository.save(resistance);
     }
     StockLine existingStockLine = matchedResistance.get();
-    existingStockLine.increaseTouchCount();
+    existingStockLine.increaseResistanceTouch();
+    return stockLineRepository.save(existingStockLine);
+  }
+
+  @Override
+  public StockLine determineSupport(Stock stock, StockCandle lowPivotPoint, double thresholdPercent) {
+    Optional<StockLine> matchedSupport = stockLineRepository.findLowestSupportInRange(stock.getId(),
+        lowPivotPoint.getClosePrice(), thresholdPercent);
+    if (matchedSupport.isEmpty()) {
+      StockLine resistance = StockLine.support(lowPivotPoint.getClosePrice(), stock);
+      return stockLineRepository.save(resistance);
+    }
+    StockLine existingStockLine = matchedSupport.get();
+    existingStockLine.increaseSupportTouch();
     return stockLineRepository.save(existingStockLine);
   }
 }

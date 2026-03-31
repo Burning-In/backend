@@ -6,5 +6,7 @@ import com.momentum.domain.entity.indicator.StockLine;
 
 public interface StockLineService {
 
-  StockLine determineResistance(Stock stock, StockCandle candle, double v);
+  StockLine determineResistance(Stock stock, StockCandle candle, double thresholdPercent);
+
+  StockLine determineSupport(Stock stock, StockCandle candle, double thresholdPercent);
 }

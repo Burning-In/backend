@@ -7,5 +7,7 @@ public interface StockLineRepository {
 
   Optional<StockLine> findTopResistanceInRange(Long stockId, long highPivotPointClosePrice, double thresholdPercent);
 
+  Optional<StockLine> findLowestSupportInRange(Long stockId, long highPivotPointClosePrice, double thresholdPercent);
+
   StockLine save(StockLine stockLine);
 }
