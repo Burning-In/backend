@@ -18,4 +18,6 @@ dependencies {
 
     testFixturesImplementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testFixturesImplementation("org.testcontainers:mysql")
+
+    testFixturesImplementation("com.h2database:h2")
 }
