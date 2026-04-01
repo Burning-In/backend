@@ -4,27 +4,41 @@ import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.indicator.StockBase;
 import com.momentum.domain.entity.indicator.StockLine;
+import com.momentum.domain.respository.StockBaseRepository;
 import com.momentum.domain.service.StockBaseService;
-import lombok.NoArgsConstructor;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class StockBaseServiceImpl implements StockBaseService {
 
-  // # 이전베이스가 없으면 바로 생성
-  // # 이전베이스가 있어도 돌파 이후의 고점(저항선)은 새로운 candidate로 생성 -> 이전 베이스 돌파여부를 알아야함
-  public StockBase createCandidate(Stock stock, StockLine stockLine) {
-    return null;
+  private final StockBaseRepository stockBaseRepository;
+
+  // 애는 기존 베이스에서 벗어난 저항선 또는 지지선
+  // # 예외처리 : triggerLine이 이전베이스에 정말 존재하지 않던, 초과미만의 라인인가?
+  public StockBase createCandidate(Stock stock, StockLine triggerLine) {
+    Optional<StockBase> previousBase = stockBaseRepository.findLastBase(stock.getId());
+    long previousBaseAccCount = previousBase
+        .map(StockBase::getAccumulationCount)
+        .orElse(0L);
+    StockBase candidate = StockBase.createCandidate(stock, triggerLine, previousBaseAccCount);
+
+    return stockBaseRepository.save(candidate);
   }
+
+  // 새로운 저항선 -> 후보 베이스 -> 처음 저점 -> 이전베이스 지지선 아래 형성되면 베이스 병합
+  // 새로운 지지선 -> 후보베이스  -> 처음 고점 -> 이전베이스 지지선 위에 형성되면 베이스 병합
+
 
   // # 베이스 내부의 변동성 업데이트에 사용
   // - 베이스 지지/저항내에 피봇이 있으면 변동성 업데이트에 사용이 됩니다. -> 지지/저항으로 생성되지는 않습니다.
-  public StockBase update(Stock stock, StockCandle candle) {
+  public StockBase update(Stock stock, StockCandle pivotCandle) {
     return null;
   }
 
-  // # 돌파이후 새로운 candidate이후로 첫저점이 지지선아래, 지지/저항선 이전 베이스에 병합하고, candidate 삭제
+  // # 새로운 저항선 이후, 새로운 candidate이후로 첫저점이 지지선아래, 지지/저항선 이전 베이스에 병합하고, candidate 삭제
   // # 돌파이후 새로운 candidate이후로 첫저점이 나온다면, 지지/저항선 이전 베이스에 병합하고  candidate 삭제
   public StockBase merge(Stock stock, StockLine stockLine) {
     return null;
