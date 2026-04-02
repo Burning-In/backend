@@ -1,4 +1,4 @@
-package com.momentum.domain.entity.indicator;
+package com.momentum.domain.entity.indicator.price;
 
 import com.momentum.domain.BaseEntity;
 import jakarta.persistence.Entity;

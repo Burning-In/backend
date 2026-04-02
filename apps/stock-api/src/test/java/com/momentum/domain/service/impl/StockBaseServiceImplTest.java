@@ -3,10 +3,10 @@ package com.momentum.domain.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.indicator.StockBase;
-import com.momentum.domain.entity.indicator.StockBaseLine;
-import com.momentum.domain.entity.indicator.StockBaseType;
-import com.momentum.domain.entity.indicator.StockLine;
+import com.momentum.domain.entity.indicator.price.StockBase;
+import com.momentum.domain.entity.indicator.price.StockBaseLine;
+import com.momentum.domain.entity.indicator.price.StockBaseType;
+import com.momentum.domain.entity.indicator.price.StockLine;
 import com.momentum.domain.respository.StockBaseRepository;
 import com.momentum.domain.respository.StockLineRepository;
 import com.momentum.domain.respository.StockRepository;

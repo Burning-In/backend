@@ -1,6 +1,6 @@
 package com.momentum.domain.respository;
 
-import com.momentum.domain.entity.indicator.StockLine;
+import com.momentum.domain.entity.indicator.price.StockLine;
 import java.util.Optional;
 
 public interface StockLineRepository {

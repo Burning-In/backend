@@ -1,4 +1,4 @@
-package com.momentum.domain.entity.indicator;
+package com.momentum.domain.entity.indicator.price;
 
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.entity.Stock;
@@ -63,7 +63,6 @@ public class StockBase extends BaseEntity {
   }
 
   // 병합시 변동성 수정필요
-  // 저항선을 잡을떄 못잡는다는건데
   public void merge(StockBase failedConfirmed, StockLine firstLineAfterCandidate) {
     if (failedConfirmed.highestResistancePrice != null) {
       this.highestResistancePrice = Math.max(failedConfirmed.highestResistancePrice, this.highestResistancePrice);

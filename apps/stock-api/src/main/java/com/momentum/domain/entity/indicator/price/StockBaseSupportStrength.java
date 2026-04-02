@@ -1,4 +1,4 @@
-package com.momentum.domain.entity.indicator;
+package com.momentum.domain.entity.indicator.price;
 
 public enum StockBaseSupportStrength {
   STRUCTURAL,

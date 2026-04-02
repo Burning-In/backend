@@ -2,7 +2,7 @@ package com.momentum.domain.service.impl;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
-import com.momentum.domain.entity.indicator.StockPivotType;
+import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.domain.service.StockPivotService;

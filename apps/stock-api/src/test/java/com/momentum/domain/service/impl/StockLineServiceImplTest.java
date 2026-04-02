@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
-import com.momentum.domain.entity.indicator.StockLine;
+import com.momentum.domain.entity.indicator.price.StockLine;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockLineRepository;
 import com.momentum.domain.respository.StockRepository;
