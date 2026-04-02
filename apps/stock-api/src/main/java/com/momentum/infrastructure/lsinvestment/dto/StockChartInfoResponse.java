@@ -1,4 +1,4 @@
-package com.momentum.infrastructure.api.dto;
+package com.momentum.infrastructure.lsinvestment.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;

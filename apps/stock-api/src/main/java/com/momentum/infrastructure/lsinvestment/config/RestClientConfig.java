@@ -1,4 +1,4 @@
-package com.momentum.infrastructure.api.config;
+package com.momentum.infrastructure.lsinvestment.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

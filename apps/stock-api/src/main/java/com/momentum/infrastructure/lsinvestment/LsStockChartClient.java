@@ -1,8 +1,8 @@
-package com.momentum.infrastructure.api;
+package com.momentum.infrastructure.lsinvestment;
 
 import com.momentum.application.StockCandleRequest;
-import com.momentum.infrastructure.api.dto.StockChartInfoRequest;
-import com.momentum.infrastructure.api.dto.StockChartInfoResponse;
+import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoRequest;
+import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
