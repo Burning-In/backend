@@ -1,11 +1,13 @@
 package com.momentum.domain.service.impl;
 
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.indicator.StockBase;
+import com.momentum.domain.entity.indicator.StockBaseType;
 import com.momentum.domain.entity.indicator.StockLine;
+import com.momentum.domain.entity.indicator.StockLineType;
 import com.momentum.domain.respository.StockBaseRepository;
 import com.momentum.domain.service.StockBaseService;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,10 +18,10 @@ public class StockBaseServiceImpl implements StockBaseService {
 
   private final StockBaseRepository stockBaseRepository;
 
-  // 애는 기존 베이스에서 벗어난 저항선 또는 지지선
-  // # 예외처리 : triggerLine이 이전베이스에 정말 존재하지 않던, 초과미만의 라인인가?
+  @Transactional
+  @Override
   public StockBase createCandidate(Stock stock, StockLine triggerLine) {
-    Optional<StockBase> previousBase = stockBaseRepository.findLastBase(stock.getId());
+    Optional<StockBase> previousBase = stockBaseRepository.findLastBase(stock.getId(), StockBaseType.CONFIRMED);
     long previousBaseAccCount = previousBase
         .map(StockBase::getAccumulationCount)
         .orElse(0L);
@@ -28,30 +30,48 @@ public class StockBaseServiceImpl implements StockBaseService {
     return stockBaseRepository.save(candidate);
   }
 
-  // 새로운 저항선 -> 후보 베이스 -> 처음 저점 -> 이전베이스 지지선 아래 형성되면 베이스 병합
-  // 새로운 지지선 -> 후보베이스  -> 처음 고점 -> 이전베이스 지지선 위에 형성되면 베이스 병합
+  // 리펙토링 해야되는데
+  @Transactional
+  @Override
+  public void evaluateBase(Stock stock, StockLine firstLineAfterCandidate) {
+    StockBase candidate = stockBaseRepository
+        .findLastBase(stock.getId(), StockBaseType.CANDIDATE)
+        .orElseThrow(() -> new IllegalStateException("No candidate base found"));
+    // 여기에서 에러가 생기긴하네
+    StockBase previousConfirmed = stockBaseRepository
+        .findLastBase(stock.getId(), StockBaseType.CONFIRMED)
+        .orElse(null);
 
+    // PIVOT_LOW → 첫저점 (저항 형성 이후)
+    if (firstLineAfterCandidate.getLineType().equals(StockLineType.SUPPORT)) {
+      // 지지선 위에서 형성 → 병합 조건 (상승 유지 실패)
+      if (previousConfirmed != null &&
+          firstLineAfterCandidate.getPrice() < previousConfirmed.getHighestResistancePrice()) {
+        previousConfirmed.merge(candidate, firstLineAfterCandidate);
+        stockBaseRepository.save(previousConfirmed);
+        candidate.delete();
+        stockBaseRepository.save(candidate);
+      } else {
+        // 정상 범위라면 → confirm
+        candidate.confirm(firstLineAfterCandidate);
+        stockBaseRepository.save(candidate);
+      }
+    }
 
-  // # 베이스 내부의 변동성 업데이트에 사용
-  // - 베이스 지지/저항내에 피봇이 있으면 변동성 업데이트에 사용이 됩니다. -> 지지/저항으로 생성되지는 않습니다.
-  public StockBase update(Stock stock, StockCandle pivotCandle) {
-    return null;
-  }
-
-  // # 새로운 저항선 이후, 새로운 candidate이후로 첫저점이 지지선아래, 지지/저항선 이전 베이스에 병합하고, candidate 삭제
-  // # 돌파이후 새로운 candidate이후로 첫저점이 나온다면, 지지/저항선 이전 베이스에 병합하고  candidate 삭제
-  public StockBase merge(Stock stock, StockLine stockLine) {
-    return null;
-  }
-
-  // # 병합이후 삭제
-  public StockBase delete(Stock stock, StockLine stockLine) {
-    return null;
+    // PIVOT_HIGH → 첫고점 (지지선 하락후 첫지지 형성 이후)
+    if (firstLineAfterCandidate.getLineType().equals(StockLineType.RESISTANCE)) {
+      // 지지선 아래로 깨짐 → 병합 조건 (하락)
+      if (previousConfirmed != null &&
+          firstLineAfterCandidate.getPrice() < previousConfirmed.getLowestSupportLinePrice()) {
+        previousConfirmed.merge(candidate, firstLineAfterCandidate);
+        stockBaseRepository.save(previousConfirmed);
+        candidate.delete();
+        stockBaseRepository.save(candidate);
+      } else {
+        // 정상 범위 → 후보 업데이트
+        candidate.confirm(firstLineAfterCandidate);
+        stockBaseRepository.save(candidate);
+      }
+    }
   }
 }
-
-//	1.	이전 베이스 없으면 → 고점/저점 상관없이 바로 베이스 생성
-//	2.	이전 저항 돌파 시 → 바로 확정 X, candidate 베이스로 먼저 생성
-//	3.	돌파 이후 첫 저점 기준으로 판단 → 이전 지지보다 높으면 새로운 베이스 확정
-//	4.	조건 안 맞으면 → 기존 베이스로 merge하고 candidate 제거
-//	5.	핵심 규칙 → “고점은 후보, 저점이 나와야 베이스 확정”

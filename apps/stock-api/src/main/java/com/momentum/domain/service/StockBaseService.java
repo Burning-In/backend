@@ -7,4 +7,6 @@ import com.momentum.domain.entity.indicator.StockLine;
 public interface StockBaseService {
 
   StockBase createCandidate(Stock stock, StockLine triggerLine);
+
+  void evaluateBase(Stock stock, StockLine firstLineAfterCandidate);
 }

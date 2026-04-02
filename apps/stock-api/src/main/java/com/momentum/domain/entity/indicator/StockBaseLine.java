@@ -18,8 +18,15 @@ public class StockBaseLine extends BaseEntity {
   @ManyToOne
   private StockLine stockLine;
 
+  private StockBaseSupportStrength strength;
+
   public StockBaseLine(StockBase stockBase, StockLine stockLine) {
     this.stockBase = stockBase;
     this.stockLine = stockLine;
+    this.strength = StockBaseSupportStrength.WEAK;
+  }
+
+  public void changeBase(StockBase newBase) {
+    this.stockBase = newBase;
   }
 }

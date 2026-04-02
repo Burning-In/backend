@@ -33,19 +33,19 @@ public class StockBase extends BaseEntity {
   @Enumerated(value = EnumType.STRING)
   private StockBaseType stockBaseType;
 
-  @OneToMany(mappedBy = "stockBase", cascade = CascadeType.PERSIST)
-  private List<StockBaseLine> stockLines;
+  @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  private List<StockBaseLine> stockBaseLines;
 
   public StockBase(Long highestResistancePrice, Long lowestSupportLinePrice, Long accumulationCount,
       StockBaseVolatility stockBaseVolatility, Stock stock, StockBaseType stockBaseType,
-      List<StockBaseLine> stockLines) {
+      List<StockBaseLine> stockBaseLines) {
     this.highestResistancePrice = highestResistancePrice;
     this.lowestSupportLinePrice = lowestSupportLinePrice;
     this.accumulationCount = accumulationCount;
     this.stockBaseVolatility = stockBaseVolatility;
     this.stock = stock;
     this.stockBaseType = stockBaseType;
-    this.stockLines = stockLines;
+    this.stockBaseLines = stockBaseLines;
   }
 
   public static StockBase createCandidate(Stock stock, StockLine triggerLine, long previousBaseCount) {
@@ -60,6 +60,51 @@ public class StockBase extends BaseEntity {
     );
     candidate.updateBaseLine(triggerLine);
     return candidate;
+  }
+
+  // 병합시 변동성 수정필요
+  // 저항선을 잡을떄 못잡는다는건데
+  public void merge(StockBase failedConfirmed, StockLine firstLineAfterCandidate) {
+    if (failedConfirmed.highestResistancePrice != null) {
+      this.highestResistancePrice = Math.max(failedConfirmed.highestResistancePrice, this.highestResistancePrice);
+      if (this.lowestSupportLinePrice != null) {
+        this.lowestSupportLinePrice = Math.min(firstLineAfterCandidate.getPrice(), this.lowestSupportLinePrice);
+      } else {
+        this.lowestSupportLinePrice = firstLineAfterCandidate.getPrice();
+      }
+    }
+    if (failedConfirmed.lowestSupportLinePrice != null) {
+      this.lowestSupportLinePrice = Math.min(failedConfirmed.lowestSupportLinePrice, this.lowestSupportLinePrice);
+      if (this.highestResistancePrice != null) {
+        this.highestResistancePrice = Math.max(firstLineAfterCandidate.getPrice(), this.highestResistancePrice);
+      } else {
+        this.highestResistancePrice = firstLineAfterCandidate.getPrice();
+      }
+    }
+
+    for (StockBaseLine stockBaseLine : failedConfirmed.stockBaseLines) {
+      stockBaseLine.changeBase(this);
+      this.stockBaseLines.add(stockBaseLine);
+    }
+    this.updateBaseLine(firstLineAfterCandidate);
+  }
+
+  public void confirm(StockLine triggerLine) {
+    this.stockBaseType = StockBaseType.CONFIRMED;
+    if (this.highestResistancePrice != null && triggerLine.getPrice() != null) {
+      this.highestResistancePrice = Math.max(triggerLine.getPrice(), this.highestResistancePrice);
+    }
+    if (this.highestResistancePrice == null) {
+      this.highestResistancePrice = triggerLine.getPrice();
+    }
+    if (this.lowestSupportLinePrice != null && triggerLine.getPrice() != null) {
+      this.lowestSupportLinePrice = Math.min(triggerLine.getPrice(), this.lowestSupportLinePrice);
+    }
+    if (this.lowestSupportLinePrice == null && triggerLine.getPrice() != null) {
+      this.lowestSupportLinePrice = triggerLine.getPrice();
+    }
+    StockBaseLine stockBaseLine = new StockBaseLine(this, triggerLine);
+    this.stockBaseLines.add(stockBaseLine);
   }
 
   private static Long initHighestResistancePrice(StockLine triggerLine) {
@@ -85,11 +130,6 @@ public class StockBase extends BaseEntity {
 
   private void updateBaseLine(StockLine stockLine) {
     StockBaseLine baseLine = new StockBaseLine(this, stockLine);
-    this.stockLines.add(baseLine);
-  }
-
-  public void mergeStockBase(StockLine triggerLine) {
-    StockBaseLine stockBaseLine = new StockBaseLine(this, triggerLine);
-    this.stockLines.add(stockBaseLine);
+    this.stockBaseLines.add(baseLine);
   }
 }

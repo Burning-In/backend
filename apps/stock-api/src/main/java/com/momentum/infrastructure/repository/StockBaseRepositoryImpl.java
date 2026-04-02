@@ -23,12 +23,13 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
   }
 
   @Override
-  public Optional<StockBase> findLastBase(Long stockId) {
+  public Optional<StockBase> findLastBase(Long stockId, StockBaseType stockBaseType) {
     StockBase result = queryFactory
         .selectFrom(stockBase)
         .where(
             stockBase.stock.id.eq(stockId),
-            stockBase.stockBaseType.eq(StockBaseType.CONFIRMED)
+            stockBase.stockBaseType.eq(stockBaseType),
+            stockBase.deletedAt.isNull()
         )
         .orderBy(stockBase.createdAt.desc())
         .limit(1)
