@@ -1,6 +1,7 @@
 package com.momentum.infrastructure.lsinvestment.stocktick;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.momentum.application.StockTickInfo;
 import com.momentum.domain.entity.StockCode;
 import com.momentum.infrastructure.lsinvestment.dto.stocktick.LsWsRequest;
 import com.momentum.infrastructure.lsinvestment.dto.stocktick.LsWsResponse;
@@ -59,14 +60,13 @@ public class LsWebSocketHandler extends TextWebSocketHandler {
 
     log.info("LS WS RAW MESSAGE = {}", payload);
     try {
-      LsWsResponse response =
-          objectMapper.readValue(payload, LsWsResponse.class);
+      LsWsResponse response = objectMapper.readValue(payload, LsWsResponse.class);
       // subscribe ACK 메시지 패스
       if (response.body() == null) {
         return;
       }
-
-      // 여기서 틱데이터가 들어가야함
+      // dto로 바꿔서 서비스나 db에 저장
+      StockTickInfo.from(response);
     } catch (Exception e) {
       log.warn("LS tick parse error payload={}", payload, e);
     }

@@ -956,4 +956,13 @@ public enum StockCode {
   StockCode(String code) {
     this.code = code;
   }
+
+  public static StockCode getCode(String code) {
+    for (StockCode stockCode : values()) {
+      if (stockCode.code.equals(code)) {
+        return stockCode;
+      }
+    }
+    throw new IllegalArgumentException("Unknown stock code: " + code);
+  }
 }
