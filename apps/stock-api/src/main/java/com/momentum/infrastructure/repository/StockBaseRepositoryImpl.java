@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.repository;
 
-import static com.momentum.domain.entity.indicator.QStockBase.stockBase;
+import static com.momentum.domain.entity.indicator.price.QStockBase.stockBase;
 
 import com.momentum.domain.entity.indicator.price.StockBase;
 import com.momentum.domain.entity.indicator.price.StockBaseType;
