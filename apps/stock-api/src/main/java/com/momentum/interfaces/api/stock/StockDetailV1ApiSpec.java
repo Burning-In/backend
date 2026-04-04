@@ -5,7 +5,7 @@ import com.momentum.interfaces.api.stock.StockDetailV1Dto.CandleChartResponse;
 import com.momentum.interfaces.api.stock.StockDetailV1Dto.EpsResponse;
 import com.momentum.interfaces.api.stock.StockDetailV1Dto.ExpectedReturnResponse;
 import com.momentum.interfaces.api.stock.StockDetailV1Dto.InsightResponse;
-import com.momentum.interfaces.api.stock.StockDetailV1Dto.PbResponse;
+import com.momentum.interfaces.api.stock.StockDetailV1Dto.RsResponse;
 import com.momentum.interfaces.api.stock.StockDetailV1Dto.SummaryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -43,7 +43,7 @@ public interface StockDetailV1ApiSpec {
         summary = "RS 정보 조회",
         description = "KOSPI 대비 RS 정보를 조회합니다."
     )
-    ApiResponse<PbResponse> getPb(
+    ApiResponse<RsResponse> getRs(
         @Schema(description = "종목 코드") String stockCode
     );
 

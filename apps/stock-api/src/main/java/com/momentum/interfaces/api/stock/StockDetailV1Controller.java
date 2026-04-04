@@ -5,7 +5,7 @@ import com.momentum.interfaces.api.stock.StockDetailV1Dto.CandleChartResponse;
 import com.momentum.interfaces.api.stock.StockDetailV1Dto.EpsResponse;
 import com.momentum.interfaces.api.stock.StockDetailV1Dto.ExpectedReturnResponse;
 import com.momentum.interfaces.api.stock.StockDetailV1Dto.InsightResponse;
-import com.momentum.interfaces.api.stock.StockDetailV1Dto.PbResponse;
+import com.momentum.interfaces.api.stock.StockDetailV1Dto.RsResponse;
 import com.momentum.interfaces.api.stock.StockDetailV1Dto.SummaryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,9 +49,9 @@ public class StockDetailV1Controller implements StockDetailV1ApiSpec {
         return ApiResponse.success(null);
     }
 
-    @GetMapping("/pb")
+    @GetMapping("/rs")
     @Override
-    public ApiResponse<PbResponse> getPb(
+    public ApiResponse<RsResponse> getRs(
         @PathVariable String stockCode
     ) {
         // TODO: StockDetailFacade 연결

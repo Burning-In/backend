@@ -51,9 +51,9 @@ public class StockDetailV1Dto {
         ) {}
     }
 
-    // ===================== PB Section =====================
+    // ===================== Rs Section =====================
 
-    public record PbResponse(
+    public record RsResponse(
         String kospiComparisonInfo  // KOSPI 대비 정보
     ) {}
 
