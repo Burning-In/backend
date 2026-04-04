@@ -1,4 +1,4 @@
-package com.momentum.application;
+package com.momentum.application.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,5 +1,6 @@
 package com.momentum.application;
 
+import com.momentum.application.dto.StockCandleInfo;
 import com.momentum.domain.service.StockCandleService;
 import com.momentum.infrastructure.lsinvestment.LsStockChartClient;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;

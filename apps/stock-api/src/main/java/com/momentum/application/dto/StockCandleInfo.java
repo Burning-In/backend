@@ -1,4 +1,4 @@
-package com.momentum.application;
+package com.momentum.application.dto;
 
 import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;

@@ -1,7 +1,7 @@
 package com.momentum.infrastructure.lsinvestment.stocktick;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.momentum.application.StockTickInfo;
+import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.entity.StockCode;
 import com.momentum.infrastructure.lsinvestment.dto.stocktick.LsWsRequest;
 import com.momentum.infrastructure.lsinvestment.dto.stocktick.LsWsResponse;
