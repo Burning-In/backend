@@ -1,7 +1,7 @@
 package com.momentum.application;
 
 import com.momentum.application.dto.StockCandleInfo;
-import com.momentum.domain.service.StockCandleService;
+import com.momentum.application.dto.StockCandleRequest;
 import com.momentum.infrastructure.lsinvestment.LsStockChartClient;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
 import java.util.List;

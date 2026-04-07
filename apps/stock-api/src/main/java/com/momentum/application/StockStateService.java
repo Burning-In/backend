@@ -1,5 +1,6 @@
 package com.momentum.application;
 
+import com.momentum.application.dto.StockStateChangedEvent;
 import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;

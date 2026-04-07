@@ -1,10 +1,9 @@
-package com.momentum.domain.service.impl;
+package com.momentum.application;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
-import com.momentum.domain.service.StockCandleService;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse.CandleResponse;
 import java.util.List;
@@ -14,12 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class StockCandleServiceImpl implements StockCandleService {
+public class StockCandleService{
 
   private final StockRepository stockRepository;
   private final StockCandleRepository stockCandleRepository;
 
-  @Override
   @Transactional
   public List<StockCandle> create(String stockCode, StockChartInfoResponse stockChartInfoResponse) {
     Stock stock = stockRepository.findByStockCode(stockCode)

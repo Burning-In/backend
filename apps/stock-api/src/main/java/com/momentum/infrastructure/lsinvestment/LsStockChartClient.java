@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.lsinvestment;
 
-import com.momentum.application.StockCandleRequest;
+import com.momentum.application.dto.StockCandleRequest;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoRequest;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
 import lombok.RequiredArgsConstructor;

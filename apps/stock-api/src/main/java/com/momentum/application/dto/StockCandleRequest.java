@@ -1,4 +1,4 @@
-package com.momentum.application;
+package com.momentum.application.dto;
 
 public record StockCandleRequest(
     String stockCode,

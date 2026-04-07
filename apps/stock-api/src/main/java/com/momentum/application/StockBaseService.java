@@ -1,4 +1,4 @@
-package com.momentum.domain.service.impl;
+package com.momentum.application;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.indicator.price.StockBase;
@@ -6,7 +6,6 @@ import com.momentum.domain.entity.indicator.price.StockBaseType;
 import com.momentum.domain.entity.indicator.price.StockLine;
 import com.momentum.domain.entity.indicator.price.StockLineType;
 import com.momentum.domain.respository.StockBaseRepository;
-import com.momentum.domain.service.StockBaseService;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +13,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class StockBaseServiceImpl implements StockBaseService {
+public class StockBaseService {
 
   private final StockBaseRepository stockBaseRepository;
 
   @Transactional
-  @Override
   public StockBase createCandidate(Stock stock, StockLine triggerLine) {
     Optional<StockBase> previousBase = stockBaseRepository.findLastBase(stock.getId(), StockBaseType.CONFIRMED);
     long previousBaseAccCount = previousBase
@@ -30,9 +28,8 @@ public class StockBaseServiceImpl implements StockBaseService {
     return stockBaseRepository.save(candidate);
   }
 
-  // 리펙토링 해야되는데
+  // 리펙토링 필요
   @Transactional
-  @Override
   public void evaluateBase(Stock stock, StockLine firstLineAfterCandidate) {
     StockBase candidate = stockBaseRepository
         .findLastBase(stock.getId(), StockBaseType.CANDIDATE)

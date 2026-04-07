@@ -2,6 +2,7 @@ package com.momentum.domain.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.momentum.application.StockPivotService;
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.StockState;
@@ -9,7 +10,6 @@ import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
-import com.momentum.domain.service.StockPivotService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SpringBootTest
-class StockPivotServiceImplTest {
+class StockPivotServiceTest {
 
   @Autowired
   private StockPivotService stockPivotService;

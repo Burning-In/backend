@@ -1,21 +1,19 @@
-package com.momentum.domain.service.impl;
+package com.momentum.application;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.indicator.price.StockLine;
 import com.momentum.domain.respository.StockLineRepository;
-import com.momentum.domain.service.StockLineService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class StockLineServiceImpl implements StockLineService {
+public class StockLineService {
 
   private final StockLineRepository stockLineRepository;
 
-  @Override
   public StockLine determineResistance(Stock stock, StockCandle highPivotPoint, double thresholdPercent) {
     Optional<StockLine> matchedResistance = stockLineRepository.findTopResistanceInRange(stock.getId(),
         highPivotPoint.getClosePrice(), thresholdPercent);
@@ -28,7 +26,6 @@ public class StockLineServiceImpl implements StockLineService {
     return stockLineRepository.save(existingStockLine);
   }
 
-  @Override
   public StockLine determineSupport(Stock stock, StockCandle lowPivotPoint, double thresholdPercent) {
     Optional<StockLine> matchedSupport = stockLineRepository.findLowestSupportInRange(stock.getId(),
         lowPivotPoint.getClosePrice(), thresholdPercent);

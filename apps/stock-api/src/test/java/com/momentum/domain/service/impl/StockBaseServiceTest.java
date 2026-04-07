@@ -2,6 +2,7 @@ package com.momentum.domain.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.momentum.application.StockBaseService;
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockState;
 import com.momentum.domain.entity.StockTrend;
@@ -12,7 +13,6 @@ import com.momentum.domain.entity.indicator.price.StockLine;
 import com.momentum.domain.respository.StockBaseRepository;
 import com.momentum.domain.respository.StockLineRepository;
 import com.momentum.domain.respository.StockRepository;
-import com.momentum.domain.service.StockBaseService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Transactional
 @SpringBootTest
-class StockBaseServiceImplTest {
+class StockBaseServiceTest {
 
   @Autowired
   private StockBaseService stockBaseService;

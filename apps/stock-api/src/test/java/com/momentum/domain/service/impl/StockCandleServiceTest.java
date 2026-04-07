@@ -2,12 +2,12 @@ package com.momentum.domain.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.momentum.application.StockCandleService;
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.StockState;
 import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.respository.StockRepository;
-import com.momentum.domain.service.StockCandleService;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse.CandleResponse;
 import java.util.List;
@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-class StockCandleServiceImplTest {
+class StockCandleServiceTest {
 
   @Autowired
   private StockCandleService stockCandleService;
