@@ -2,6 +2,7 @@ package com.momentum.application;
 
 import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.entity.Stock;
+import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.StockCode;
 import com.momentum.domain.entity.StockState;
 import com.momentum.domain.entity.StockTick;
@@ -113,12 +114,49 @@ public class StockStateService {
     return ((double) (currentPrice - linePrice) / linePrice) * 100;
   }
 
-
   //-----------
   // # 일봉 데이터(보정 및 확정용)
-  // 일봉으로 데이터 바뀌는 것도 해야함
-  // 이거 하고 일일 배치일떄는 어떻게 할건지 정하자 -> 일일 배치를 통해서는 어떻게 업데이트 할건가?
-  public void finalizeDailyState() {
+  //
+  public void finalizeDailyState(StockCandle stockCandle) {
+    StockCode stockCode = StockCode.getCode(stockCandle.getStock().getCode());
+    Stock stock = stockRepository.findByStockCode(stockCode.getCode())
+        .orElseThrow(IllegalStateException::new);
+    StockBase stockBase = stockBaseRepository.findLastBase(stock.getId(), StockBaseType.CONFIRMED)
+        .orElseThrow(IllegalArgumentException::new);
 
+    // # 상승돌파
+    if (calculateGap(stockBase.getHighestResistancePrice(), stockCandle.getClosePrice()) > NOISE_THRESHOLD_PERCENT
+        && stock.getStockTrend().equals(StockTrend.UPTREND) && !stock.getStockState().equals(StockState.BREAKOUT)) {
+      stock.update(StockState.BREAKOUT);
+      stockRepository.save(stock);
+    }
+    // # 상승가능
+    // - 가격이 지지/저항선 안에 있고, vcp가 형성되어야함, 아리면 저항선에 가깝던가
+    if (calculateGap(stockBase.getHighestResistancePrice(), stockCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
+        stockBase.getLowestSupportLinePrice() < stockCandle.getClosePrice() && stock.getStockTrend().equals(StockTrend.UPTREND)
+        && !stock.getStockState().equals(StockState.BREAKOUT_CANDIDATE)) {
+      if (stockBase.getStockBaseVolatility().isContracting()) {
+        stock.update(StockState.BREAKOUT_CANDIDATE);
+      }
+      if (Math.abs(calculateGap(stockBase.getHighestResistancePrice(), stockCandle.getClosePrice())) <= NOISE_THRESHOLD_PERCENT) {
+        stock.update(StockState.BREAKOUT_CANDIDATE);
+      }
+
+      stockRepository.save(stock);
+    }
+
+    // # 하락가능
+    if (calculateGap(stockBase.getHighestResistancePrice(), stockCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
+        stockBase.getLowestSupportLinePrice() < stockCandle.getClosePrice() &&
+        !stock.getStockState().equals(StockState.FAILED_BREAKOUT)) {
+      stock.update(StockState.FAILED_BREAKOUT);
+      stockRepository.save(stock);
+    }
+    // # 하락
+    if (calculateGap(stockBase.getLowestSupportLinePrice(), stockCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
+        !stock.getStockState().equals(StockState.BREAKDOWN)) {
+      stock.update(StockState.BREAKDOWN);
+      stockRepository.save(stock);
+    }
   }
 }

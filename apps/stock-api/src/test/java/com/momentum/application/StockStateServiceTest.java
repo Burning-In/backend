@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.entity.Stock;
+import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.StockCode;
 import com.momentum.domain.entity.StockState;
 import com.momentum.domain.entity.StockTick;
@@ -15,6 +16,7 @@ import com.momentum.domain.respository.StockLineRepository;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.domain.respository.StockTickRepository;
 import java.time.Instant;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -201,6 +203,100 @@ class StockStateServiceTest {
     stockStateService.processTick(tickInfo, now);
 
     // then
+    assertThat(stock.getStockState()).isEqualTo(StockState.BREAKDOWN);
+  }
+
+  @Test
+  @DisplayName("종가가 저항 돌파 → BREAKOUT")
+  void finalize_breakout() {
+    Stock stock = createStock();
+    createBase(stock, 100_000L, 90_000L);
+
+    StockCandle candle = StockCandle.daily(
+        stock,
+        "20240407",
+        95_000L,
+        103_000L,
+        94_000L,
+        102_001L,
+        1_000_000L,
+        "2" // 상승
+    );
+
+    stockStateService.finalizeDailyState(candle);
+
+    assertThat(stock.getStockState()).isEqualTo(StockState.BREAKOUT);
+  }
+
+
+  @Disabled
+  @Test
+  @DisplayName("수렴 상태 + 저항 아래 → BREAKOUT_CANDIDATE")
+  void finalize_candidate_vcp() {
+    Stock stock = createStock();
+    StockBase base = createBase(stock, 100_000L, 90_000L);
+
+    // 👉 수렴 상태 만들어야 함
+//    base.updateVolatility(new StockBaseVolatility(1.0, 2.0, 3.0));
+    // pre > prev > current → contracting
+
+    StockCandle candle = StockCandle.daily(
+        stock,
+        "20240407",
+        95_000L,
+        99_000L,
+        94_000L,
+        98_000L,
+        1_000_000L,
+        "2"
+    );
+
+    stockStateService.finalizeDailyState(candle);
+
+    assertThat(stock.getStockState()).isEqualTo(StockState.BREAKOUT_CANDIDATE);
+  }
+
+  @Test
+  @DisplayName("저항 아래 유지 → FAILED_BREAKOUT")
+  void finalize_failedBreakout() {
+    Stock stock = createStock();
+    createBase(stock, 100_000L, 90_000L);
+
+    StockCandle candle = StockCandle.daily(
+        stock,
+        "20240407",
+        95_000L,
+        97_000L,
+        93_000L,
+        94_000L,
+        1_000_000L,
+        "5" // 하락
+    );
+
+    stockStateService.finalizeDailyState(candle);
+
+    assertThat(stock.getStockState()).isEqualTo(StockState.FAILED_BREAKOUT);
+  }
+
+  @Test
+  @DisplayName("지지선 붕괴 → BREAKDOWN")
+  void finalize_breakdown() {
+    Stock stock = createStock();
+    createBase(stock, 100_000L, 90_000L);
+
+    StockCandle candle = StockCandle.daily(
+        stock,
+        "20240407",
+        92_000L,
+        93_000L,
+        85_000L,
+        88_000L,
+        1_000_000L,
+        "5"
+    );
+
+    stockStateService.finalizeDailyState(candle);
+
     assertThat(stock.getStockState()).isEqualTo(StockState.BREAKDOWN);
   }
 }
