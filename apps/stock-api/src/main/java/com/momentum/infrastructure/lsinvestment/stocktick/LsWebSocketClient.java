@@ -15,7 +15,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class LsWebSocketClient {
 

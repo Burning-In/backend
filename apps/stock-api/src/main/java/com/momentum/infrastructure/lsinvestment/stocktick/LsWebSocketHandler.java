@@ -16,7 +16,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class LsWebSocketHandler extends TextWebSocketHandler {
 

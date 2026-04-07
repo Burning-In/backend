@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockState;
+import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.domain.service.StockCandleService;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
@@ -30,7 +32,7 @@ class StockCandleServiceImplTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = new Stock("삼성전자", stockCode);
+    Stock stock = new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND);
     stockRepository.save(stock);
     StockChartInfoResponse response = new StockChartInfoResponse(
         List.of(

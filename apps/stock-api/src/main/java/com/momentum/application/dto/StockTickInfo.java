@@ -1,53 +1,24 @@
 package com.momentum.application.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.momentum.infrastructure.lsinvestment.dto.stocktick.LsWsResponse;
 
 public record StockTickInfo(
-
-    @JsonProperty("MKSC_SHRN_ISCD")
     String stockCode,
-
-    @JsonProperty("STCK_CNTG_HOUR")
     String tradeTime,
-
-    @JsonProperty("STCK_PRPR")
     long currentPrice,
-
-    @JsonProperty("PRDY_VRSS_SIGN")
     String priceSign,
-
-    @JsonProperty("PRDY_VRSS")
     long priceChange,
-
-    @JsonProperty("PRDY_CTRT")
     double changeRate,
-
-    @JsonProperty("WGHN_AVRG_STCK_PRC")
     double weightedAveragePrice,
-
-    @JsonProperty("STCK_OPRC")
     long openPrice,
-
-    @JsonProperty("STCK_HGPR")
     long highPrice,
-
-    @JsonProperty("STCK_LWPR")
     long lowPrice,
-
-    @JsonProperty("ASKP1")
     long bestAskPrice,
-
-    @JsonProperty("BIDP1")
     long bestBidPrice,
-
-    @JsonProperty("CNTG_VOL")
     long tradeVolume,
-
-    @JsonProperty("ACML_VOL")
-    long accumulatedVolume
-
+    long accumulatedVolume,
+    double tradeStrength
 ) {
 
   public static StockTickInfo from(LsWsResponse response) {
@@ -66,7 +37,8 @@ public record StockTickInfo(
         body.bestAskPrice(),           // 매도호가
         body.bestBidPrice(),           // 매수호가
         body.tradeVolume(),            // 체결량
-        body.accumulatedVolume()       // 누적거래량
+        body.accumulatedVolume(),       // 누적거래량
+        body.tradeStrength()
     );
   }
 

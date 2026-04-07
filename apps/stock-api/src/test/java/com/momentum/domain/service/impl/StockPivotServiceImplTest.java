@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockState;
+import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
@@ -37,7 +39,7 @@ class StockPivotServiceImplTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = stockRepository.save(new Stock("삼성전자", stockCode));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
 
     String baseDate = "20250327";
 
@@ -86,7 +88,7 @@ class StockPivotServiceImplTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = stockRepository.save(new Stock("삼성전자", stockCode));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
 
     String baseDate = "20250327";
 
@@ -144,7 +146,7 @@ class StockPivotServiceImplTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = stockRepository.save(new Stock("삼성전자", stockCode));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
 
     String baseDate = "20250327";
 
