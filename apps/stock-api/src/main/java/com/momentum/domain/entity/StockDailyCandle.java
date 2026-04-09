@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StockCandle extends BaseEntity {
+public class StockDailyCandle extends BaseEntity {
 
   private LocalDate tradeDate;
   private Long openPrice;
@@ -31,15 +31,11 @@ public class StockCandle extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private StockPivotType stockPivotType;
 
-  @Enumerated(EnumType.STRING)
-  private StockCandlePeriod candlePeriod;
-
   @ManyToOne
   private Stock stock;
 
-  private StockCandle(LocalDate tradeDate, Long openPrice, Long highPrice, Long lowPrice, Long closePrice, Long volume,
-      StockPriceTrend stockPriceTrend, StockPivotType stockPivotType,
-      StockCandlePeriod candlePeriod, Stock stock) {
+  private StockDailyCandle(LocalDate tradeDate, Long openPrice, Long highPrice, Long lowPrice, Long closePrice, Long volume,
+      StockPriceTrend stockPriceTrend, StockPivotType stockPivotType, Stock stock) {
     this.tradeDate = tradeDate;
     this.openPrice = openPrice;
     this.highPrice = highPrice;
@@ -48,11 +44,10 @@ public class StockCandle extends BaseEntity {
     this.volume = volume;
     this.stockPriceTrend = stockPriceTrend;
     this.stockPivotType = stockPivotType;
-    this.candlePeriod = candlePeriod;
     this.stock = stock;
   }
 
-  public static StockCandle daily(
+  public static StockDailyCandle create(
       Stock stock,
       String rawDate,
       long openPrice,
@@ -61,7 +56,7 @@ public class StockCandle extends BaseEntity {
       long closePrice,
       long volume,
       String priceChangeSign) {
-    return new StockCandle(
+    return new StockDailyCandle(
         LocalDate.parse(rawDate, DateTimeFormatter.BASIC_ISO_DATE),
         openPrice,
         highPrice,
@@ -70,7 +65,6 @@ public class StockCandle extends BaseEntity {
         volume,
         StockPriceTrend.getValue(priceChangeSign),
         StockPivotType.UNDEFINED,
-        StockCandlePeriod.DAY,
         stock
     );
   }

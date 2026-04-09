@@ -1,15 +1,15 @@
 package com.momentum.domain.respository;
 
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public interface StockCandleRepository {
 
-  List<StockCandle> saveAll(List<StockCandle> candles);
+  List<StockDailyCandle> saveAll(List<StockDailyCandle> candles);
 
-  StockCandle save(StockCandle candle);
+  StockDailyCandle save(StockDailyCandle candle);
 
-  Optional<StockCandle> findDailyCandle(Long stockId, LocalDate tradeDate);
+  Optional<StockDailyCandle> findDailyCandle(Long stockId, LocalDate tradeDate);
 }

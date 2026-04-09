@@ -1,7 +1,7 @@
 package com.momentum.application;
 
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.indicator.price.StockLine;
 import com.momentum.domain.respository.StockLineRepository;
 import java.util.Optional;
@@ -14,7 +14,7 @@ public class StockLineService {
 
   private final StockLineRepository stockLineRepository;
 
-  public StockLine determineResistance(Stock stock, StockCandle highPivotPoint, double thresholdPercent) {
+  public StockLine determineResistance(Stock stock, StockDailyCandle highPivotPoint, double thresholdPercent) {
     Optional<StockLine> matchedResistance = stockLineRepository.findTopResistanceInRange(stock.getId(),
         highPivotPoint.getClosePrice(), thresholdPercent);
     if (matchedResistance.isEmpty()) {
@@ -26,7 +26,7 @@ public class StockLineService {
     return stockLineRepository.save(existingStockLine);
   }
 
-  public StockLine determineSupport(Stock stock, StockCandle lowPivotPoint, double thresholdPercent) {
+  public StockLine determineSupport(Stock stock, StockDailyCandle lowPivotPoint, double thresholdPercent) {
     Optional<StockLine> matchedSupport = stockLineRepository.findLowestSupportInRange(stock.getId(),
         lowPivotPoint.getClosePrice(), thresholdPercent);
     if (matchedSupport.isEmpty()) {

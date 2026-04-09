@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.application.StockPivotService;
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
@@ -44,8 +44,8 @@ class StockPivotServiceTest {
     String baseDate = "20250327";
 
     // T-2 (저점)
-    List<StockCandle> dailyCandles = List.of(
-        StockCandle.daily(stock, "20250325",
+    List<StockDailyCandle> dailyCandles = List.of(
+        StockDailyCandle.create(stock, "20250325",
             100L, // open
             105L, // high
             95L,  // low
@@ -53,7 +53,7 @@ class StockPivotServiceTest {
             1000L, // volume
             "5" // DOWN
         ),
-        StockCandle.daily(
+        StockDailyCandle.create(
             stock,
             "20250326",
             100L,
@@ -63,7 +63,7 @@ class StockPivotServiceTest {
             1200L,
             "2" // UP
         ),
-        StockCandle.daily(
+        StockDailyCandle.create(
             stock,
             baseDate,
             105L,
@@ -76,7 +76,7 @@ class StockPivotServiceTest {
     stockCandleRepository.saveAll(dailyCandles);
 
     // when
-    StockCandle result = stockPivotService.determineDailyPivot(stockCode, LocalDate.parse(baseDate, DateTimeFormatter.BASIC_ISO_DATE));
+    StockDailyCandle result = stockPivotService.determineDailyPivot(stockCode, LocalDate.parse(baseDate, DateTimeFormatter.BASIC_ISO_DATE));
 
     // then
     assertThat(result.getStockPivotType()).isEqualTo(StockPivotType.PIVOT_LOW);
@@ -92,9 +92,9 @@ class StockPivotServiceTest {
 
     String baseDate = "20250327";
 
-    List<StockCandle> dailyCandles = List.of(
+    List<StockDailyCandle> dailyCandles = List.of(
         // T-2 (고점)
-        StockCandle.daily(
+        StockDailyCandle.create(
             stock,
             "20250325",
             110L,
@@ -105,7 +105,7 @@ class StockPivotServiceTest {
             "2" // UP
         ),
         // T-1
-        StockCandle.daily(
+        StockDailyCandle.create(
             stock,
             "20250326",
             110L,
@@ -116,7 +116,7 @@ class StockPivotServiceTest {
             "5" // DOWN
         ),
         // T
-        StockCandle.daily(
+        StockDailyCandle.create(
             stock,
             baseDate,
             95L,
@@ -131,7 +131,7 @@ class StockPivotServiceTest {
     stockCandleRepository.saveAll(dailyCandles);
 
     // when
-    StockCandle result = stockPivotService.determineDailyPivot(
+    StockDailyCandle result = stockPivotService.determineDailyPivot(
         stockCode,
         LocalDate.parse(baseDate, DateTimeFormatter.BASIC_ISO_DATE)
     );
@@ -150,9 +150,9 @@ class StockPivotServiceTest {
 
     String baseDate = "20250327";
 
-    List<StockCandle> dailyCandles = List.of(
+    List<StockDailyCandle> dailyCandles = List.of(
         // T-2
-        StockCandle.daily(
+        StockDailyCandle.create(
             stock,
             "20250325",
             100L,
@@ -163,7 +163,7 @@ class StockPivotServiceTest {
             "5" // DOWN
         ),
         // T-1 (미세 상승)
-        StockCandle.daily(
+        StockDailyCandle.create(
             stock,
             "20250326",
             100L,
@@ -174,7 +174,7 @@ class StockPivotServiceTest {
             "2" // UP
         ),
         // T (또 미세 상승)
-        StockCandle.daily(
+        StockDailyCandle.create(
             stock,
             baseDate,
             101L,
@@ -189,7 +189,7 @@ class StockPivotServiceTest {
     stockCandleRepository.saveAll(dailyCandles);
 
     // when
-    StockCandle result = stockPivotService.determineDailyPivot(
+    StockDailyCandle result = stockPivotService.determineDailyPivot(
         stockCode,
         LocalDate.parse(baseDate, DateTimeFormatter.BASIC_ISO_DATE)
     );

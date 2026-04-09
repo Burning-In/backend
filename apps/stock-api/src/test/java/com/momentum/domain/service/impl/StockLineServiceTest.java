@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.application.StockLineService;
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.entity.indicator.price.StockLine;
@@ -37,7 +37,7 @@ class StockLineServiceTest {
     Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
     StockLine existing = StockLine.resistance(100_800L, stock);
     stockLineRepository.save(existing);
-    StockCandle candle = StockCandle.daily(
+    StockDailyCandle candle = StockDailyCandle.create(
         stock,
         "20250801",
         100_000L,
@@ -68,7 +68,7 @@ class StockLineServiceTest {
     StockLine existingLow = StockLine.resistance(100_100L, stock);
     stockLineRepository.save(existingHigh);
     stockLineRepository.save(existingLow);
-    StockCandle candle = StockCandle.daily(
+    StockDailyCandle candle = StockDailyCandle.create(
         stock,
         "20250801",
         100_000L,
@@ -98,7 +98,7 @@ class StockLineServiceTest {
     StockLine existing = StockLine.support(99_000L, stock);
     stockLineRepository.save(existing);
 
-    StockCandle candle = StockCandle.daily(
+    StockDailyCandle candle = StockDailyCandle.create(
         stock,
         "20250801",
         100_000L,
@@ -130,7 +130,7 @@ class StockLineServiceTest {
     stockLineRepository.save(existingHigh);
     stockLineRepository.save(existingLow);
 
-    StockCandle candle = StockCandle.daily(
+    StockDailyCandle candle = StockDailyCandle.create(
         stock,
         "20250801",
         100_000L,

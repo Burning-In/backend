@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.StockCode;
 import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTick;
@@ -212,7 +212,7 @@ class StockRegimeServiceTest {
     Stock stock = createStock();
     createBase(stock, 100_000L, 90_000L);
 
-    StockCandle candle = StockCandle.daily(
+    StockDailyCandle candle = StockDailyCandle.create(
         stock,
         "20240407",
         95_000L,
@@ -240,7 +240,7 @@ class StockRegimeServiceTest {
 //    base.updateVolatility(new StockBaseVolatility(1.0, 2.0, 3.0));
     // pre > prev > current → contracting
 
-    StockCandle candle = StockCandle.daily(
+    StockDailyCandle candle = StockDailyCandle.create(
         stock,
         "20240407",
         95_000L,
@@ -262,7 +262,7 @@ class StockRegimeServiceTest {
     Stock stock = createStock();
     createBase(stock, 100_000L, 90_000L);
 
-    StockCandle candle = StockCandle.daily(
+    StockDailyCandle candle = StockDailyCandle.create(
         stock,
         "20240407",
         95_000L,
@@ -284,7 +284,7 @@ class StockRegimeServiceTest {
     Stock stock = createStock();
     createBase(stock, 100_000L, 90_000L);
 
-    StockCandle candle = StockCandle.daily(
+    StockDailyCandle candle = StockDailyCandle.create(
         stock,
         "20240407",
         92_000L,

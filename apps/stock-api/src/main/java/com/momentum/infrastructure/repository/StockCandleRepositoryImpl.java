@@ -1,7 +1,7 @@
 package com.momentum.infrastructure.repository;
 
-import com.momentum.domain.entity.QStockCandle;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.QStockDailyCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
@@ -18,24 +18,24 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
   private final JPAQueryFactory jpaQueryFactory;
 
   @Override
-  public List<StockCandle> saveAll(List<StockCandle> candles) {
+  public List<StockDailyCandle> saveAll(List<StockDailyCandle> candles) {
     return stockCandleJpaRepository.saveAll(candles);
   }
 
   @Override
-  public StockCandle save(StockCandle candle) {
+  public StockDailyCandle save(StockDailyCandle candle) {
     return stockCandleJpaRepository.save(candle);
   }
 
   @Override
-  public Optional<StockCandle> findDailyCandle(Long stockId, LocalDate tradeDate) {
-    QStockCandle stockCandle = QStockCandle.stockCandle;
+  public Optional<StockDailyCandle> findDailyCandle(Long stockId, LocalDate tradeDate) {
+    QStockDailyCandle stockDailyCandle = QStockDailyCandle.stockDailyCandle;
 
-    StockCandle result = jpaQueryFactory
-        .selectFrom(stockCandle)
+    StockDailyCandle result = jpaQueryFactory
+        .selectFrom(stockDailyCandle)
         .where(
-            stockCandle.stock.id.eq(stockId),
-            stockCandle.tradeDate.eq(tradeDate)
+            stockDailyCandle.stock.id.eq(stockId),
+            stockDailyCandle.tradeDate.eq(tradeDate)
         )
         .fetchOne();
 

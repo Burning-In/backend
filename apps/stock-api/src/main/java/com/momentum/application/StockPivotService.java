@@ -1,7 +1,7 @@
 package com.momentum.application;
 
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
@@ -20,15 +20,15 @@ public class StockPivotService {
   private final StockRepository stockRepository;
 
   @Transactional
-  public StockCandle determineDailyPivot(String stockCode, LocalDate tradeDate) {
+  public StockDailyCandle determineDailyPivot(String stockCode, LocalDate tradeDate) {
     Stock stock = stockRepository.findByStockCode(stockCode)
         .orElseThrow(() -> new IllegalArgumentException("stock not found"));
 
-    StockCandle twoDaysAgoCandle = stockCandleRepository.findDailyCandle(stock.getId(), tradeDate.minusDays(2))
+    StockDailyCandle twoDaysAgoCandle = stockCandleRepository.findDailyCandle(stock.getId(), tradeDate.minusDays(2))
         .orElseThrow(IllegalArgumentException::new);
-    StockCandle oneDayAgoCandle = stockCandleRepository.findDailyCandle(stock.getId(), tradeDate.minusDays(1))
+    StockDailyCandle oneDayAgoCandle = stockCandleRepository.findDailyCandle(stock.getId(), tradeDate.minusDays(1))
         .orElseThrow(IllegalArgumentException::new);
-    StockCandle currentCandle = stockCandleRepository.findDailyCandle(stock.getId(), tradeDate)
+    StockDailyCandle currentCandle = stockCandleRepository.findDailyCandle(stock.getId(), tradeDate)
         .orElseThrow(IllegalArgumentException::new);
 
     double changeFromTwoToOne = getChangePercent(

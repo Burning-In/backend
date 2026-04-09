@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.application.StockCandleService;
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.respository.StockRepository;
@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-class StockCandleServiceTest {
+class StockDailyCandleServiceTest {
 
   @Autowired
   private StockCandleService stockCandleService;
@@ -42,12 +42,12 @@ class StockCandleServiceTest {
     );
 
     // when
-    List<StockCandle> result = stockCandleService.create(stockCode, response);
+    List<StockDailyCandle> result = stockCandleService.create(stockCode, response);
 
     // then
     assertThat(result).hasSize(2);
     assertThat(result).extracting(
-        StockCandle::getTradeDate,
+        StockDailyCandle::getTradeDate,
             s -> s.getStock().getCode()
         )
         .containsExactlyInAnyOrder(

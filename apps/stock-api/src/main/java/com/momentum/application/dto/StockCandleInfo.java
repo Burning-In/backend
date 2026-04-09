@@ -1,6 +1,6 @@
 package com.momentum.application.dto;
 
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
 import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPriceTrend;
 import lombok.Builder;
@@ -17,7 +17,7 @@ public record StockCandleInfo(
     Long stockId
 ) {
 
-  public static StockCandleInfo from(StockCandle entity) {
+  public static StockCandleInfo from(StockDailyCandle entity) {
     return StockCandleInfo.builder()
         .openPrice(entity.getOpenPrice())
         .highPrice(entity.getHighPrice())

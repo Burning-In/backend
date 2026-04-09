@@ -3,7 +3,7 @@ package com.momentum.application;
 import com.momentum.application.dto.StockStateChangedEvent;
 import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.StockCode;
 import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTick;
@@ -118,28 +118,28 @@ public class StockStateService {
   //-----------
   // # 일봉 데이터(보정 및 확정용)
   //
-  public void finalizeDailyState(StockCandle stockCandle) {
-    StockCode stockCode = StockCode.getCode(stockCandle.getStock().getCode());
+  public void finalizeDailyState(StockDailyCandle stockDailyCandle) {
+    StockCode stockCode = StockCode.getCode(stockDailyCandle.getStock().getCode());
     Stock stock = stockRepository.findByStockCode(stockCode.getCode())
         .orElseThrow(IllegalStateException::new);
     StockBase stockBase = stockBaseRepository.findLastBase(stock.getId(), StockBaseType.CONFIRMED)
         .orElseThrow(IllegalArgumentException::new);
 
     // # 상승돌파
-    if (calculateGap(stockBase.getHighestResistancePrice(), stockCandle.getClosePrice()) > NOISE_THRESHOLD_PERCENT
+    if (calculateGap(stockBase.getHighestResistancePrice(), stockDailyCandle.getClosePrice()) > NOISE_THRESHOLD_PERCENT
         && stock.getStockTrend().equals(StockTrend.UPTREND) && !stock.getStockRegime().equals(StockRegime.BREAKOUT)) {
       stock.update(StockRegime.BREAKOUT);
       stockRepository.save(stock);
     }
     // # 상승가능
     // - 가격이 지지/저항선 안에 있고, vcp가 형성되어야함, 아리면 저항선에 가깝던가
-    if (calculateGap(stockBase.getHighestResistancePrice(), stockCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
-        stockBase.getLowestSupportLinePrice() < stockCandle.getClosePrice() && stock.getStockTrend().equals(StockTrend.UPTREND)
+    if (calculateGap(stockBase.getHighestResistancePrice(), stockDailyCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
+        stockBase.getLowestSupportLinePrice() < stockDailyCandle.getClosePrice() && stock.getStockTrend().equals(StockTrend.UPTREND)
         && !stock.getStockRegime().equals(StockRegime.BREAKOUT_CANDIDATE)) {
       if (stockBase.getStockBaseVolatility().isContracting()) {
         stock.update(StockRegime.BREAKOUT_CANDIDATE);
       }
-      if (Math.abs(calculateGap(stockBase.getHighestResistancePrice(), stockCandle.getClosePrice())) <= NOISE_THRESHOLD_PERCENT) {
+      if (Math.abs(calculateGap(stockBase.getHighestResistancePrice(), stockDailyCandle.getClosePrice())) <= NOISE_THRESHOLD_PERCENT) {
         stock.update(StockRegime.BREAKOUT_CANDIDATE);
       }
 
@@ -147,14 +147,14 @@ public class StockStateService {
     }
 
     // # 하락가능
-    if (calculateGap(stockBase.getHighestResistancePrice(), stockCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
-        stockBase.getLowestSupportLinePrice() < stockCandle.getClosePrice() &&
+    if (calculateGap(stockBase.getHighestResistancePrice(), stockDailyCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
+        stockBase.getLowestSupportLinePrice() < stockDailyCandle.getClosePrice() &&
         !stock.getStockRegime().equals(StockRegime.FAILED_BREAKOUT)) {
       stock.update(StockRegime.FAILED_BREAKOUT);
       stockRepository.save(stock);
     }
     // # 하락
-    if (calculateGap(stockBase.getLowestSupportLinePrice(), stockCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
+    if (calculateGap(stockBase.getLowestSupportLinePrice(), stockDailyCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
         !stock.getStockRegime().equals(StockRegime.BREAKDOWN)) {
       stock.update(StockRegime.BREAKDOWN);
       stockRepository.save(stock);

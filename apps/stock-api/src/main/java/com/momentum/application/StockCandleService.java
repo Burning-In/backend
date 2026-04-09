@@ -1,7 +1,7 @@
 package com.momentum.application;
 
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockCandle;
+import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
@@ -19,11 +19,11 @@ public class StockCandleService{
   private final StockCandleRepository stockCandleRepository;
 
   @Transactional
-  public List<StockCandle> create(String stockCode, StockChartInfoResponse stockChartInfoResponse) {
+  public List<StockDailyCandle> create(String stockCode, StockChartInfoResponse stockChartInfoResponse) {
     Stock stock = stockRepository.findByStockCode(stockCode)
         .orElseThrow(IllegalArgumentException::new);
 
-    List<StockCandle> dailyCandles = stockChartInfoResponse.candleResponses()
+    List<StockDailyCandle> dailyCandles = stockChartInfoResponse.candleResponses()
         .stream()
         .map(candle -> fromCandle(stock, candle))
         .toList();
@@ -31,8 +31,8 @@ public class StockCandleService{
     return stockCandleRepository.saveAll(dailyCandles);
   }
 
-  private StockCandle fromCandle(Stock stock, CandleResponse candle) {
-    return StockCandle.daily(
+  private StockDailyCandle fromCandle(Stock stock, CandleResponse candle) {
+    return StockDailyCandle.create(
         stock,
         candle.date(),
         candle.openPrice(),
