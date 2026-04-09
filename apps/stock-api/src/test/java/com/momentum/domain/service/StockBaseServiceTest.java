@@ -1,8 +1,7 @@
-package com.momentum.domain.service.impl;
+package com.momentum.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.application.StockBaseService;
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTrend;

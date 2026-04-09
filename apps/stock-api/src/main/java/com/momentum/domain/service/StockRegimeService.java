@@ -1,4 +1,4 @@
-package com.momentum.application;
+package com.momentum.domain.service;
 
 import com.momentum.application.dto.StockStateChangedEvent;
 import com.momentum.application.dto.StockTickInfo;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class StockStateService {
+public class StockRegimeService {
 
   private static final Double NOISE_THRESHOLD_PERCENT = 2.0;
 

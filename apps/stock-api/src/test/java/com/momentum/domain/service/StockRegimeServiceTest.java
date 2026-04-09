@@ -1,4 +1,4 @@
-package com.momentum.application;
+package com.momentum.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 class StockRegimeServiceTest {
 
   @Autowired
-  private StockStateService stockStateService;
+  private StockRegimeService stockRegimeService;
 
   @Autowired
   private StockRepository stockRepository;
@@ -126,7 +126,7 @@ class StockRegimeServiceTest {
     );
 
     // when
-    stockStateService.processTick(tickInfo, now);
+    stockRegimeService.processTick(tickInfo, now);
 
     // then
     assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKOUT);
@@ -163,7 +163,7 @@ class StockRegimeServiceTest {
     );
 
     // when
-    stockStateService.processTick(tickInfo, now);
+    stockRegimeService.processTick(tickInfo, now);
 
     // then
     assertThat(stock.getStockRegime()).isEqualTo(StockRegime.FAILED_BREAKOUT);
@@ -200,7 +200,7 @@ class StockRegimeServiceTest {
     );
 
     // when
-    stockStateService.processTick(tickInfo, now);
+    stockRegimeService.processTick(tickInfo, now);
 
     // then
     assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKDOWN);
@@ -223,7 +223,7 @@ class StockRegimeServiceTest {
         "2" // 상승
     );
 
-    stockStateService.finalizeDailyState(candle);
+    stockRegimeService.finalizeDailyState(candle);
 
     assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKOUT);
   }
@@ -251,7 +251,7 @@ class StockRegimeServiceTest {
         "2"
     );
 
-    stockStateService.finalizeDailyState(candle);
+    stockRegimeService.finalizeDailyState(candle);
 
     assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKOUT_CANDIDATE);
   }
@@ -273,7 +273,7 @@ class StockRegimeServiceTest {
         "5" // 하락
     );
 
-    stockStateService.finalizeDailyState(candle);
+    stockRegimeService.finalizeDailyState(candle);
 
     assertThat(stock.getStockRegime()).isEqualTo(StockRegime.FAILED_BREAKOUT);
   }
@@ -295,7 +295,7 @@ class StockRegimeServiceTest {
         "5"
     );
 
-    stockStateService.finalizeDailyState(candle);
+    stockRegimeService.finalizeDailyState(candle);
 
     assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKDOWN);
   }

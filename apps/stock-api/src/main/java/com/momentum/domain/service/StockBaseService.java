@@ -1,4 +1,4 @@
-package com.momentum.application;
+package com.momentum.domain.service;
 
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.indicator.price.StockBase;
