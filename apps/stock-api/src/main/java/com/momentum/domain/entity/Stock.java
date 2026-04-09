@@ -13,17 +13,17 @@ public class Stock extends BaseEntity {
 
   private String name;
   private String code;
-  private StockState stockState;
+  private StockRegime stockRegime;
   private StockTrend stockTrend;
 
-  public Stock(String name, String code, StockState stockState, StockTrend stockTrend) {
+  public Stock(String name, String code, StockRegime stockRegime, StockTrend stockTrend) {
     this.name = name;
     this.code = code;
-    this.stockState = stockState;
+    this.stockRegime = stockRegime;
     this.stockTrend = stockTrend;
   }
 
-  public void update(StockState stockState) {
-    this.stockState = stockState;
+  public void update(StockRegime stockRegime) {
+    this.stockRegime = stockRegime;
   }
 }

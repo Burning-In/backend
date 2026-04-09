@@ -1,6 +1,6 @@
 package com.momentum.domain.entity;
 
-public enum StockState {
+public enum StockRegime {
   BREAKOUT,
   BREAKOUT_CANDIDATE,
   FAILED_BREAKOUT,

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.application.StockBaseService;
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockState;
+import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.entity.indicator.price.StockBase;
 import com.momentum.domain.entity.indicator.price.StockBaseLine;
@@ -39,7 +39,7 @@ class StockBaseServiceTest {
   @DisplayName("이전 베이스가 없으면 accumulationCount = 1으로 생성된다")
   void createCandidate_noPreviousBase() {
     // given
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
     StockLine triggerLine = stockLineRepository.save(
         StockLine.resistance(100_000L, stock)
     );
@@ -56,7 +56,7 @@ class StockBaseServiceTest {
   @DisplayName("저항선 돌파 이후, 후보 베이스 첫번쨰 SUPPORT가 이전 저항보다 낮으면 병합된다")
   void evaluateBase_support_merge() {
     // given
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
 
     StockLine resistance = stockLineRepository.save(
         StockLine.resistance(100_000L, stock)
@@ -99,7 +99,7 @@ class StockBaseServiceTest {
   @DisplayName("저항선 돌파 이후 후보베이스 SUPPORT가 정상 범위면 confirm 된다")
   void evaluateBase_support_confirm() {
     // given
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
 
     StockLine resistance = stockLineRepository.save(
         StockLine.resistance(100_000L, stock)
@@ -135,7 +135,7 @@ class StockBaseServiceTest {
   @DisplayName("지지선 하락돌파이후 후보베이스 RESISTANCE가 이전 지지보다 낮으면 병합된다")
   void evaluateBase_resistance_merge() {
     // given
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
 
     StockLine supportLine = stockLineRepository.save(
         StockLine.support(90_000L, stock)
@@ -166,7 +166,7 @@ class StockBaseServiceTest {
   @DisplayName("지지선 돌파이후 후보베이스 RESISTANCE가 정상 범위면 confirm 된다")
   void evaluateBase_resistance_confirm() {
     // given
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
 
     StockLine supportLine = stockLineRepository.save(
         StockLine.support(90_000L, stock)

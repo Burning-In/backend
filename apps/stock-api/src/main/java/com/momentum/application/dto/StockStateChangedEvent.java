@@ -1,11 +1,11 @@
 package com.momentum.application.dto;
 
-import com.momentum.domain.entity.StockState;
+import com.momentum.domain.entity.StockRegime;
 
 public record StockStateChangedEvent(
     String stockCode,
-    StockState fromState,
-    StockState toState
+    StockRegime fromState,
+    StockRegime toState
 ) {
 
 }

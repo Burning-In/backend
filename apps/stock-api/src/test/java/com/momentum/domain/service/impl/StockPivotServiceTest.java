@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.momentum.application.StockPivotService;
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
-import com.momentum.domain.entity.StockState;
+import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
 import com.momentum.domain.respository.StockCandleRepository;
@@ -39,7 +39,7 @@ class StockPivotServiceTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
 
     String baseDate = "20250327";
 
@@ -88,7 +88,7 @@ class StockPivotServiceTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
 
     String baseDate = "20250327";
 
@@ -146,7 +146,7 @@ class StockPivotServiceTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
 
     String baseDate = "20250327";
 

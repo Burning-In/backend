@@ -6,7 +6,7 @@ import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockCandle;
 import com.momentum.domain.entity.StockCode;
-import com.momentum.domain.entity.StockState;
+import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTick;
 import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.entity.indicator.price.StockBase;
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SpringBootTest
-class StockStateServiceTest {
+class StockRegimeServiceTest {
 
   @Autowired
   private StockStateService stockStateService;
@@ -45,7 +45,7 @@ class StockStateServiceTest {
   // 공통 헬퍼
   // -------------------------------
   private Stock createStock() {
-    return stockRepository.save(new Stock("삼성전자", "005930", StockState.UNDEFIED, StockTrend.UPTREND));
+    return stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND));
   }
 
   private StockBase createBase(Stock stock, long resistance, long support) {
@@ -129,7 +129,7 @@ class StockStateServiceTest {
     stockStateService.processTick(tickInfo, now);
 
     // then
-    assertThat(stock.getStockState()).isEqualTo(StockState.BREAKOUT);
+    assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKOUT);
   }
 
   // -------------------------------
@@ -166,7 +166,7 @@ class StockStateServiceTest {
     stockStateService.processTick(tickInfo, now);
 
     // then
-    assertThat(stock.getStockState()).isEqualTo(StockState.FAILED_BREAKOUT);
+    assertThat(stock.getStockRegime()).isEqualTo(StockRegime.FAILED_BREAKOUT);
   }
 
   // -------------------------------
@@ -203,7 +203,7 @@ class StockStateServiceTest {
     stockStateService.processTick(tickInfo, now);
 
     // then
-    assertThat(stock.getStockState()).isEqualTo(StockState.BREAKDOWN);
+    assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKDOWN);
   }
 
   @Test
@@ -225,7 +225,7 @@ class StockStateServiceTest {
 
     stockStateService.finalizeDailyState(candle);
 
-    assertThat(stock.getStockState()).isEqualTo(StockState.BREAKOUT);
+    assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKOUT);
   }
 
 
@@ -253,7 +253,7 @@ class StockStateServiceTest {
 
     stockStateService.finalizeDailyState(candle);
 
-    assertThat(stock.getStockState()).isEqualTo(StockState.BREAKOUT_CANDIDATE);
+    assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKOUT_CANDIDATE);
   }
 
   @Test
@@ -275,7 +275,7 @@ class StockStateServiceTest {
 
     stockStateService.finalizeDailyState(candle);
 
-    assertThat(stock.getStockState()).isEqualTo(StockState.FAILED_BREAKOUT);
+    assertThat(stock.getStockRegime()).isEqualTo(StockRegime.FAILED_BREAKOUT);
   }
 
   @Test
@@ -297,6 +297,6 @@ class StockStateServiceTest {
 
     stockStateService.finalizeDailyState(candle);
 
-    assertThat(stock.getStockState()).isEqualTo(StockState.BREAKDOWN);
+    assertThat(stock.getStockRegime()).isEqualTo(StockRegime.BREAKDOWN);
   }
 }
