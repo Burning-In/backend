@@ -1,7 +1,7 @@
 package com.momentum.domain.service;
 
-import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
 import com.momentum.domain.entity.indicator.price.StockPivot;
+import com.momentum.domain.entity.indicator.price.StockPivotType;
 import com.momentum.domain.respository.StockPivotRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

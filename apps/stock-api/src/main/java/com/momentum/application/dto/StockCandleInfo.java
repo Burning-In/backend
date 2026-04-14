@@ -1,8 +1,7 @@
 package com.momentum.application.dto;
 
 import com.momentum.domain.entity.StockDailyCandle;
-import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
-import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPriceTrend;
+import com.momentum.domain.entity.indicator.price.StockPriceTrend;
 import lombok.Builder;
 
 @Builder

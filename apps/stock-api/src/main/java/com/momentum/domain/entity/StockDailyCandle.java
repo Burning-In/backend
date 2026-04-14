@@ -1,8 +1,7 @@
 package com.momentum.domain.entity;
 
 import com.momentum.domain.BaseEntity;
-import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPivotType;
-import com.momentum.domain.entity.indicator.price.StockBaseVolatility.StockPriceTrend;
+import com.momentum.domain.entity.indicator.price.StockPriceTrend;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
