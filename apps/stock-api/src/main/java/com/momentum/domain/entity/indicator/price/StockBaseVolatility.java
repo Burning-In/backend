@@ -30,7 +30,6 @@ public class StockBaseVolatility {
   public enum StockPivotType {
     PIVOT_HIGH,
     PIVOT_LOW,
-    FLAT,
     UNDEFINED
   }
 
@@ -61,11 +60,11 @@ public class StockBaseVolatility {
       return NONE;
     }
 
-    public boolean isUpper(){
+    public boolean isUpper() {
       return this == UPPER_LIMIT || this == UP;
     }
 
-    public boolean isLower(){
+    public boolean isLower() {
       return this == LOWER_LIMIT || this == DOWN;
     }
   }

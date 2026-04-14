@@ -19,23 +19,19 @@ import lombok.NoArgsConstructor;
 public class StockDailyCandle extends BaseEntity {
 
   private LocalDate tradeDate;
-  private Long openPrice;
-  private Long highPrice;
-  private Long lowPrice;
-  private Long closePrice;
-  private Long volume;
+  private long openPrice;
+  private long highPrice;
+  private long lowPrice;
+  private long closePrice;
+  private long volume;
 
   @Enumerated(EnumType.STRING)
   private StockPriceTrend stockPriceTrend;
-
-  @Enumerated(EnumType.STRING)
-  private StockPivotType stockPivotType;
-
   @ManyToOne
   private Stock stock;
 
   private StockDailyCandle(LocalDate tradeDate, Long openPrice, Long highPrice, Long lowPrice, Long closePrice, Long volume,
-      StockPriceTrend stockPriceTrend, StockPivotType stockPivotType, Stock stock) {
+      StockPriceTrend stockPriceTrend, Stock stock) {
     this.tradeDate = tradeDate;
     this.openPrice = openPrice;
     this.highPrice = highPrice;
@@ -43,7 +39,6 @@ public class StockDailyCandle extends BaseEntity {
     this.closePrice = closePrice;
     this.volume = volume;
     this.stockPriceTrend = stockPriceTrend;
-    this.stockPivotType = stockPivotType;
     this.stock = stock;
   }
 
@@ -64,14 +59,7 @@ public class StockDailyCandle extends BaseEntity {
         closePrice,
         volume,
         StockPriceTrend.getValue(priceChangeSign),
-        StockPivotType.UNDEFINED,
         stock
     );
-  }
-
-  public void updatePivotType(StockPivotType stockPivotType) {
-    if (this.stockPivotType != stockPivotType) {
-      this.stockPivotType = stockPivotType;
-    }
   }
 }

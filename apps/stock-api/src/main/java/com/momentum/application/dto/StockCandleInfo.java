@@ -13,7 +13,6 @@ public record StockCandleInfo(
     Long closePrice,
     Long volume,
     StockPriceTrend stockPriceTrend,
-    StockPivotType stockPivotType,
     Long stockId
 ) {
 
@@ -25,7 +24,6 @@ public record StockCandleInfo(
         .closePrice(entity.getClosePrice())
         .volume(entity.getVolume())
         .stockPriceTrend(entity.getStockPriceTrend())
-        .stockPivotType(entity.getStockPivotType())
         .stockId(entity.getStock().getId())
         .build();
   }
