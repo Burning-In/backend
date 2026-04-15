@@ -1,5 +1,7 @@
 package com.momentum.infrastructure.repository;
 
+import static com.momentum.domain.entity.QStockDailyCandle.stockDailyCandle;
+
 import com.momentum.domain.entity.QStockDailyCandle;
 import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockDailyCandle;
@@ -30,8 +32,6 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
 
   @Override
   public Optional<StockDailyCandle> findByStockAndDate(Stock stock, LocalDate tradeDate) {
-    QStockDailyCandle stockDailyCandle = QStockDailyCandle.stockDailyCandle;
-
     StockDailyCandle result = jpaQueryFactory
         .selectFrom(stockDailyCandle)
         .where(
@@ -41,5 +41,17 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
         .fetchOne();
 
     return Optional.ofNullable(result);
+  }
+
+  @Override
+  public Long findAvgVolumeByStockAndDateAfter(Stock stock, LocalDate oneYearAgo) {
+    return jpaQueryFactory
+        .select(stockDailyCandle.volume.avg().longValue())
+        .from(stockDailyCandle)
+        .where(
+            stockDailyCandle.stock.id.eq(stock.getId()),
+            stockDailyCandle.tradeDate.goe(oneYearAgo)
+        )
+        .fetchOne();
   }
 }

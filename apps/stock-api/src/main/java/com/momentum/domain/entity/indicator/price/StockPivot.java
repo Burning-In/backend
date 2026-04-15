@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 public class StockPivot extends BaseEntity {
 
   private long price;
+  private long volume;
 
   private LocalDate tradeDate;
 
@@ -25,15 +27,16 @@ public class StockPivot extends BaseEntity {
   @ManyToOne
   private Stock stock;
 
-  public StockPivot(long price, LocalDate tradeDate, StockPivotType stockPivotType, Stock stock) {
+  public StockPivot(long price, long volume, LocalDate tradeDate, StockPivotType stockPivotType, Stock stock) {
     this.price = price;
-    this.tradeDate = tradeDate;
-    this.stockPivotType = stockPivotType;
-    this.stock = stock;
+    this.volume = volume;
+    this.tradeDate = Objects.requireNonNull(tradeDate);
+    this.stockPivotType = Objects.requireNonNull(stockPivotType);
+    this.stock = Objects.requireNonNull(stock);
   }
 
-  public static StockPivot create(long closingPrice, LocalDate tradeDate, Stock stock) {
-    return new StockPivot(closingPrice, tradeDate, StockPivotType.UNDEFINED, stock);
+  public static StockPivot create(long closingPrice, long volume, LocalDate tradeDate, Stock stock) {
+    return new StockPivot(closingPrice, volume, tradeDate, StockPivotType.UNDEFINED, stock);
   }
 
   public void updateType(StockPivotType stockPivotType) {

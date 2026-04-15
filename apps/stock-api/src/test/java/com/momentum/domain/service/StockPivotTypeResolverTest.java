@@ -21,9 +21,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class StockPivotTypeResolverTest {
 
-  @Autowired private StockPivotTypeResolver stockPivotTypeResolver;
-  @Autowired private StockPivotRepository stockPivotRepository;
-  @Autowired private StockRepository stockRepository;
+  @Autowired
+  private StockPivotTypeResolver stockPivotTypeResolver;
+  @Autowired
+  private StockPivotRepository stockPivotRepository;
+  @Autowired
+  private StockRepository stockRepository;
 
   private Stock stock;
 
@@ -36,8 +39,8 @@ class StockPivotTypeResolverTest {
   @DisplayName("피벗이 3개 미만이면 타입 미확정 (UNDEFINED 유지)")
   void resolveType_lessThan3Pivots() {
     // given
-    stockPivotRepository.save(StockPivot.create(10000L, LocalDate.of(2024, 1, 1), stock));
-    StockPivot current = stockPivotRepository.save(StockPivot.create(11000L, LocalDate.of(2024, 1, 2), stock));
+    stockPivotRepository.save(StockPivot.create(10000L, 100L, LocalDate.of(2024, 1, 1), stock));
+    StockPivot current = stockPivotRepository.save(StockPivot.create(11000L, 100L, LocalDate.of(2024, 1, 2), stock));
 
     // when
     stockPivotTypeResolver.resolveType(current);
@@ -51,9 +54,9 @@ class StockPivotTypeResolverTest {
   void resolveType_pivotHigh() {
     // given
     // oldest(10000) → middle(15000) → current(12000)
-    stockPivotRepository.save(StockPivot.create(10000L, LocalDate.of(2024, 1, 1), stock));
-    StockPivot middle = stockPivotRepository.save(StockPivot.create(15000L, LocalDate.of(2024, 1, 2), stock));
-    StockPivot current = stockPivotRepository.save(StockPivot.create(12000L, LocalDate.of(2024, 1, 3), stock));
+    stockPivotRepository.save(StockPivot.create(10000L, 100L, LocalDate.of(2024, 1, 1), stock));
+    StockPivot middle = stockPivotRepository.save(StockPivot.create(15000L, 100L, LocalDate.of(2024, 1, 2), stock));
+    StockPivot current = stockPivotRepository.save(StockPivot.create(12000L, 100L, LocalDate.of(2024, 1, 3), stock));
 
     // when
     stockPivotTypeResolver.resolveType(current);
@@ -67,9 +70,9 @@ class StockPivotTypeResolverTest {
   void resolveType_pivotLow() {
     // given
     // oldest(15000) → middle(8000) → current(12000)
-    stockPivotRepository.save(StockPivot.create(15000L, LocalDate.of(2024, 1, 1), stock));
-    StockPivot middle = stockPivotRepository.save(StockPivot.create(8000L, LocalDate.of(2024, 1, 2), stock));
-    StockPivot current = stockPivotRepository.save(StockPivot.create(12000L, LocalDate.of(2024, 1, 3), stock));
+    stockPivotRepository.save(StockPivot.create(15000L, 100L, LocalDate.of(2024, 1, 1), stock));
+    StockPivot middle = stockPivotRepository.save(StockPivot.create(8000L, 100L, LocalDate.of(2024, 1, 2), stock));
+    StockPivot current = stockPivotRepository.save(StockPivot.create(12000L, 100L, LocalDate.of(2024, 1, 3), stock));
 
     // when
     stockPivotTypeResolver.resolveType(current);
@@ -83,9 +86,9 @@ class StockPivotTypeResolverTest {
   void resolveType_undetermined() {
     // given
     // oldest(10000) → middle(11000) → current(12000) 계속 상승
-    stockPivotRepository.save(StockPivot.create(10000L, LocalDate.of(2024, 1, 1), stock));
-    StockPivot middle = stockPivotRepository.save(StockPivot.create(11000L, LocalDate.of(2024, 1, 2), stock));
-    StockPivot current = stockPivotRepository.save(StockPivot.create(12000L, LocalDate.of(2024, 1, 3), stock));
+    stockPivotRepository.save(StockPivot.create(10000L, 100L, LocalDate.of(2024, 1, 1), stock));
+    StockPivot middle = stockPivotRepository.save(StockPivot.create(11000L, 100L, LocalDate.of(2024, 1, 2), stock));
+    StockPivot current = stockPivotRepository.save(StockPivot.create(12000L, 100L, LocalDate.of(2024, 1, 3), stock));
 
     // when
     stockPivotTypeResolver.resolveType(current);

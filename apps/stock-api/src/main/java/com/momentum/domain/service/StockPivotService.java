@@ -37,6 +37,7 @@ public class StockPivotService {
       if (lastPivot.isEmpty()) {
         StockPivot high = StockPivot.create(
             stockDailyCandle.getClosePrice(),
+            stockDailyCandle.getVolume(),
             stockDailyCandle.getTradeDate(),
             stockDailyCandle.getStock()
         );
@@ -75,7 +76,8 @@ public class StockPivotService {
       StockDailyCandle yesterdayCandle = stockCandleRepository.findByStockAndDate(stockDailyCandle.getStock(), yesterday)
           .orElseThrow(() -> new IllegalStateException("어제 캔들 없음"));
       StockPivot savedPivot = stockPivotRepository.save(
-          StockPivot.create(yesterdayCandle.getClosePrice(), yesterdayCandle.getTradeDate(), yesterdayCandle.getStock())
+          StockPivot.create(yesterdayCandle.getClosePrice(), yesterdayCandle.getVolume(), yesterdayCandle.getTradeDate(),
+              yesterdayCandle.getStock())
       );
       SlopeResult recalcSlope = stockPivotSlopCalculator.calculateSlope(
           yesterdayCandle.getClosePrice(),

@@ -7,6 +7,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,8 +18,9 @@ import lombok.NoArgsConstructor;
 public class StockLine extends BaseEntity {
 
   private Long price;
-  private Long resistanceTouchCount;
-  private Long supportTouchCount;
+
+  @Enumerated
+  private StockLineStrength stockLineStrength;
 
   @Enumerated(EnumType.STRING)
   private StockLineType lineType;
@@ -26,41 +28,33 @@ public class StockLine extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   private Stock stock;
 
-  public StockLine(Long price, Long resistanceTouchCount, Long supportTouchCount,
+  public StockLine(Long price, StockLineStrength stockLineStrength,
       StockLineType lineType, Stock stock) {
     this.price = price;
-    this.resistanceTouchCount = resistanceTouchCount;
-    this.supportTouchCount = supportTouchCount;
+    this.stockLineStrength = stockLineStrength;
     this.lineType = lineType;
     this.stock = stock;
   }
 
-  public static StockLine resistance(long closePrice, Stock stock) {
+  public static StockLine resistance(long closePrice, Long currentVolume, Long averageDailyVolume, Stock stock) {
     return new StockLine(
         closePrice,
-        1L,
-        0L,
+        StockLineStrength.create(currentVolume, averageDailyVolume),
         StockLineType.RESISTANCE,
         stock
     );
   }
 
-  public static StockLine support(long closePrice, Stock stock) {
+  public static StockLine support(long closePrice, Long currentVolume, Long averageDailyVolume, Stock stock) {
     return new StockLine(
         closePrice,
-        0L,
-        1L,
+        StockLineStrength.create(currentVolume, averageDailyVolume),
         StockLineType.SUPPORT,
         stock
     );
   }
 
-  // 동시성 문제 해결 필요
-  public void increaseResistanceTouch() {
-    this.resistanceTouchCount++;
-  }
-
-  public void increaseSupportTouch() {
-    this.supportTouchCount++;
+  public void updateStrength(Long additionalVolume, Long averageDailyVolume) {
+    this.stockLineStrength.touch(additionalVolume, averageDailyVolume);
   }
 }

@@ -22,7 +22,11 @@ public class StockBase extends BaseEntity {
 
   private Long highestResistancePrice;
   private Long lowestSupportLinePrice;
-  private Long accumulationCount;
+
+  private Long strongestResistanceLinePrice;
+  private Long strongestSupportLinePrice;
+
+  private Long accumulationCount; // 스택으로 가자
 
   @Embedded
   private StockBaseVolatility stockBaseVolatility;

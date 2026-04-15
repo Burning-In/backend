@@ -13,4 +13,6 @@ public interface StockCandleRepository {
   StockDailyCandle save(StockDailyCandle candle);
 
   Optional<StockDailyCandle> findByStockAndDate(Stock stock, LocalDate tradeDate);
+
+  Long findAvgVolumeByStockAndDateAfter(Stock stock, LocalDate oneYearAgo);
 }

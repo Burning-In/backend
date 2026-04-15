@@ -1,9 +1,14 @@
 package com.momentum.domain.service;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockDailyCandle;
+import com.momentum.domain.entity.indicator.price.StockBase;
+import com.momentum.domain.entity.indicator.price.StockBaseType;
 import com.momentum.domain.entity.indicator.price.StockLine;
+import com.momentum.domain.entity.indicator.price.StockPivot;
+import com.momentum.domain.entity.indicator.price.StockPivotType;
+import com.momentum.domain.respository.StockBaseRepository;
+import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockLineRepository;
+import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,35 +17,65 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StockLineService {
 
-  private final StockLineRepository stockLineRepository;
+  private static final double PIVOT_THRESHOLD = 2.0;
 
-  public StockLine determineResistance(Stock stock, StockDailyCandle highPivotPoint, double thresholdPercent) {
-    Optional<StockLine> matchedResistance = stockLineRepository.findTopResistanceInRange(stock.getId(),
-        highPivotPoint.getClosePrice(), thresholdPercent);
-    if (matchedResistance.isEmpty()) {
-      StockLine resistance = StockLine.resistance(highPivotPoint.getClosePrice(), stock);
-      return stockLineRepository.save(resistance);
+  private final StockLineRepository stockLineRepository;
+  private final StockBaseRepository stockBaseRepository;
+  private final StockCandleRepository stockCandleRepository;
+
+  public void resolveStockLine(StockPivot stockPivot) {
+    if (stockPivot == null) {
+      throw new IllegalStateException();
     }
-    StockLine existingStockLine = matchedResistance.get();
-    existingStockLine.increaseResistanceTouch();
-    return stockLineRepository.save(existingStockLine);
+    Long averageDailyVolume = stockCandleRepository.findAvgVolumeByStockAndDateAfter(stockPivot.getStock(),
+        LocalDate.now().minusYears(1));
+    Optional<StockLine> matchedResistance = stockLineRepository.findTopResistanceInRange(stockPivot.getStock().getId(),
+        stockPivot.getPrice(), PIVOT_THRESHOLD);
+    if (matchedResistance.isPresent()) {
+      StockLine existingStockLine = matchedResistance.get();
+      if (averageDailyVolume != null) {
+        existingStockLine.updateStrength(stockPivot.getVolume(), averageDailyVolume);
+      }
+      stockLineRepository.save(existingStockLine);
+      return;
+    }
+
+    StockLine stockLine = createStockLine(stockPivot, averageDailyVolume);
+    if (stockLine != null) {
+      stockLineRepository.save(stockLine);
+    }
   }
 
-  public StockLine determineSupport(Stock stock, StockDailyCandle lowPivotPoint, double thresholdPercent) {
-    Optional<StockLine> matchedSupport = stockLineRepository.findLowestSupportInRange(stock.getId(),
-        lowPivotPoint.getClosePrice(), thresholdPercent);
-    if (matchedSupport.isEmpty()) {
-      StockLine resistance = StockLine.support(lowPivotPoint.getClosePrice(), stock);
-      return stockLineRepository.save(resistance);
+  private StockLine createStockLine(StockPivot stockPivot, Long averageDailyVolume) {
+    Optional<StockBase> lastBase = stockBaseRepository.findLastBase(stockPivot.getStock().getId(), StockBaseType.CONFIRMED);
+    if (lastBase.isPresent()) {
+      return createNewStockLine(stockPivot, averageDailyVolume, lastBase.get());
     }
-    StockLine existingStockLine = matchedSupport.get();
-    existingStockLine.increaseSupportTouch();
-    return stockLineRepository.save(existingStockLine);
+    return createFirstStockLine(stockPivot, averageDailyVolume);
+
+  }
+
+  public StockLine createFirstStockLine(StockPivot stockPivot, Long averageDailyVolume) {
+    if (stockPivot.getStockPivotType().equals(StockPivotType.PIVOT_HIGH)) {
+      return StockLine.resistance(stockPivot.getPrice(), stockPivot.getVolume(), averageDailyVolume,
+          stockPivot.getStock());
+    }
+    return StockLine.support(stockPivot.getPrice(), stockPivot.getVolume(), averageDailyVolume,
+        stockPivot.getStock());
+  }
+
+  private StockLine createNewStockLine(StockPivot stockPivot, Long averageDailyVolume, StockBase lastBase) {
+    if (lastBase.getStrongestResistanceLinePrice() < stockPivot.getPrice()
+        && stockPivot.getStockPivotType().equals(StockPivotType.PIVOT_HIGH)) {
+      return StockLine.resistance(stockPivot.getPrice(), stockPivot.getVolume(), averageDailyVolume,
+          stockPivot.getStock());
+    }
+    if (lastBase.getStrongestSupportLinePrice() > stockPivot.getPrice()
+        && stockPivot.getStockPivotType().equals(StockPivotType.PIVOT_LOW)) {
+      return StockLine.support(stockPivot.getPrice(), stockPivot.getVolume(), averageDailyVolume,
+          stockPivot.getStock());
+    }
+
+    return null;
   }
 }
-
-// # 저항선(그제, 중요 지우지말것)
-// - 주의사항 : 아직 만들어지지 않은 저항선을 주가가 오늘 통과를 해버리면 어떻게 하지?(이러면 서로 엇갈릴수도 있는데, 하루전에도 4%가 떨어졌으면 고점인데, 현재 주가가 그값을 넘어버리니깐 지지로 상태 변경을 해야함)
-
-// # 주의할점
-// - (추후에 이벤트로) 지지/저항 상태 변경은 주가 내려가거나 올라갈떄 가차없이 처리합니다. 베이스 상태랑 달라요
