@@ -6,11 +6,11 @@ import com.momentum.domain.entity.Stock;
 import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTrend;
-import com.momentum.domain.entity.indicator.price.StockPivot;
+import com.momentum.domain.entity.indicator.price.StockPricePoint;
 import com.momentum.domain.entity.indicator.price.StockPivotCalculateHistory;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockPivotCalculateHistoryRepository;
-import com.momentum.domain.respository.StockPivotRepository;
+import com.momentum.domain.respository.StockPricePointRepository;
 import com.momentum.domain.respository.StockRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,16 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SpringBootTest
-class StockPivotServiceTest {
+class StockPricePointServiceTest {
 
   @Autowired
-  private StockPivotService stockPivotService;
+  private StockPricePointService stockPricePointService;
   @Autowired
   private StockCandleRepository stockCandleRepository;
   @Autowired
   private StockRepository stockRepository;
   @Autowired
-  private StockPivotRepository stockPivotRepository;
+  private StockPricePointRepository stockPricePointRepository;
   @Autowired
   private StockPivotCalculateHistoryRepository stockPivotCalculateHistoryRepository;
 
@@ -51,10 +51,10 @@ class StockPivotServiceTest {
     );
 
     // when
-    stockPivotService.resolvePivot(candle);
+    stockPricePointService.resolvePricePoint(candle);
 
     // then
-    Optional<StockPivot> savedPivot = stockPivotRepository.findTopByStockOrderByCreatedAtDesc(stock);
+    Optional<StockPricePoint> savedPivot = stockPricePointRepository.findTopByStockOrderByCreatedAtDesc(stock);
     assertThat(savedPivot).isPresent();
     assertThat(savedPivot.get().getPrice()).isEqualTo(10500L);
 
@@ -70,7 +70,7 @@ class StockPivotServiceTest {
     StockDailyCandle pivotCandle = stockCandleRepository.save(
         StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L, "2")
     );
-    stockPivotService.resolvePivot(pivotCandle); // 피벗만 저장됨
+    stockPricePointService.resolvePricePoint(pivotCandle); // 피벗만 저장됨
 
     // 다음 포인트 (B 포인트 역할)
     StockDailyCandle nextCandle = stockCandleRepository.save(
@@ -78,7 +78,7 @@ class StockPivotServiceTest {
     );
 
     // when
-    stockPivotService.resolvePivot(nextCandle);
+    stockPricePointService.resolvePricePoint(nextCandle);
 
     // then
     Optional<StockPivotCalculateHistory> history = stockPivotCalculateHistoryRepository.findTopCalculationHistory(stock);
@@ -96,13 +96,13 @@ class StockPivotServiceTest {
     StockDailyCandle candleA = stockCandleRepository.save(
         StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L, "2")
     );
-    stockPivotService.resolvePivot(candleA);
+    stockPricePointService.resolvePricePoint(candleA);
 
     // B 포인트
     StockDailyCandle candleB = stockCandleRepository.save(
         StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10500L, 1200L, "2")
     );
-    stockPivotService.resolvePivot(candleB);
+    stockPricePointService.resolvePricePoint(candleB);
 
     // C 포인트 (도어 안에 들어오는 포인트)
     StockDailyCandle candleC = stockCandleRepository.save(
@@ -110,7 +110,7 @@ class StockPivotServiceTest {
     );
 
     // when
-    stockPivotService.resolvePivot(candleC);
+    stockPricePointService.resolvePricePoint(candleC);
 
     // then
     Optional<StockPivotCalculateHistory> history = stockPivotCalculateHistoryRepository.findTopCalculationHistory(stock);
@@ -127,13 +127,13 @@ class StockPivotServiceTest {
     StockDailyCandle candleA = stockCandleRepository.save(
         StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L, "2")
     );
-    stockPivotService.resolvePivot(candleA);
+    stockPricePointService.resolvePricePoint(candleA);
 
     // B 포인트
     StockDailyCandle candleB = stockCandleRepository.save(
         StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10200L, 1200L, "2")
     );
-    stockPivotService.resolvePivot(candleB);
+    stockPricePointService.resolvePricePoint(candleB);
 
     // C 포인트 (도어 안에 들어오는 포인트)
     StockDailyCandle candleC = stockCandleRepository.save(
@@ -141,7 +141,7 @@ class StockPivotServiceTest {
     );
 
     // when
-    stockPivotService.resolvePivot(candleC);
+    stockPricePointService.resolvePricePoint(candleC);
 
     // then
     Optional<StockPivotCalculateHistory> history = stockPivotCalculateHistoryRepository.findTopCalculationHistory(stock);
@@ -159,19 +159,19 @@ class StockPivotServiceTest {
     StockDailyCandle candleA = stockCandleRepository.save(
         StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L, "2")
     );
-    stockPivotService.resolvePivot(candleA);
+    stockPricePointService.resolvePricePoint(candleA);
 
     // B 포인트
     StockDailyCandle candleB = stockCandleRepository.save(
         StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10300L, 1200L, "2")
     );
-    stockPivotService.resolvePivot(candleB);
+    stockPricePointService.resolvePricePoint(candleB);
 
     // G 포인트 (마지막 범위내 포인트 역할, 내일이 H가 됨)
     StockDailyCandle candleG = stockCandleRepository.save(
         StockDailyCandle.create(stock, "20240103", 10400L, 11000L, 10000L, 10500L, 1300L, "2")
     );
-    stockPivotService.resolvePivot(candleG);
+    stockPricePointService.resolvePricePoint(candleG);
 
     // H 포인트 (역전 유발, 급등)
     StockDailyCandle candleH = stockCandleRepository.save(
@@ -179,18 +179,18 @@ class StockPivotServiceTest {
     );
 
     // when
-    stockPivotService.resolvePivot(candleH);
+    stockPricePointService.resolvePricePoint(candleH);
 
     // then
     // 새 피벗이 생성됨 (G = 어제 = 20240103)
-    Optional<StockPivot> newPivot = stockPivotRepository.findTopByStockOrderByCreatedAtDesc(stock);
+    Optional<StockPricePoint> newPivot = stockPricePointRepository.findTopByStockOrderByCreatedAtDesc(stock);
     assertThat(newPivot).isPresent();
     assertThat(newPivot.get().getPrice()).isEqualTo(10500L); // G의 closePrice
 
     // 히스토리가 새 피벗 기준으로 재초기화됨
     Optional<StockPivotCalculateHistory> history = stockPivotCalculateHistoryRepository.findTopCalculationHistory(stock);
     assertThat(history).isPresent();
-    assertThat(history.get().getStockPivot().getPrice()).isEqualTo(10500L);
+    assertThat(history.get().getStockPricePoint().getPrice()).isEqualTo(10500L);
     assertThat(history.get().getSU_MAX().compareTo(history.get().getSL_MIN())).isLessThan(0);
   }
 }

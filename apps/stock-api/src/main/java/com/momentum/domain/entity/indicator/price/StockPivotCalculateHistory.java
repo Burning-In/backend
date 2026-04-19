@@ -18,21 +18,21 @@ public class StockPivotCalculateHistory extends BaseEntity {
   private BigDecimal SU_MAX;
   private BigDecimal SL_MIN;
   @ManyToOne
-  private StockPivot stockPivot;
+  private StockPricePoint stockPricePoint;
 
   private StockPivotCalculateHistory(long currentPrice, BigDecimal SU_MAX, BigDecimal SL_MIN,
-      StockPivot stockPivot) {
+      StockPricePoint stockPricePoint) {
     this.currentPrice = currentPrice;
     this.SU_MAX = Objects.requireNonNull(SU_MAX);
     this.SL_MIN = Objects.requireNonNull(SL_MIN);
-    this.stockPivot = Objects.requireNonNull(stockPivot);
+    this.stockPricePoint = Objects.requireNonNull(stockPricePoint);
   }
 
   public static StockPivotCalculateHistory create(
-      long currentPrice, BigDecimal SU_MAX, BigDecimal SL_MIN, StockPivot stockPivot
+      long currentPrice, BigDecimal SU_MAX, BigDecimal SL_MIN, StockPricePoint stockPricePoint
   ) {
     return new StockPivotCalculateHistory(
-        currentPrice, SU_MAX, SL_MIN, stockPivot
+        currentPrice, SU_MAX, SL_MIN, stockPricePoint
     );
   }
 }

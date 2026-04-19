@@ -1,6 +1,6 @@
 package com.momentum.domain.entity.indicator.price;
 
-public enum StockBaseType {
-  CANDIDATE,
-  CONFIRMED
+public enum StockBaseKind {
+  BASE,
+  PULLBACK
 }

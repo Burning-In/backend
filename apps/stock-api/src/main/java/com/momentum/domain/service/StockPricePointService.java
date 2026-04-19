@@ -2,11 +2,11 @@ package com.momentum.domain.service;
 
 import com.momentum.application.dto.SlopeResult;
 import com.momentum.domain.entity.StockDailyCandle;
-import com.momentum.domain.entity.indicator.price.StockPivot;
+import com.momentum.domain.entity.indicator.price.StockPricePoint;
 import com.momentum.domain.entity.indicator.price.StockPivotCalculateHistory;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockPivotCalculateHistoryRepository;
-import com.momentum.domain.respository.StockPivotRepository;
+import com.momentum.domain.respository.StockPricePointRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -16,43 +16,43 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class StockPivotService {
+public class StockPricePointService {
 
   private static final BigDecimal PIVOT_ERROR_PERCENT = BigDecimal.valueOf(3.0);
 
-  private final StockPivotCalculateHistoryRepository stockPivotCalculateHistoryRepository;
+  private final StockPivotCalculateHistoryRepository stockPricePointCalculateHistoryRepository;
   private final StockCandleRepository stockCandleRepository;
-  private final StockPivotRepository stockPivotRepository;
-  private final StockPivotSlopCalculator stockPivotSlopCalculator;
+  private final StockPricePointRepository stockPricePointRepository;
+  private final StockPricePointSlopCalculator stockPricePointSlopCalculator;
 
   @Transactional
-  public void resolvePivot(StockDailyCandle stockDailyCandle) {
-    Optional<StockPivotCalculateHistory> calculationHistory = stockPivotCalculateHistoryRepository.findTopCalculationHistory(
+  public void resolvePricePoint(StockDailyCandle stockDailyCandle) {
+    Optional<StockPivotCalculateHistory> calculationHistory = stockPricePointCalculateHistoryRepository.findTopCalculationHistory(
         stockDailyCandle.getStock()
     );
     if (calculationHistory.isEmpty()) {
-      Optional<StockPivot> lastPivot = stockPivotRepository.findTopByStockOrderByCreatedAtDesc(
+      Optional<StockPricePoint> lastPricePoint = stockPricePointRepository.findTopByStockOrderByCreatedAtDesc(
           stockDailyCandle.getStock()
       );
-      if (lastPivot.isEmpty()) {
-        StockPivot high = StockPivot.create(
+      if (lastPricePoint.isEmpty()) {
+        StockPricePoint high = StockPricePoint.create(
             stockDailyCandle.getClosePrice(),
             stockDailyCandle.getVolume(),
             stockDailyCandle.getTradeDate(),
             stockDailyCandle.getStock()
         );
-        stockPivotRepository.save(high);
+        stockPricePointRepository.save(high);
       }
-      if (lastPivot.isPresent()) {
-        SlopeResult slope = stockPivotSlopCalculator.calculateSlope(
-            lastPivot.get().getPrice(),
-            lastPivot.get().getTradeDate(),
+      if (lastPricePoint.isPresent()) {
+        SlopeResult slope = stockPricePointSlopCalculator.calculateSlope(
+            lastPricePoint.get().getPrice(),
+            lastPricePoint.get().getTradeDate(),
             stockDailyCandle.getClosePrice(),
             stockDailyCandle.getTradeDate(),
             PIVOT_ERROR_PERCENT
         );
-        stockPivotCalculateHistoryRepository.save(
-            StockPivotCalculateHistory.create(stockDailyCandle.getClosePrice(), slope.su(), slope.sl(), lastPivot.get())
+        stockPricePointCalculateHistoryRepository.save(
+            StockPivotCalculateHistory.create(stockDailyCandle.getClosePrice(), slope.su(), slope.sl(), lastPricePoint.get())
         );
       }
       return;
@@ -60,9 +60,9 @@ public class StockPivotService {
 
     BigDecimal suMax = calculationHistory.get().getSU_MAX();
     BigDecimal slMin = calculationHistory.get().getSL_MIN();
-    SlopeResult slope = stockPivotSlopCalculator.calculateSlope(
-        calculationHistory.get().getStockPivot().getPrice(),
-        calculationHistory.get().getStockPivot().getTradeDate(),
+    SlopeResult slope = stockPricePointSlopCalculator.calculateSlope(
+        calculationHistory.get().getStockPricePoint().getPrice(),
+        calculationHistory.get().getStockPricePoint().getTradeDate(),
         stockDailyCandle.getClosePrice(),
         stockDailyCandle.getTradeDate(),
         PIVOT_ERROR_PERCENT
@@ -75,26 +75,26 @@ public class StockPivotService {
       LocalDate yesterday = stockDailyCandle.getTradeDate().minusDays(1);
       StockDailyCandle yesterdayCandle = stockCandleRepository.findByStockAndDate(stockDailyCandle.getStock(), yesterday)
           .orElseThrow(() -> new IllegalStateException("어제 캔들 없음"));
-      StockPivot savedPivot = stockPivotRepository.save(
-          StockPivot.create(yesterdayCandle.getClosePrice(), yesterdayCandle.getVolume(), yesterdayCandle.getTradeDate(),
+      StockPricePoint savedPivot = stockPricePointRepository.save(
+          StockPricePoint.create(yesterdayCandle.getClosePrice(), yesterdayCandle.getVolume(), yesterdayCandle.getTradeDate(),
               yesterdayCandle.getStock())
       );
-      SlopeResult recalcSlope = stockPivotSlopCalculator.calculateSlope(
+      SlopeResult recalcSlope = stockPricePointSlopCalculator.calculateSlope(
           yesterdayCandle.getClosePrice(),
           yesterdayCandle.getTradeDate(),
           stockDailyCandle.getClosePrice(),
           stockDailyCandle.getTradeDate(),
           PIVOT_ERROR_PERCENT
       );
-      stockPivotCalculateHistoryRepository.save(
+      stockPricePointCalculateHistoryRepository.save(
           StockPivotCalculateHistory.create(stockDailyCandle.getClosePrice(), recalcSlope.su(), recalcSlope.sl(), savedPivot)
       );
       return;
     }
 
-    stockPivotCalculateHistoryRepository.save(
+    stockPricePointCalculateHistoryRepository.save(
         StockPivotCalculateHistory.create(stockDailyCandle.getClosePrice(), suMax, slMin,
-            calculationHistory.get().getStockPivot())
+            calculationHistory.get().getStockPricePoint())
     );
   }
 }

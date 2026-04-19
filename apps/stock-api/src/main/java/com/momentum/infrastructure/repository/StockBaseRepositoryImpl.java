@@ -3,9 +3,11 @@ package com.momentum.infrastructure.repository;
 import static com.momentum.domain.entity.indicator.price.QStockBase.stockBase;
 
 import com.momentum.domain.entity.indicator.price.StockBase;
-import com.momentum.domain.entity.indicator.price.StockBaseType;
 import com.momentum.domain.respository.StockBaseRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -23,12 +25,33 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
   }
 
   @Override
-  public Optional<StockBase> findLastBase(Long stockId, StockBaseType stockBaseType) {
+  public List<StockBase> saveAll(List<StockBase> stockBases) {
+    return stockBaseJpaRepository.saveAll(stockBases);
+  }
+
+  @Override
+  public Optional<StockBase> findCurrentBaseWithLines(Long stockId) {
+    StockBase result = queryFactory
+        .selectFrom(stockBase)
+        .leftJoin(stockBase.stockBaseLines).fetchJoin()
+        .where(
+            stockBase.stock.id.eq(stockId),
+            stockBase.deletedAt.isNull()
+        )
+        .orderBy(stockBase.createdAt.desc())
+        .limit(1)
+        .fetchOne();
+
+    return Optional.ofNullable(result);
+  }
+
+  @Override
+  public Optional<StockBase> findPreviousBase(Long stockId, Instant currentBaseCreatedAt) {
     StockBase result = queryFactory
         .selectFrom(stockBase)
         .where(
             stockBase.stock.id.eq(stockId),
-            stockBase.stockBaseType.eq(stockBaseType),
+            stockBase.createdAt.lt(ZonedDateTime.from(currentBaseCreatedAt)),
             stockBase.deletedAt.isNull()
         )
         .orderBy(stockBase.createdAt.desc())

@@ -10,14 +10,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class StockPivotSlopCalculatorTest {
+class StockPricePointSlopCalculatorTest {
 
-  private StockPivotSlopCalculator calculator;
+  private StockPricePointSlopCalculator calculator;
   private static final BigDecimal ERROR = BigDecimal.valueOf(3.0);
 
   @BeforeEach
   void setUp() {
-    calculator = new StockPivotSlopCalculator();
+    calculator = new StockPricePointSlopCalculator();
   }
 
   @Test

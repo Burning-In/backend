@@ -3,14 +3,13 @@ package com.momentum.domain.entity.indicator.price;
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.entity.Stock;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,114 +24,128 @@ public class StockBase extends BaseEntity {
 
   private Long strongestResistanceLinePrice;
   private Long strongestSupportLinePrice;
+  private StockBaseKind stockBaseKind;
 
-  private Long accumulationCount; // 스택으로 가자
-
-  @Embedded
-  private StockBaseVolatility stockBaseVolatility;
+  private long stageLevel;
 
   @ManyToOne
   private Stock stock;
 
-  @Enumerated(value = EnumType.STRING)
-  private StockBaseType stockBaseType;
-
   @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   private List<StockBaseLine> stockBaseLines;
 
-  public StockBase(Long highestResistancePrice, Long lowestSupportLinePrice, Long accumulationCount,
-      StockBaseVolatility stockBaseVolatility, Stock stock, StockBaseType stockBaseType,
-      List<StockBaseLine> stockBaseLines) {
+  @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  private List<StockPricePoint> stockPricePoints;
+
+  // 눌림이면 표현을 할건지 안할건지
+  public StockBase(Long highestResistancePrice, Long lowestSupportLinePrice,
+      Long strongestResistanceLinePrice, Long strongestSupportLinePrice, StockBaseKind stockBaseKind,
+      long stageLevel, Stock stock, List<StockBaseLine> stockBaseLines) {
     this.highestResistancePrice = highestResistancePrice;
     this.lowestSupportLinePrice = lowestSupportLinePrice;
-    this.accumulationCount = accumulationCount;
-    this.stockBaseVolatility = stockBaseVolatility;
+    this.strongestResistanceLinePrice = strongestResistanceLinePrice;
+    this.strongestSupportLinePrice = strongestSupportLinePrice;
+    this.stockBaseKind = stockBaseKind;
+    this.stageLevel = stageLevel;
     this.stock = stock;
-    this.stockBaseType = stockBaseType;
     this.stockBaseLines = stockBaseLines;
+    this.stockPricePoints = new ArrayList<>();
   }
 
-  public static StockBase createCandidate(Stock stock, StockLine triggerLine, long previousBaseCount) {
-    StockBase candidate = new StockBase(
-        initHighestResistancePrice(triggerLine),
-        initLowestSupportPrice(triggerLine),
-        initAccumulateCount(triggerLine, previousBaseCount),
-        new StockBaseVolatility(0.0, 0.0, 0.0),
-        stock,
-        StockBaseType.CANDIDATE,
+  public static StockBase create(StockPricePoint highPricePoint, StockPricePoint lowPricePoint,
+      long currentStageLevel, long averageDailyVolume) {
+    StockBase stockBase = new StockBase(
+        highPricePoint.getPrice(),
+        lowPricePoint.getPrice(),
+        highPricePoint.getPrice(),
+        lowPricePoint.getPrice(),
+        StockBaseKind.PULLBACK,
+        currentStageLevel,
+        highPricePoint.getStock(),
         new ArrayList<>()
     );
-    candidate.updateBaseLine(triggerLine);
-    return candidate;
+    StockBaseLine resistance = StockBaseLine.resistance(highPricePoint.getPrice(), highPricePoint.getVolume(),
+        averageDailyVolume, stockBase);
+    StockBaseLine support = StockBaseLine.support(lowPricePoint.getPrice(), lowPricePoint.getVolume(),
+        averageDailyVolume, stockBase);
+    stockBase.stockBaseLines.addAll(List.of(resistance, support));
+    highPricePoint.assignBase(stockBase);
+    lowPricePoint.assignBase(stockBase);
+    stockBase.stockPricePoints.addAll(List.of(highPricePoint, lowPricePoint));
+
+    return stockBase;
   }
 
-  // 병합시 변동성 수정필요
-  public void merge(StockBase failedConfirmed, StockLine firstLineAfterCandidate) {
-    if (failedConfirmed.highestResistancePrice != null) {
-      this.highestResistancePrice = Math.max(failedConfirmed.highestResistancePrice, this.highestResistancePrice);
-      if (this.lowestSupportLinePrice != null) {
-        this.lowestSupportLinePrice = Math.min(firstLineAfterCandidate.getPrice(), this.lowestSupportLinePrice);
+  public void update(long lastBaseStageLevel) {
+    this.stageLevel = lastBaseStageLevel;
+  }
+
+  // 동일한 좀 필터링 필요
+  public void addPoints(List<StockPricePoint> points, long averageDailyVolume, double threshold) {
+    if (points == null || points.isEmpty()) {
+      return;
+    }
+
+    for (StockPricePoint point : points) {
+      point.assignBase(this);
+      this.stockPricePoints.add(point);
+
+      Optional<StockBaseLine> matchedLine = findMatchedLine(point, threshold);
+      if (matchedLine.isPresent()) {
+        matchedLine.get().updateStrength(point.getVolume(), averageDailyVolume);
       } else {
-        this.lowestSupportLinePrice = firstLineAfterCandidate.getPrice();
+        this.stockBaseLines.add(createLine(point, averageDailyVolume));
       }
-    }
-    if (failedConfirmed.lowestSupportLinePrice != null) {
-      this.lowestSupportLinePrice = Math.min(failedConfirmed.lowestSupportLinePrice, this.lowestSupportLinePrice);
-      if (this.highestResistancePrice != null) {
-        this.highestResistancePrice = Math.max(firstLineAfterCandidate.getPrice(), this.highestResistancePrice);
-      } else {
-        this.highestResistancePrice = firstLineAfterCandidate.getPrice();
-      }
-    }
 
-    for (StockBaseLine stockBaseLine : failedConfirmed.stockBaseLines) {
-      stockBaseLine.changeBase(this);
-      this.stockBaseLines.add(stockBaseLine);
+      updateBoundary(point);
     }
-    this.updateBaseLine(firstLineAfterCandidate);
   }
 
-  public void confirm(StockLine triggerLine) {
-    this.stockBaseType = StockBaseType.CONFIRMED;
-    if (this.highestResistancePrice != null && triggerLine.getPrice() != null) {
-      this.highestResistancePrice = Math.max(triggerLine.getPrice(), this.highestResistancePrice);
+  private StockBaseLine createLine(StockPricePoint point, long averageDailyVolume) {
+    if (point.getStockPricePointType() == StockPricePointType.PIVOT_HIGH) {
+      return StockBaseLine.resistance(point.getPrice(), point.getVolume(), averageDailyVolume, this);
     }
-    if (this.highestResistancePrice == null) {
-      this.highestResistancePrice = triggerLine.getPrice();
-    }
-    if (this.lowestSupportLinePrice != null && triggerLine.getPrice() != null) {
-      this.lowestSupportLinePrice = Math.min(triggerLine.getPrice(), this.lowestSupportLinePrice);
-    }
-    if (this.lowestSupportLinePrice == null && triggerLine.getPrice() != null) {
-      this.lowestSupportLinePrice = triggerLine.getPrice();
-    }
-    StockBaseLine stockBaseLine = new StockBaseLine(this, triggerLine);
-    this.stockBaseLines.add(stockBaseLine);
+    return StockBaseLine.support(point.getPrice(), point.getVolume(), averageDailyVolume, this);
   }
 
-  private static Long initHighestResistancePrice(StockLine triggerLine) {
-    if (triggerLine.getLineType().equals(StockLineType.RESISTANCE)) {
-      return triggerLine.getPrice();
-    }
-    return null;
+  private Optional<StockBaseLine> findMatchedLine(StockPricePoint point, double threshold) {
+    return this.stockBaseLines.stream()
+        .filter(line -> line.getLineType() == toLineType(point))
+        .filter(line -> isWithinThreshold(line.getPrice(), point.getPrice(), threshold))
+        .findFirst();
   }
 
-  private static Long initLowestSupportPrice(StockLine triggerLine) {
-    if (triggerLine.getLineType().equals(StockLineType.SUPPORT)) {
-      return triggerLine.getPrice();
+  private StockLineType toLineType(StockPricePoint point) {
+    if (point.getStockPricePointType() == StockPricePointType.PIVOT_HIGH) {
+      return StockLineType.RESISTANCE;
     }
-    return null;
+    return StockLineType.SUPPORT;
   }
 
-  private static long initAccumulateCount(StockLine stockLine, long previousBaseCount) {
-    if (stockLine.getLineType().equals(StockLineType.RESISTANCE)) {
-      return previousBaseCount + 1;
-    }
-    return 1L;
+  private boolean isWithinThreshold(long linePrice, long pointPrice, double threshold) {
+    double diff = Math.abs(linePrice - pointPrice) / (double) linePrice;
+    return diff <= threshold;
   }
 
-  private void updateBaseLine(StockLine stockLine) {
-    StockBaseLine baseLine = new StockBaseLine(this, stockLine);
-    this.stockBaseLines.add(baseLine);
+  private void updateBoundary(StockPricePoint point) {
+    if (point.getPrice() > this.highestResistancePrice) {
+      this.highestResistancePrice = point.getPrice();
+    }
+    if (point.getPrice() < this.lowestSupportLinePrice) {
+      this.lowestSupportLinePrice = point.getPrice();
+    }
+    updateStrongestLines();
+  }
+
+  private void updateStrongestLines() {
+    this.stockBaseLines.stream()
+        .filter(line -> line.getLineType() == StockLineType.RESISTANCE)
+        .max(Comparator.comparing(line -> line.getStockLineStrength().getStrength()))
+        .ifPresent(line -> this.strongestResistanceLinePrice = line.getPrice());
+
+    this.stockBaseLines.stream()
+        .filter(line -> line.getLineType() == StockLineType.SUPPORT)
+        .max(Comparator.comparing(line -> line.getStockLineStrength().getStrength()))
+        .ifPresent(line -> this.strongestSupportLinePrice = line.getPrice());
   }
 }

@@ -9,7 +9,6 @@ import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTick;
 import com.momentum.domain.entity.StockTrend;
 import com.momentum.domain.entity.indicator.price.StockBase;
-import com.momentum.domain.entity.indicator.price.StockBaseType;
 import com.momentum.domain.respository.StockBaseRepository;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.domain.respository.StockTickRepository;
@@ -35,7 +34,7 @@ public class StockRegimeService {
     StockCode stockCode = StockCode.getCode(stockTickInfo.stockCode());
     Stock stock = stockRepository.findByStockCode(stockCode.getCode())
         .orElseThrow(IllegalStateException::new);
-    StockBase stockBase = stockBaseRepository.findLastBase(stock.getId(), StockBaseType.CONFIRMED)
+    StockBase stockBase = stockBaseRepository.findCurrentBaseWithLines(stock.getId())
         .orElseThrow(IllegalArgumentException::new);
 
     // # 상승돌파
@@ -122,7 +121,7 @@ public class StockRegimeService {
     StockCode stockCode = StockCode.getCode(stockDailyCandle.getStock().getCode());
     Stock stock = stockRepository.findByStockCode(stockCode.getCode())
         .orElseThrow(IllegalStateException::new);
-    StockBase stockBase = stockBaseRepository.findLastBase(stock.getId(), StockBaseType.CONFIRMED)
+    StockBase stockBase = stockBaseRepository.findCurrentBaseWithLines(stock.getId())
         .orElseThrow(IllegalArgumentException::new);
 
     // # 상승돌파
@@ -136,9 +135,9 @@ public class StockRegimeService {
     if (calculateGap(stockBase.getHighestResistancePrice(), stockDailyCandle.getClosePrice()) <= -NOISE_THRESHOLD_PERCENT &&
         stockBase.getLowestSupportLinePrice() < stockDailyCandle.getClosePrice() && stock.getStockTrend().equals(StockTrend.UPTREND)
         && !stock.getStockRegime().equals(StockRegime.BREAKOUT_CANDIDATE)) {
-      if (stockBase.getStockBaseVolatility().isContracting()) {
-        stock.update(StockRegime.BREAKOUT_CANDIDATE);
-      }
+//      if (stockBase.getStockBaseVolatility().isContracting()) {
+//        stock.update(StockRegime.BREAKOUT_CANDIDATE);
+//      }
       if (Math.abs(calculateGap(stockBase.getHighestResistancePrice(), stockDailyCandle.getClosePrice())) <= NOISE_THRESHOLD_PERCENT) {
         stock.update(StockRegime.BREAKOUT_CANDIDATE);
       }

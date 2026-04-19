@@ -21,7 +21,7 @@ public class StockPivotCalculateHistoryRepositoryImpl implements StockPivotCalcu
   public Optional<StockPivotCalculateHistory> findTopCalculationHistory(Stock stock) {
     StockPivotCalculateHistory result = jpaQueryFactory.selectFrom(stockPivotCalculateHistory)
         .where(
-            stockPivotCalculateHistory.stockPivot.stock.eq(stock)
+            stockPivotCalculateHistory.stockPricePoint.stock.eq(stock)
         )
         .orderBy(stockPivotCalculateHistory.createdAt.desc())
         .limit(1)
