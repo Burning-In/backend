@@ -9,6 +9,7 @@ import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,6 +28,7 @@ public class StockBase extends BaseEntity {
   private StockBaseKind stockBaseKind;
 
   private long stageLevel;
+  private boolean isVcp;
 
   @ManyToOne
   private Stock stock;
@@ -38,18 +40,19 @@ public class StockBase extends BaseEntity {
   private List<StockPricePoint> stockPricePoints;
 
   // 눌림이면 표현을 할건지 안할건지
-  public StockBase(Long highestResistancePrice, Long lowestSupportLinePrice,
+  private StockBase(Long highestResistancePrice, Long lowestSupportLinePrice,
       Long strongestResistanceLinePrice, Long strongestSupportLinePrice, StockBaseKind stockBaseKind,
-      long stageLevel, Stock stock, List<StockBaseLine> stockBaseLines) {
-    this.highestResistancePrice = highestResistancePrice;
-    this.lowestSupportLinePrice = lowestSupportLinePrice;
-    this.strongestResistanceLinePrice = strongestResistanceLinePrice;
-    this.strongestSupportLinePrice = strongestSupportLinePrice;
-    this.stockBaseKind = stockBaseKind;
+      long stageLevel, Stock stock, List<StockBaseLine> stockBaseLines, boolean isVcp) {
+    this.highestResistancePrice = Objects.requireNonNull(highestResistancePrice);
+    this.lowestSupportLinePrice = Objects.requireNonNull(lowestSupportLinePrice);
+    this.strongestResistanceLinePrice = Objects.requireNonNull(strongestResistanceLinePrice);
+    this.strongestSupportLinePrice = Objects.requireNonNull(strongestSupportLinePrice);
+    this.stockBaseKind = Objects.requireNonNull(stockBaseKind);
     this.stageLevel = stageLevel;
-    this.stock = stock;
-    this.stockBaseLines = stockBaseLines;
+    this.stock = Objects.requireNonNull(stock);
+    this.stockBaseLines = Objects.requireNonNull(stockBaseLines);
     this.stockPricePoints = new ArrayList<>();
+    this.isVcp = isVcp;
   }
 
   public static StockBase create(StockPricePoint highPricePoint, StockPricePoint lowPricePoint,
@@ -62,7 +65,8 @@ public class StockBase extends BaseEntity {
         StockBaseKind.PULLBACK,
         currentStageLevel,
         highPricePoint.getStock(),
-        new ArrayList<>()
+        new ArrayList<>(),
+        false
     );
     StockBaseLine resistance = StockBaseLine.resistance(highPricePoint.getPrice(), highPricePoint.getVolume(),
         averageDailyVolume, stockBase);
@@ -99,6 +103,36 @@ public class StockBase extends BaseEntity {
 
       updateBoundary(point);
     }
+  }
+
+  public void updateVcp(List<Long> volatilityHistories) {
+    if (volatilityHistories.size() == 1) {
+      this.isVcp = false;
+    } else if (volatilityHistories.size() == 2) {
+      this.isVcp = volatilityHistories.get(0) > volatilityHistories.get(1);
+    } else {
+      this.isVcp = calculateSlope(movingAverage(volatilityHistories)) < 0;
+    }
+  }
+
+  private List<Double> movingAverage(List<Long> histories) {
+    List<Double> result = new ArrayList<>();
+    for (int i = 0; i < histories.size() - 1; i++) {
+      result.add((histories.get(i) + histories.get(i + 1)) / 2.0);
+    }
+    return result;
+  }
+
+  private double calculateSlope(List<Double> values) {
+    int n = values.size();
+    double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    for (int i = 0; i < n; i++) {
+      sumX += i;
+      sumY += values.get(i);
+      sumXY += (double) i * values.get(i);
+      sumX2 += (double) i * i;
+    }
+    return (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
   }
 
   private StockBaseLine createLine(StockPricePoint point, long averageDailyVolume) {

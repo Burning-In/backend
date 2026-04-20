@@ -60,4 +60,18 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
 
     return Optional.ofNullable(result);
   }
+
+  @Override
+  public Optional<StockBase> findWithPricePointsById(Long baseId) {
+    StockBase result = queryFactory
+        .selectFrom(stockBase)
+        .leftJoin(stockBase.stockBaseLines).fetchJoin()
+        .where(
+            stockBase.id.eq(baseId),
+            stockBase.deletedAt.isNull()
+        )
+        .fetchOne();
+
+    return Optional.ofNullable(result);
+  }
 }
