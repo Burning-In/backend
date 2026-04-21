@@ -38,11 +38,20 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
   }
 
   @Override
-  public List<StockPricePoint> findTop3ByStockOrderByCreatedAtDesc(Stock stock) {
+  public List<StockPricePoint> findTop3ByStockOrderByCreatedAtDesc(Long stockId) {
     return jpaQueryFactory.selectFrom(stockPricePoint)
-        .where(stockPricePoint.stock.eq(stock))
+        .where(stockPricePoint.stock.id.eq(stockId))
         .orderBy(stockPricePoint.createdAt.desc())
         .limit(3)
+        .fetch();
+  }
+
+  @Override
+  public List<StockPricePoint> findTop4ByStockOrderByCreatedAtDesc(Long stockId) {
+    return jpaQueryFactory.selectFrom(stockPricePoint)
+        .where(stockPricePoint.stock.id.eq(stockId))
+        .orderBy(stockPricePoint.createdAt.desc())
+        .limit(4)
         .fetch();
   }
 
@@ -96,5 +105,10 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
             stockPricePoint.stockBase.isNull(),
             stockPricePoint.createdAt.goe(ZonedDateTime.from(currentBaseCreatedAt)))
         .fetch();
+  }
+
+  @Override
+  public List<StockPricePoint> saveAll(List<StockPricePoint> stockPricePoints) {
+    return stockPricePointJpaRepository.saveAll(stockPricePoints);
   }
 }

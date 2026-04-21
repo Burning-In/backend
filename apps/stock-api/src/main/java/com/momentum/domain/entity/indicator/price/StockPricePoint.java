@@ -41,7 +41,7 @@ public class StockPricePoint extends BaseEntity {
   }
 
   public static StockPricePoint create(long closingPrice, long volume, LocalDate tradeDate, Stock stock) {
-    return new StockPricePoint(closingPrice, volume, tradeDate, StockPricePointType.UNDEFINED, null, stock);
+    return new StockPricePoint(closingPrice, volume, tradeDate, StockPricePointType.INIT, null, stock);
   }
 
   public void updateType(StockPricePointType stockPricePointType) {

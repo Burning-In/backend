@@ -13,7 +13,9 @@ public interface StockPricePointRepository {
 
   Optional<StockPricePoint> findTopByStockOrderByCreatedAtDesc(Stock stock);
 
-  List<StockPricePoint> findTop3ByStockOrderByCreatedAtDesc(Stock stock);
+  List<StockPricePoint> findTop3ByStockOrderByCreatedAtDesc(Long stockId);
+
+  List<StockPricePoint> findTop4ByStockOrderByCreatedAtDesc(Long stockId);
 
   Optional<StockPricePoint> findUpperPricePoint(Instant currentBaseCreatedAt, long overPrice);
 
@@ -22,4 +24,6 @@ public interface StockPricePointRepository {
   Optional<StockPricePoint> findPricePointNoBase(StockPricePointType stockPricePointType);
 
   List<StockPricePoint> findUnassignedPointsSinceBase(Instant lastBaseCreatedAt);
+
+  List<StockPricePoint> saveAll(List<StockPricePoint> stockPricePoints);
 }
