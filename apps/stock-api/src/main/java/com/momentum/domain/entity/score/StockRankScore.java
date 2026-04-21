@@ -6,6 +6,6 @@ import lombok.Getter;
 
 @Getter
 @Entity
-public class StockScore extends BaseEntity {
+public class StockRankScore extends BaseEntity {
 
 }
