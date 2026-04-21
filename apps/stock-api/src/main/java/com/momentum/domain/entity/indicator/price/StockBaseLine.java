@@ -56,4 +56,13 @@ public class StockBaseLine extends BaseEntity {
   public void updateStrength(Long additionalVolume, Long averageDailyVolume) {
     this.stockLineStrength.touch(additionalVolume, averageDailyVolume);
   }
+
+  // 저항 ↔ 지지 타입 전환
+  public void convertLineType() {
+    if (this.lineType == StockLineType.RESISTANCE) {
+      this.lineType = StockLineType.SUPPORT;
+    } else {
+      this.lineType = StockLineType.RESISTANCE;
+    }
+  }
 }
