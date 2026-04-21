@@ -1,4 +1,4 @@
-package com.momentum.domain.entity.indicator.price;
+package com.momentum.domain.entity.analysis.base;
 
 import jakarta.persistence.Embeddable;
 import java.math.BigDecimal;
@@ -10,20 +10,20 @@ import lombok.NoArgsConstructor;
 @Getter
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StockLineStrength {
+public class StockBaseLineStrength {
 
   private Long touchCount;
   private Long accumulatedVolume;
   private BigDecimal strength;
 
-  private StockLineStrength(Long touchCount, Long accumulatedVolume, BigDecimal strength) {
+  private StockBaseLineStrength(Long touchCount, Long accumulatedVolume, BigDecimal strength) {
     this.touchCount = touchCount;
     this.accumulatedVolume = accumulatedVolume;
     this.strength = strength;
   }
 
-  public static StockLineStrength create(Long currentVolume, Long averageDailyVolume) {
-    return new StockLineStrength(0L, currentVolume, calculateStrength(currentVolume, averageDailyVolume, 0L));
+  public static StockBaseLineStrength create(Long currentVolume, Long averageDailyVolume) {
+    return new StockBaseLineStrength(0L, currentVolume, calculateStrength(currentVolume, averageDailyVolume, 0L));
   }
 
   public void touch(Long additionalVolume, Long averageDailyVolume) {

@@ -1,4 +1,4 @@
-package com.momentum.domain.entity;
+package com.momentum.domain.entity.stock;
 
 public enum StockTrend {
   UPTREND,

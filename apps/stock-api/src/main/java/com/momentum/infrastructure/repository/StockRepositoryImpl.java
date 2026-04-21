@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.repository;
 
-import com.momentum.domain.entity.Stock;
+import com.momentum.domain.entity.stock.Stock;
 import com.momentum.domain.respository.StockRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

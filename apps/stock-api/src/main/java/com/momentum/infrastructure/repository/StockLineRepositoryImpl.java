@@ -2,8 +2,8 @@ package com.momentum.infrastructure.repository;
 
 import static com.momentum.domain.entity.indicator.price.QStockBaseLine.stockBaseLine;
 
-import com.momentum.domain.entity.indicator.price.StockBaseLine;
-import com.momentum.domain.entity.indicator.price.StockLineType;
+import com.momentum.domain.entity.analysis.base.StockBaseLine;
+import com.momentum.domain.entity.analysis.base.StockBaseLineType;
 import com.momentum.domain.respository.StockLineRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.Optional;
@@ -26,7 +26,7 @@ public class StockLineRepositoryImpl implements StockLineRepository {
         .selectFrom(stockBaseLine)
         .where(
             stockBaseLine.stockBase.stock.id.eq(stockId),
-            stockBaseLine.lineType.eq(StockLineType.RESISTANCE),
+            stockBaseLine.lineType.eq(StockBaseLineType.RESISTANCE),
             stockBaseLine.price.gt(lowerBound).and(stockBaseLine.price.lt(upperBound))
         )
         .orderBy(stockBaseLine.price.desc())
@@ -45,7 +45,7 @@ public class StockLineRepositoryImpl implements StockLineRepository {
         .selectFrom(stockBaseLine)
         .where(
             stockBaseLine.stockBase.stock.id.eq(stockId),
-            stockBaseLine.lineType.eq(StockLineType.SUPPORT),
+            stockBaseLine.lineType.eq(StockBaseLineType.SUPPORT),
             stockBaseLine.price.gt(lowerBound).and(stockBaseLine.price.lt(upperBound))
         )
         .orderBy(stockBaseLine.price.asc())
@@ -64,7 +64,7 @@ public class StockLineRepositoryImpl implements StockLineRepository {
     StockBaseLine result = jpaQueryFactory.selectFrom(stockBaseLine)
         .where(
             stockBaseLine.stockBase.stock.id.eq(stockId),
-            stockBaseLine.lineType.eq(StockLineType.RESISTANCE)
+            stockBaseLine.lineType.eq(StockBaseLineType.RESISTANCE)
         )
         .orderBy(stockBaseLine.createdAt.desc())
         .fetchFirst();

@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.repository;
 
-import com.momentum.domain.entity.StockTick;
+import com.momentum.domain.entity.stock.StockTick;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

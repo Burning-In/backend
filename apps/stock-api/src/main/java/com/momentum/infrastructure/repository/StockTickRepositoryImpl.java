@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.repository;
 
-import com.momentum.domain.entity.StockTick;
+import com.momentum.domain.entity.stock.StockTick;
 import com.momentum.domain.respository.StockTickRepository;
 import java.time.Instant;
 import java.time.LocalDate;

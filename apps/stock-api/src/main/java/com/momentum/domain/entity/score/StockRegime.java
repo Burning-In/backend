@@ -1,4 +1,4 @@
-package com.momentum.domain.entity;
+package com.momentum.domain.entity.score;
 
 public enum StockRegime {
   BREAKOUT_START,      // 돌파시작

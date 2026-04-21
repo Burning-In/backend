@@ -2,9 +2,9 @@ package com.momentum.infrastructure.repository;
 
 import static com.momentum.domain.entity.indicator.price.QStockPricePoint.stockPricePoint;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.indicator.price.StockPricePoint;
-import com.momentum.domain.entity.indicator.price.StockPricePointType;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.analysis.pivot.StockPricePoint;
+import com.momentum.domain.entity.analysis.pivot.StockPricePointType;
 import com.momentum.domain.respository.StockPricePointRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;

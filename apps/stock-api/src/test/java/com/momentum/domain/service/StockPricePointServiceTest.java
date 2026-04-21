@@ -2,12 +2,12 @@ package com.momentum.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockDailyCandle;
-import com.momentum.domain.entity.StockRegime;
-import com.momentum.domain.entity.StockTrend;
-import com.momentum.domain.entity.indicator.price.StockPricePoint;
-import com.momentum.domain.entity.indicator.price.StockPivotCalculateHistory;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.stock.StockDailyCandle;
+import com.momentum.domain.entity.score.StockRegime;
+import com.momentum.domain.entity.stock.StockTrend;
+import com.momentum.domain.entity.analysis.pivot.StockPricePoint;
+import com.momentum.domain.entity.analysis.pivot.StockPivotCalculateHistory;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockPivotCalculateHistoryRepository;
 import com.momentum.domain.respository.StockPricePointRepository;

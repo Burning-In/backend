@@ -1,11 +1,9 @@
-package com.momentum.domain.entity.indicator.price;
+package com.momentum.domain.entity.analysis.base;
 
 import com.momentum.domain.BaseEntity;
-import com.momentum.domain.entity.Stock;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,18 +17,18 @@ public class StockBaseLine extends BaseEntity {
   private Long price;
 
   @Enumerated
-  private StockLineStrength stockLineStrength;
+  private StockBaseLineStrength stockBaseLineStrength;
 
   @Enumerated(EnumType.STRING)
-  private StockLineType lineType;
+  private StockBaseLineType lineType;
 
   @ManyToOne
   private StockBase stockBase;
 
-  private StockBaseLine(Long price, StockLineStrength stockLineStrength,
-      StockLineType lineType, StockBase stockBase) {
+  private StockBaseLine(Long price, StockBaseLineStrength stockBaseLineStrength,
+      StockBaseLineType lineType, StockBase stockBase) {
     this.price = price;
-    this.stockLineStrength = stockLineStrength;
+    this.stockBaseLineStrength = stockBaseLineStrength;
     this.lineType = lineType;
     this.stockBase = stockBase;
   }
@@ -38,8 +36,8 @@ public class StockBaseLine extends BaseEntity {
   public static StockBaseLine resistance(long closePrice, Long currentVolume, Long averageDailyVolume, StockBase stockBase) {
     return new StockBaseLine(
         closePrice,
-        StockLineStrength.create(currentVolume, averageDailyVolume),
-        StockLineType.RESISTANCE,
+        StockBaseLineStrength.create(currentVolume, averageDailyVolume),
+        StockBaseLineType.RESISTANCE,
         stockBase
     );
   }
@@ -47,22 +45,22 @@ public class StockBaseLine extends BaseEntity {
   public static StockBaseLine support(long closePrice, Long currentVolume, Long averageDailyVolume, StockBase stockBase) {
     return new StockBaseLine(
         closePrice,
-        StockLineStrength.create(currentVolume, averageDailyVolume),
-        StockLineType.SUPPORT,
+        StockBaseLineStrength.create(currentVolume, averageDailyVolume),
+        StockBaseLineType.SUPPORT,
         stockBase
     );
   }
 
   public void updateStrength(Long additionalVolume, Long averageDailyVolume) {
-    this.stockLineStrength.touch(additionalVolume, averageDailyVolume);
+    this.stockBaseLineStrength.touch(additionalVolume, averageDailyVolume);
   }
 
   // 저항 ↔ 지지 타입 전환
   public void convertLineType() {
-    if (this.lineType == StockLineType.RESISTANCE) {
-      this.lineType = StockLineType.SUPPORT;
+    if (this.lineType == StockBaseLineType.RESISTANCE) {
+      this.lineType = StockBaseLineType.SUPPORT;
     } else {
-      this.lineType = StockLineType.RESISTANCE;
+      this.lineType = StockBaseLineType.RESISTANCE;
     }
   }
 }

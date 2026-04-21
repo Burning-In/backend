@@ -2,8 +2,8 @@ package com.momentum.infrastructure.repository;
 
 import static com.momentum.domain.entity.indicator.price.QStockPivotCalculateHistory.stockPivotCalculateHistory;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.indicator.price.StockPivotCalculateHistory;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.analysis.pivot.StockPivotCalculateHistory;
 import com.momentum.domain.respository.StockPivotCalculateHistoryRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.Optional;

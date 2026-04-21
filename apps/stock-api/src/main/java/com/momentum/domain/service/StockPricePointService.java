@@ -1,9 +1,9 @@
 package com.momentum.domain.service;
 
 import com.momentum.application.dto.SlopeResult;
-import com.momentum.domain.entity.StockDailyCandle;
-import com.momentum.domain.entity.indicator.price.StockPricePoint;
-import com.momentum.domain.entity.indicator.price.StockPivotCalculateHistory;
+import com.momentum.domain.entity.stock.StockDailyCandle;
+import com.momentum.domain.entity.analysis.pivot.StockPricePoint;
+import com.momentum.domain.entity.analysis.pivot.StockPivotCalculateHistory;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockPivotCalculateHistoryRepository;
 import com.momentum.domain.respository.StockPricePointRepository;

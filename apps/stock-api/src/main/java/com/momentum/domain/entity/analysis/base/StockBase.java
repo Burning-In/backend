@@ -1,7 +1,9 @@
-package com.momentum.domain.entity.indicator.price;
+package com.momentum.domain.entity.analysis.base;
 
 import com.momentum.domain.BaseEntity;
-import com.momentum.domain.entity.Stock;
+import com.momentum.domain.entity.analysis.pivot.StockPricePoint;
+import com.momentum.domain.entity.analysis.pivot.StockPricePointType;
+import com.momentum.domain.entity.stock.Stock;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
@@ -166,11 +168,11 @@ public class StockBase extends BaseEntity {
         .findFirst();
   }
 
-  private StockLineType toLineType(StockPricePoint point) {
+  private StockBaseLineType toLineType(StockPricePoint point) {
     if (point.getStockPricePointType() == StockPricePointType.PIVOT_HIGH) {
-      return StockLineType.RESISTANCE;
+      return StockBaseLineType.RESISTANCE;
     }
-    return StockLineType.SUPPORT;
+    return StockBaseLineType.SUPPORT;
   }
 
   private boolean isWithinThreshold(long linePrice, long pointPrice, double threshold) {
@@ -190,13 +192,13 @@ public class StockBase extends BaseEntity {
 
   private void updateStrongestLines() {
     this.stockBaseLines.stream()
-        .filter(line -> line.getLineType() == StockLineType.RESISTANCE)
-        .max(Comparator.comparing(line -> line.getStockLineStrength().getStrength()))
+        .filter(line -> line.getLineType() == StockBaseLineType.RESISTANCE)
+        .max(Comparator.comparing(line -> line.getStockBaseLineStrength().getStrength()))
         .ifPresent(line -> this.strongestResistanceLinePrice = line.getPrice());
 
     this.stockBaseLines.stream()
-        .filter(line -> line.getLineType() == StockLineType.SUPPORT)
-        .max(Comparator.comparing(line -> line.getStockLineStrength().getStrength()))
+        .filter(line -> line.getLineType() == StockBaseLineType.SUPPORT)
+        .max(Comparator.comparing(line -> line.getStockBaseLineStrength().getStrength()))
         .ifPresent(line -> this.strongestSupportLinePrice = line.getPrice());
   }
 }

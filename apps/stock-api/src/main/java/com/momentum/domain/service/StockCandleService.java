@@ -1,7 +1,7 @@
 package com.momentum.domain.service;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockDailyCandle;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.stock.StockDailyCandle;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;

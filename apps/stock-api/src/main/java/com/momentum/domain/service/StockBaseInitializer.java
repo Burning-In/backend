@@ -1,10 +1,10 @@
 package com.momentum.domain.service;
 
-import com.momentum.domain.entity.indicator.price.StockBase;
-import com.momentum.domain.entity.indicator.price.StockBaseLine;
-import com.momentum.domain.entity.indicator.price.StockLineType;
-import com.momentum.domain.entity.indicator.price.StockPricePoint;
-import com.momentum.domain.entity.indicator.price.StockPricePointType;
+import com.momentum.domain.entity.analysis.base.StockBase;
+import com.momentum.domain.entity.analysis.base.StockBaseLine;
+import com.momentum.domain.entity.analysis.base.StockBaseLineType;
+import com.momentum.domain.entity.analysis.pivot.StockPricePoint;
+import com.momentum.domain.entity.analysis.pivot.StockPricePointType;
 import com.momentum.domain.respository.StockBaseRepository;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.momentum.domain.respository.StockPricePointRepository;
@@ -57,11 +57,11 @@ public class StockBaseInitializer {
       return;
     }
     for (StockBaseLine line : previousBaseOpt.get().getStockBaseLines()) {
-      if (line.getLineType() == StockLineType.RESISTANCE
+      if (line.getLineType() == StockBaseLineType.RESISTANCE
           && line.getPrice() <= newBase.getLowestSupportLinePrice()) {
         line.convertLineType();
       }
-      if (line.getLineType() == StockLineType.SUPPORT
+      if (line.getLineType() == StockBaseLineType.SUPPORT
           && line.getPrice() >= newBase.getHighestResistancePrice()) {
         line.convertLineType();
       }

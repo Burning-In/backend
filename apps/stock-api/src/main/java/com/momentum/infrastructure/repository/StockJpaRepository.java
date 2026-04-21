@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.repository;
 
-import com.momentum.domain.entity.Stock;
+import com.momentum.domain.entity.stock.Stock;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

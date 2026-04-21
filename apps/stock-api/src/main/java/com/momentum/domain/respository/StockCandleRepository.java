@@ -1,7 +1,7 @@
 package com.momentum.domain.respository;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockDailyCandle;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.stock.StockDailyCandle;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;

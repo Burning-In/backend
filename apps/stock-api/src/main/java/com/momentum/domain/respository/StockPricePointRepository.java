@@ -1,8 +1,8 @@
 package com.momentum.domain.respository;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.indicator.price.StockPricePoint;
-import com.momentum.domain.entity.indicator.price.StockPricePointType;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.analysis.pivot.StockPricePoint;
+import com.momentum.domain.entity.analysis.pivot.StockPricePointType;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;

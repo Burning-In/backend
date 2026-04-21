@@ -1,8 +1,7 @@
 package com.momentum.domain.respository;
 
-import com.momentum.domain.entity.indicator.price.StockBase;
+import com.momentum.domain.entity.analysis.base.StockBase;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 public interface StockBaseRepository {

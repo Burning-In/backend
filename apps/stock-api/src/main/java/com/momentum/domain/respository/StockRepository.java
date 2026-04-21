@@ -1,6 +1,6 @@
 package com.momentum.domain.respository;
 
-import com.momentum.domain.entity.Stock;
+import com.momentum.domain.entity.stock.Stock;
 import java.util.Optional;
 
 public interface StockRepository {

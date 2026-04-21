@@ -1,8 +1,8 @@
 package com.momentum.domain.service;
 
-import com.momentum.domain.entity.indicator.price.StockBase;
-import com.momentum.domain.entity.indicator.price.StockPricePoint;
-import com.momentum.domain.entity.indicator.price.StockPricePointType;
+import com.momentum.domain.entity.analysis.base.StockBase;
+import com.momentum.domain.entity.analysis.pivot.StockPricePoint;
+import com.momentum.domain.entity.analysis.pivot.StockPricePointType;
 import com.momentum.domain.respository.StockBaseRepository;
 import jakarta.transaction.Transactional;
 import java.util.Optional;

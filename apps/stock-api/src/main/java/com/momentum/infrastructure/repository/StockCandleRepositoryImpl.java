@@ -2,9 +2,8 @@ package com.momentum.infrastructure.repository;
 
 import static com.momentum.domain.entity.QStockDailyCandle.stockDailyCandle;
 
-import com.momentum.domain.entity.QStockDailyCandle;
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockDailyCandle;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.stock.StockDailyCandle;
 import com.momentum.domain.respository.StockCandleRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;

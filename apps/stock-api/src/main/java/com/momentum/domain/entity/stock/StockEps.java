@@ -1,10 +1,10 @@
-package com.momentum.domain.entity.indicator;
+package com.momentum.domain.entity.stock;
 
 import com.momentum.domain.BaseEntity;
 import jakarta.persistence.Entity;
 
 @Entity
-public class MarketIndex  extends BaseEntity {
+public class StockEps extends BaseEntity {
 
   private Long value;
 }

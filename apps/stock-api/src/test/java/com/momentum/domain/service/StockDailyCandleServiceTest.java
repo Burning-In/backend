@@ -2,10 +2,10 @@ package com.momentum.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockDailyCandle;
-import com.momentum.domain.entity.StockRegime;
-import com.momentum.domain.entity.StockTrend;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.stock.StockDailyCandle;
+import com.momentum.domain.entity.score.StockRegime;
+import com.momentum.domain.entity.stock.StockTrend;
 import com.momentum.domain.respository.StockRepository;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse.CandleResponse;

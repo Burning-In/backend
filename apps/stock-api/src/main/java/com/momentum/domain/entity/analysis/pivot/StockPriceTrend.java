@@ -1,4 +1,4 @@
-package com.momentum.domain.entity.indicator.price;
+package com.momentum.domain.entity.analysis.pivot;
 
 
 import lombok.Getter;

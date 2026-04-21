@@ -2,14 +2,13 @@ package com.momentum.infrastructure.lsinvestment.stocktick;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.momentum.application.dto.StockTickInfo;
-import com.momentum.domain.entity.StockCode;
+import com.momentum.domain.entity.stock.StockCode;
 import com.momentum.infrastructure.lsinvestment.dto.stocktick.LsWsRequest;
 import com.momentum.infrastructure.lsinvestment.dto.stocktick.LsWsResponse;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;

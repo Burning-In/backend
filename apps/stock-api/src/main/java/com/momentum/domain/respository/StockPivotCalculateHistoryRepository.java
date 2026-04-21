@@ -1,7 +1,7 @@
 package com.momentum.domain.respository;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.indicator.price.StockPivotCalculateHistory;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.analysis.pivot.StockPivotCalculateHistory;
 import java.util.Optional;
 
 public interface StockPivotCalculateHistoryRepository {

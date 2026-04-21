@@ -1,8 +1,8 @@
 package com.momentum.domain.service;
 
-import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockRegime;
-import com.momentum.domain.entity.StockTrend;
+import com.momentum.domain.entity.stock.Stock;
+import com.momentum.domain.entity.score.StockRegime;
+import com.momentum.domain.entity.stock.StockTrend;
 import com.momentum.domain.respository.StockPricePointRepository;
 import com.momentum.domain.respository.StockRepository;
 import jakarta.transaction.Transactional;

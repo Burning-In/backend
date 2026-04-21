@@ -2,8 +2,8 @@ package com.momentum.infrastructure.repository;
 
 import static com.momentum.domain.entity.indicator.price.QStockBase.stockBase;
 
-import com.momentum.domain.entity.indicator.price.StockBase;
-import com.momentum.domain.entity.indicator.price.StockBaseKind;
+import com.momentum.domain.entity.analysis.base.StockBase;
+import com.momentum.domain.entity.analysis.base.StockBaseKind;
 import com.momentum.domain.respository.StockBaseRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
