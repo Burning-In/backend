@@ -20,6 +20,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockBase extends BaseEntity {
 
+  private static final double BASE_VOLATILITY_THRESHOLD = 10.0;
+
   private Long highestResistancePrice;
   private Long lowestSupportLinePrice;
 
@@ -39,7 +41,6 @@ public class StockBase extends BaseEntity {
   @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   private List<StockPricePoint> stockPricePoints;
 
-  // 눌림이면 표현을 할건지 안할건지
   private StockBase(Long highestResistancePrice, Long lowestSupportLinePrice,
       Long strongestResistanceLinePrice, Long strongestSupportLinePrice, StockBaseKind stockBaseKind,
       long stageLevel, Stock stock, List<StockBaseLine> stockBaseLines, boolean isVcp) {
@@ -55,14 +56,18 @@ public class StockBase extends BaseEntity {
     this.isVcp = isVcp;
   }
 
+  // 고점-저점 변동성이 10% 이상이면 BASE, 미만이면 PULLBACK
   public static StockBase create(StockPricePoint highPricePoint, StockPricePoint lowPricePoint,
       long currentStageLevel, long averageDailyVolume) {
+
+    StockBaseKind kind = resolveKind(highPricePoint.getPrice(), lowPricePoint.getPrice());
+
     StockBase stockBase = new StockBase(
         highPricePoint.getPrice(),
         lowPricePoint.getPrice(),
         highPricePoint.getPrice(),
         lowPricePoint.getPrice(),
-        StockBaseKind.PULLBACK,
+        kind,
         currentStageLevel,
         highPricePoint.getStock(),
         new ArrayList<>(),
@@ -84,7 +89,7 @@ public class StockBase extends BaseEntity {
     this.stageLevel = lastBaseStageLevel;
   }
 
-  // 동일한 좀 필터링 필요
+  // 점 추가 시 변동성이 10% 이상으로 바뀌면 PULLBACK → BASE로 전환
   public void addPoints(List<StockPricePoint> points, long averageDailyVolume, double threshold) {
     if (points == null || points.isEmpty()) {
       return;
@@ -103,6 +108,8 @@ public class StockBase extends BaseEntity {
 
       updateBoundary(point);
     }
+
+    this.stockBaseKind = resolveKind(this.highestResistancePrice, this.lowestSupportLinePrice);
   }
 
   public void updateVcp(List<Long> volatilityHistories) {
@@ -113,6 +120,16 @@ public class StockBase extends BaseEntity {
     } else {
       this.isVcp = calculateSlope(movingAverage(volatilityHistories)) < 0;
     }
+  }
+
+  public boolean isPullback() {
+    return this.stockBaseKind == StockBaseKind.PULLBACK;
+  }
+
+  // 고점-저점 변동성 10% 이상이면 BASE, 미만이면 PULLBACK
+  private static StockBaseKind resolveKind(long highPrice, long lowPrice) {
+    double volatility = (double) (highPrice - lowPrice) / lowPrice * 100;
+    return volatility >= BASE_VOLATILITY_THRESHOLD ? StockBaseKind.BASE : StockBaseKind.PULLBACK;
   }
 
   private List<Double> movingAverage(List<Long> histories) {

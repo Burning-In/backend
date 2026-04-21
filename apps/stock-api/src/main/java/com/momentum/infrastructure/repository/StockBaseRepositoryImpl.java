@@ -3,11 +3,11 @@ package com.momentum.infrastructure.repository;
 import static com.momentum.domain.entity.indicator.price.QStockBase.stockBase;
 
 import com.momentum.domain.entity.indicator.price.StockBase;
+import com.momentum.domain.entity.indicator.price.StockBaseKind;
 import com.momentum.domain.respository.StockBaseRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,17 +25,13 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
   }
 
   @Override
-  public List<StockBase> saveAll(List<StockBase> stockBases) {
-    return stockBaseJpaRepository.saveAll(stockBases);
-  }
-
-  @Override
   public Optional<StockBase> findCurrentBaseWithLines(Long stockId) {
     StockBase result = queryFactory
         .selectFrom(stockBase)
         .leftJoin(stockBase.stockBaseLines).fetchJoin()
         .where(
             stockBase.stock.id.eq(stockId),
+            stockBase.stockBaseKind.eq(StockBaseKind.BASE),
             stockBase.deletedAt.isNull()
         )
         .orderBy(stockBase.createdAt.desc())

@@ -9,8 +9,6 @@ public interface StockBaseRepository {
 
   StockBase save(StockBase stockBase);
 
-  List<StockBase> saveAll(List<StockBase> stockBases);
-
   Optional<StockBase> findCurrentBaseWithLines(Long stockId);
 
   Optional<StockBase> findPreviousBase(Long stockId, Instant currentBaseCreatedAt);
