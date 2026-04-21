@@ -38,6 +38,17 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
   }
 
   @Override
+  public Optional<StockPricePoint> findLatestByStock(Stock stock) {
+    StockPricePoint result = jpaQueryFactory
+        .selectFrom(stockPricePoint)
+        .where(stockPricePoint.stock.eq(stock))
+        .orderBy(stockPricePoint.tradeDate.desc())
+        .fetchFirst();
+
+    return Optional.ofNullable(result);
+  }
+
+  @Override
   public List<StockPricePoint> findTop3ByStockOrderByCreatedAtDesc(Long stockId) {
     return jpaQueryFactory.selectFrom(stockPricePoint)
         .where(stockPricePoint.stock.id.eq(stockId))

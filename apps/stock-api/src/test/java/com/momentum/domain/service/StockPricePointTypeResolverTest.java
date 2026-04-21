@@ -27,7 +27,7 @@ class StockPricePointTypeResolverTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.OTHER));
+    stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDETERMINED, StockTrend.OTHER));
   }
 
   @Test

@@ -31,7 +31,7 @@ class StockDailyCandleServiceTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = new Stock("삼성전자", "005930", StockRegime.UNDEFIED, StockTrend.UPTREND);
+    Stock stock = new Stock("삼성전자", "005930", StockRegime.UNDETERMINED, StockTrend.UPTREND);
     stockRepository.save(stock);
     StockChartInfoResponse response = new StockChartInfoResponse(
         List.of(

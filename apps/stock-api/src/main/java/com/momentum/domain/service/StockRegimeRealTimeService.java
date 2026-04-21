@@ -3,7 +3,6 @@ package com.momentum.domain.service;
 import com.momentum.application.dto.StockStateChangedEvent;
 import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.entity.Stock;
-import com.momentum.domain.entity.StockDailyCandle;
 import com.momentum.domain.entity.StockCode;
 import com.momentum.domain.entity.StockRegime;
 import com.momentum.domain.entity.StockTick;
@@ -40,7 +39,8 @@ public class StockRegimeRealTimeService {
 
     // # 상승돌파
     if (calculateGap(stockBase.getHighestResistancePrice(), stockTickInfo.currentPrice()) >= NOISE_THRESHOLD_PERCENT
-        && stock.getStockTrend().equals(StockTrend.UPTREND) && !stock.getStockRegime().equals(StockRegime.BREAKOUT)) {
+        && stock.getStockTrend().equals(StockTrend.UPTREND) && !stock.getStockRegime()
+        .equals(StockRegime.BREAKOUT_START)) {
       StockTick stockTick = stockTickRepository.findDailyFirst(now).orElseThrow(IllegalStateException::new);
       Double beforeResistanceAverage = stockTickRepository.averageDailyOrderFlow(now, stockTick.getPrice(),
           stockBase.getHighestResistancePrice() - 1);
@@ -49,10 +49,10 @@ public class StockRegimeRealTimeService {
 
       if (beforeResistanceAverage < afterResistanceAverage) {
         StockRegime prevState = stock.getStockRegime();
-        stock.update(StockRegime.BREAKOUT);
+        stock.update(StockRegime.BREAKOUT_START);
         stockRepository.save(stock);
         StockStateChangedEvent stockStateChangedEvent = new StockStateChangedEvent(stockCode.getCode(), prevState,
-            StockRegime.BREAKOUT);
+            StockRegime.BREAKOUT_START);
         applicationEventPublisher.publishEvent(stockStateChangedEvent);
       }
     }
@@ -72,10 +72,10 @@ public class StockRegimeRealTimeService {
 
       if (afterResistanceAverage < beforeResistanceAverage) {
         StockRegime prevState = stock.getStockRegime();
-        stock.update(StockRegime.FAILED_BREAKOUT);
+        stock.update(StockRegime.BREAKOUT_FAILED);
         stockRepository.save(stock);
         StockStateChangedEvent stockStateChangedEvent = new StockStateChangedEvent(stockCode.getCode(), prevState,
-            StockRegime.FAILED_BREAKOUT);
+            StockRegime.BREAKOUT_FAILED);
         applicationEventPublisher.publishEvent(stockStateChangedEvent);
       }
     }
@@ -94,10 +94,10 @@ public class StockRegimeRealTimeService {
 
       if (afterSupportAverage < beforeSupportAverage) {
         StockRegime prevState = stock.getStockRegime();
-        stock.update(StockRegime.BREAKDOWN);
+        stock.update(StockRegime.DOWNSIDE_BREAK);
         stockRepository.save(stock);
         StockStateChangedEvent stockStateChangedEvent = new StockStateChangedEvent(stockCode.getCode(), prevState,
-            StockRegime.BREAKDOWN);
+            StockRegime.DOWNSIDE_BREAK);
         applicationEventPublisher.publishEvent(stockStateChangedEvent);
       }
     }

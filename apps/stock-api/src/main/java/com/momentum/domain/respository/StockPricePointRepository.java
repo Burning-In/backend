@@ -13,6 +13,8 @@ public interface StockPricePointRepository {
 
   Optional<StockPricePoint> findTopByStockOrderByCreatedAtDesc(Stock stock);
 
+  Optional<StockPricePoint> findLatestByStock(Stock stock);
+
   List<StockPricePoint> findTop3ByStockOrderByCreatedAtDesc(Long stockId);
 
   List<StockPricePoint> findTop4ByStockOrderByCreatedAtDesc(Long stockId);
