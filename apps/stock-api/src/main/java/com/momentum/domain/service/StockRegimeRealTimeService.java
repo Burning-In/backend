@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class StockRegimeService {
+public class StockRegimeRealTimeService {
 
   private static final Double NOISE_THRESHOLD_PERCENT = 2.0;
 
@@ -29,6 +29,7 @@ public class StockRegimeService {
   private final StockTickRepository stockTickRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
 
+  // 클래스 분리 필요
   @Transactional
   public void processTick(StockTickInfo stockTickInfo, Instant now) {
     StockCode stockCode = StockCode.getCode(stockTickInfo.stockCode());

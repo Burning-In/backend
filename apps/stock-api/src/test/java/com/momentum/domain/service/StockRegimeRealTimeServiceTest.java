@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SpringBootTest
-class StockRegimeServiceTest {
+class StockRegimeRealTimeServiceTest {
 
   // -------------------------------
   // 1. BREAKOUT
