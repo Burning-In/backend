@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.repository;
 
-import static com.momentum.domain.entity.indicator.price.QStockBaseLine.stockBaseLine;
+import static com.momentum.domain.entity.analysis.base.QStockBaseLine.stockBaseLine;
 
 import com.momentum.domain.entity.analysis.base.StockBaseLine;
 import com.momentum.domain.entity.analysis.base.StockBaseLineType;

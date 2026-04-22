@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.repository;
 
-import static com.momentum.domain.entity.indicator.price.QStockPricePoint.stockPricePoint;
+import static com.momentum.domain.entity.analysis.pivot.QStockPricePoint.stockPricePoint;
 
 import com.momentum.domain.entity.stock.Stock;
 import com.momentum.domain.entity.analysis.pivot.StockPricePoint;

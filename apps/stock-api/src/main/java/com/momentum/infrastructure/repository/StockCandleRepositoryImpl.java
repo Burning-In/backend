@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.repository;
 
-import static com.momentum.domain.entity.QStockDailyCandle.stockDailyCandle;
+import static com.momentum.domain.entity.stock.QStockDailyCandle.stockDailyCandle;
 
 import com.momentum.domain.entity.stock.Stock;
 import com.momentum.domain.entity.stock.StockDailyCandle;
@@ -52,5 +52,18 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
             stockDailyCandle.tradeDate.goe(oneYearAgo)
         )
         .fetchOne();
+  }
+
+  @Override
+  public List<StockDailyCandle> findRecentCandles(Long stockId, LocalDate baseDate, int limit) {
+    return jpaQueryFactory
+        .selectFrom(stockDailyCandle)
+        .where(
+            stockDailyCandle.stock.id.eq(stockId),
+            stockDailyCandle.tradeDate.loe(baseDate)
+        )
+        .orderBy(stockDailyCandle.tradeDate.desc())
+        .limit(limit)
+        .fetch();
   }
 }
