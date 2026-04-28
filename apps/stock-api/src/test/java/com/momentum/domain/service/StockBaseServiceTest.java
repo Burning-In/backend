@@ -1,8 +1,7 @@
 package com.momentum.domain.service;
 
-import com.momentum.domain.respository.StockBaseRepository;
-import com.momentum.domain.respository.StockLineRepository;
-import com.momentum.domain.respository.StockRepository;
+import com.momentum.domain.base.StockBaseRepository;
+import com.momentum.domain.stock.StockRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

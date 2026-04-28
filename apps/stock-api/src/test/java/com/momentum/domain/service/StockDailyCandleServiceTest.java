@@ -6,7 +6,7 @@ import com.momentum.domain.entity.stock.Stock;
 import com.momentum.domain.entity.stock.StockDailyCandle;
 import com.momentum.domain.entity.score.StockRegime;
 import com.momentum.domain.entity.stock.StockTrend;
-import com.momentum.domain.respository.StockRepository;
+import com.momentum.domain.stock.StockRepository;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
 import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse.CandleResponse;
 import java.util.List;
