@@ -1,4 +1,4 @@
-package com.momentum.domain.pricepoint;
+package com.momentum.domain.pricepoint.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

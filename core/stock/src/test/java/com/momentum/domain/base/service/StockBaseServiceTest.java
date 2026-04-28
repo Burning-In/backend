@@ -1,4 +1,4 @@
-package com.momentum.domain.service;
+package com.momentum.domain.base.service;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.stock.StockRepository;
@@ -17,9 +17,6 @@ class StockBaseServiceTest {
 
   @Autowired
   private StockRepository stockRepository;
-
-  @Autowired
-  private StockLineRepository stockLineRepository;
 
   @Autowired
   private StockBaseRepository stockBaseRepository;

@@ -28,7 +28,6 @@ public class StockCandleService {
     return stockCandleRepository.saveAll(dailyCandles);
   }
 
-  // DTO 받아서 던져주가,
   private StockDailyCandle fromCandle(Stock stock, CandleResponse candle) {
     return StockDailyCandle.create(
         stock,

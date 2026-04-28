@@ -1,17 +1,17 @@
-package com.momentum.domain.service;
+package com.momentum.domain.pricepoint.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.domain.entity.stock.Stock;
-import com.momentum.domain.entity.stock.StockDailyCandle;
-import com.momentum.domain.entity.score.StockRegime;
-import com.momentum.domain.entity.stock.StockTrend;
-import com.momentum.domain.entity.analysis.pivot.StockPricePoint;
-import com.momentum.domain.entity.analysis.pivot.StockPivotCalculateHistory;
+import com.momentum.domain.pricepoint.entity.StockPivotCalculation;
+import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRegime;
+import com.momentum.domain.stock.StockTrend;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.pricepoint.StockPricePointCalculationRepository;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
 import com.momentum.domain.stock.StockRepository;
+import com.momentum.domain.stockcandle.StockDailyCandle;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,8 +58,8 @@ class StockPricePointServiceTest {
     assertThat(savedPivot).isPresent();
     assertThat(savedPivot.get().getPrice()).isEqualTo(10500L);
 
-    Optional<StockPivotCalculateHistory> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
-    assertThat(history).isEmpty();
+    Optional<StockPivotCalculation> topCalculationHistory = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
+    assertThat(topCalculationHistory).isEmpty();
   }
 
   @Test
@@ -81,7 +81,7 @@ class StockPricePointServiceTest {
     stockPricePointService.resolvePricePoint(nextCandle);
 
     // then
-    Optional<StockPivotCalculateHistory> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
+    Optional<StockPivotCalculation> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
     assertThat(history).isPresent();
     assertThat(history.get().getSU_MAX()).isNotNull();
     assertThat(history.get().getSL_MIN()).isNotNull();
@@ -113,7 +113,7 @@ class StockPricePointServiceTest {
     stockPricePointService.resolvePricePoint(candleC);
 
     // then
-    Optional<StockPivotCalculateHistory> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
+    Optional<StockPivotCalculation> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
     assertThat(history).isPresent();
     assertThat(history.get().getCurrentPrice()).isEqualTo(10600L);
     assertThat(history.get().getSU_MAX().compareTo(history.get().getSL_MIN())).isLessThan(0);
@@ -144,7 +144,7 @@ class StockPricePointServiceTest {
     stockPricePointService.resolvePricePoint(candleC);
 
     // then
-    Optional<StockPivotCalculateHistory> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
+    Optional<StockPivotCalculation> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
     assertThat(history).isPresent();
     assertThat(history.get().getCurrentPrice()).isEqualTo(10500L);
     // 정상 갱신이므로 SU_MAX < SL_MIN 유지
@@ -188,7 +188,7 @@ class StockPricePointServiceTest {
     assertThat(newPivot.get().getPrice()).isEqualTo(10500L); // G의 closePrice
 
     // 히스토리가 새 피벗 기준으로 재초기화됨
-    Optional<StockPivotCalculateHistory> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
+    Optional<StockPivotCalculation> history = stockPricePointCalculationRepository.findTopCalculationHistory(stock);
     assertThat(history).isPresent();
     assertThat(history.get().getStockPricePoint().getPrice()).isEqualTo(10500L);
     assertThat(history.get().getSU_MAX().compareTo(history.get().getSL_MIN())).isLessThan(0);

@@ -1,14 +1,14 @@
-package com.momentum.domain.service;
+package com.momentum.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.domain.entity.stock.Stock;
-import com.momentum.domain.entity.stock.StockDailyCandle;
-import com.momentum.domain.entity.score.StockRegime;
-import com.momentum.domain.entity.stock.StockTrend;
+import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
-import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse;
-import com.momentum.infrastructure.lsinvestment.dto.StockChartInfoResponse.CandleResponse;
+import com.momentum.domain.stock.StockTrend;
+import com.momentum.domain.stockcandle.StockDailyCandle;
+import com.momentum.infrastructure.dto.StockChartInfoResponse;
+import com.momentum.infrastructure.dto.StockChartInfoResponse.CandleResponse;
 import java.util.List;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
@@ -33,20 +33,18 @@ class StockDailyCandleServiceTest {
 
     Stock stock = new Stock("삼성전자", "005930", StockRegime.UNDETERMINED, StockTrend.UPTREND);
     stockRepository.save(stock);
-    StockChartInfoResponse response = new StockChartInfoResponse(
-        List.of(
-            new CandleResponse("20240101", 100L, 110L, 90L, 105L, 100, 100, "1"),
-            new CandleResponse("20240102", 105L, 115L, 95L, 110L, 100, 100, "1")
-        )
+    List<CandleResponse> candleResponses = List.of(
+        new CandleResponse("20240101", 100L, 110L, 90L, 105L, 100, 100, "1"),
+        new CandleResponse("20240102", 105L, 115L, 95L, 110L, 100, 100, "1")
     );
 
     // when
-    List<StockDailyCandle> result = stockCandleService.create(stockCode, response);
+    List<StockDailyCandle> result = stockCandleService.create(stockCode, candleResponses);
 
     // then
     assertThat(result).hasSize(2);
     assertThat(result).extracting(
-        StockDailyCandle::getTradeDate,
+            StockDailyCandle::getTradeDate,
             s -> s.getStock().getCode()
         )
         .containsExactlyInAnyOrder(

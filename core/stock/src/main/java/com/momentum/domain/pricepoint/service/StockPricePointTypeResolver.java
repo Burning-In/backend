@@ -1,7 +1,8 @@
-package com.momentum.domain.pricepoint;
+package com.momentum.domain.pricepoint.service;
 
 import static com.momentum.domain.pricepoint.entity.StockPricePointType.resolve;
 
+import com.momentum.domain.pricepoint.StockPricePointRepository;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
 import jakarta.transaction.Transactional;

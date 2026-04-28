@@ -1,9 +1,6 @@
-plugins {
-    `java-library`
-}
-
 dependencies {
-    api(project(":modules:jpa"))
+    // add-ons
+    implementation(project(":modules:jpa"))
 
     // web
     implementation("org.springframework.boot:spring-boot-starter-web")

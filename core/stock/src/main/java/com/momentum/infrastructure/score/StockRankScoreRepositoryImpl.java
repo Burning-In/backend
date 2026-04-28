@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class StockRankScoreJpaRepositoryImpl implements StockRankScoreRepository {
+public class StockRankScoreRepositoryImpl implements StockRankScoreRepository {
 
   private final StockRankScoreJpaRepository stockRankScoreJpaRepository;
 

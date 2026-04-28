@@ -7,8 +7,6 @@ spring:
     active: local
   config:
     import:
-      - jpa.yml
-      - redis.yml
       - logging.yml
       - monitoring.yml
   batch:

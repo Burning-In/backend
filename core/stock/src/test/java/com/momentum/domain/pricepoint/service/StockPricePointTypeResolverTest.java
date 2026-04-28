@@ -1,10 +1,10 @@
-package com.momentum.domain.service;
+package com.momentum.domain.pricepoint.service;
 
-import com.momentum.domain.entity.stock.Stock;
-import com.momentum.domain.entity.score.StockRegime;
-import com.momentum.domain.entity.stock.StockTrend;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
+import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
+import com.momentum.domain.stock.StockTrend;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,8 +1,9 @@
-package com.momentum.domain.service;
+package com.momentum.domain.pricepoint.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.momentum.domain.pricepoint.service.StockPricePointSlopCalculator.SlopeResult;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;

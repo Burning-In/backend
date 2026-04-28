@@ -1,6 +1,8 @@
-package com.momentum.domain.pricepoint;
+package com.momentum.domain.pricepoint.service;
 
-import com.momentum.domain.pricepoint.StockPricePointSlopCalculator.SlopeResult;
+import com.momentum.domain.pricepoint.StockPricePointCalculationRepository;
+import com.momentum.domain.pricepoint.StockPricePointRepository;
+import com.momentum.domain.pricepoint.service.StockPricePointSlopCalculator.SlopeResult;
 import com.momentum.domain.pricepoint.entity.StockPivotCalculation;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.stockcandle.StockCandleRepository;
