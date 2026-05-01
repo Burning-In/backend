@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class Stock extends BaseEntity {
 
   private String name;
-  private String code;
+  private String code; // 수정필요
   private StockRegime stockRegime;
   private StockTrend stockTrend;
 

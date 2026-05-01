@@ -1,6 +1,7 @@
 dependencies {
     // add-ons
     implementation(project(":core:stock"))
+    implementation(project(":modules:jpa"))
     implementation(project(":supports:logging"))
 
     // web

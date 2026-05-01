@@ -26,7 +26,7 @@ public class StockPricePointService {
   private final StockPricePointSlopCalculator stockPricePointSlopCalculator;
 
   @Transactional
-  public void resolvePricePoint(StockDailyCandle stockDailyCandle) {
+  public StockPricePoint resolvePricePoint(StockDailyCandle stockDailyCandle) {
     Optional<StockPivotCalculation> calculationHistory = pricePointCalculationRepository.findTopCalculationHistory(
         stockDailyCandle.getStock()
     );
@@ -41,7 +41,7 @@ public class StockPricePointService {
             stockDailyCandle.getTradeDate(),
             stockDailyCandle.getStock()
         );
-        stockPricePointRepository.save(high);
+        return stockPricePointRepository.save(high);
       }
       if (lastPricePoint.isPresent()) {
         SlopeResult slope = stockPricePointSlopCalculator.calculateSlope(
@@ -55,7 +55,7 @@ public class StockPricePointService {
             StockPivotCalculation.create(stockDailyCandle.getClosePrice(), slope.su(), slope.sl(), lastPricePoint.get())
         );
       }
-      return;
+      return null;
     }
 
     BigDecimal suMax = calculationHistory.get().getSU_MAX();
@@ -89,12 +89,13 @@ public class StockPricePointService {
       pricePointCalculationRepository.save(
           StockPivotCalculation.create(stockDailyCandle.getClosePrice(), recalcSlope.su(), recalcSlope.sl(), savedPivot)
       );
-      return;
+      return null;
     }
 
     pricePointCalculationRepository.save(
         StockPivotCalculation.create(stockDailyCandle.getClosePrice(), suMax, slMin,
             calculationHistory.get().getStockPricePoint())
     );
+    return null;
   }
 }

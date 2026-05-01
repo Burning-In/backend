@@ -8,6 +8,7 @@ import com.momentum.domain.pricepoint.entity.StockPricePointType;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -32,10 +33,11 @@ public class StockBaseService {
   // 클래스를 잘못 생각함 -> 1. 베이스 생성할떄, 2. 기존베이스 베이스에 점 통합할떄, 3. 현재베이스 -> 이전 베이스 스테이지 레벨 조정할떄
   // 새로운 베이스 일떄만 previousBase 라인타입 조정해야함
   @Transactional
-  public void resolve(StockPricePoint confirmedPricePoint) {
-    if (confirmedPricePoint == null) {
+  public void resolve(List<StockPricePoint> typeConfirmedPoints) {
+    if (typeConfirmedPoints == null || typeConfirmedPoints.isEmpty()) {
       throw new IllegalArgumentException("stockPivot cannot be null");
     }
+    StockPricePoint confirmedPricePoint = typeConfirmedPoints.getFirst();
     if (StockPricePointType.isNonPivot(confirmedPricePoint)) {
       return;
     }
@@ -51,10 +53,12 @@ public class StockBaseService {
     if (currentBaseOpt.isPresent()) {
       StockBase currentBase = currentBaseOpt.get();
       if (confirmedPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_LOW)) {
-        newBase = stockUpperBaseResolver.resolve(confirmedPricePoint, currentBase, PRICE_SIMILARITY_THRESHOLD, BASE_BOUNDARY_THRESHOLD, averageDailyVolume);
+        newBase = stockUpperBaseResolver.resolve(confirmedPricePoint, currentBase, PRICE_SIMILARITY_THRESHOLD,
+            BASE_BOUNDARY_THRESHOLD, averageDailyVolume);
       }
       if (confirmedPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_HIGH)) {
-        newBase = stockLowerBaseResolver.resolve(confirmedPricePoint, currentBase, PRICE_SIMILARITY_THRESHOLD, BASE_BOUNDARY_THRESHOLD, averageDailyVolume);
+        newBase = stockLowerBaseResolver.resolve(confirmedPricePoint, currentBase, PRICE_SIMILARITY_THRESHOLD,
+            BASE_BOUNDARY_THRESHOLD, averageDailyVolume);
       }
     }
 

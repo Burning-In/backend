@@ -2,6 +2,7 @@ package com.momentum.infrastructure.stock;
 
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,5 +21,10 @@ public class StockRepositoryImpl implements StockRepository {
   @Override
   public Stock save(Stock stock) {
     return stockCandleRepository.save(stock);
+  }
+
+  @Override
+  public List<Stock> saveAll(List<Stock> stocks) {
+    return stockCandleRepository.saveAll(stocks);
   }
 }
