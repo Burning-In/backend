@@ -31,14 +31,15 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
   }
 
   @Override
-  public Optional<StockDailyCandle> findByStockAndDate(Stock stock, LocalDate tradeDate) {
+  public Optional<StockDailyCandle> findLastCandleAfterDate(Stock stock, LocalDate tradeDate) {
     StockDailyCandle result = jpaQueryFactory
         .selectFrom(stockDailyCandle)
         .where(
             stockDailyCandle.stock.id.eq(stock.getId()),
-            stockDailyCandle.tradeDate.eq(tradeDate)
+            stockDailyCandle.tradeDate.lt(tradeDate)
         )
-        .fetchOne();
+        .orderBy(stockDailyCandle.tradeDate.desc())
+        .fetchFirst();
 
     return Optional.ofNullable(result);
   }

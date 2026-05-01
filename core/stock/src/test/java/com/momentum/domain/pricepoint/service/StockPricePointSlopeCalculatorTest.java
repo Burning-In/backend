@@ -3,21 +3,21 @@ package com.momentum.domain.pricepoint.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.momentum.domain.pricepoint.service.StockPricePointSlopCalculator.SlopeResult;
+import com.momentum.domain.pricepoint.service.StockPricePointSlopeCalculator.SlopeResult;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class StockPricePointSlopCalculatorTest {
+class StockPricePointSlopeCalculatorTest {
 
-  private StockPricePointSlopCalculator calculator;
+  private StockPricePointSlopeCalculator calculator;
   private static final BigDecimal ERROR = BigDecimal.valueOf(3.0);
 
   @BeforeEach
   void setUp() {
-    calculator = new StockPricePointSlopCalculator();
+    calculator = new StockPricePointSlopeCalculator();
   }
 
   @Test
@@ -36,7 +36,7 @@ class StockPricePointSlopCalculatorTest {
     // SU = (500 - 3) / 1 = 497.0
     // SL = (500 + 3) / 1 = 503.0
     // SU < SL 항상 성립
-    assertThat(result.su()).isLessThan(result.sl());
+    assertThat(result.upper()).isLessThan(result.lower());
   }
 
   @Test
@@ -57,8 +57,8 @@ class StockPricePointSlopCalculatorTest {
     BigDecimal expectedSU = BigDecimal.valueOf(997).divide(BigDecimal.valueOf(5), 10, java.math.RoundingMode.HALF_UP);
     BigDecimal expectedSL = BigDecimal.valueOf(1003).divide(BigDecimal.valueOf(5), 10, java.math.RoundingMode.HALF_UP);
 
-    assertThat(result.su()).isEqualByComparingTo(expectedSU);
-    assertThat(result.sl()).isEqualByComparingTo(expectedSL);
+    assertThat(result.upper()).isEqualByComparingTo(expectedSU);
+    assertThat(result.lower()).isEqualByComparingTo(expectedSL);
   }
 
   @Test
@@ -76,9 +76,9 @@ class StockPricePointSlopCalculatorTest {
     // then
     // SU = (-1000 - 3) / 1 = -1003.0
     // SL = (-1000 + 3) / 1 = -997.0
-    assertThat(result.su()).isLessThan(result.sl());
-    assertThat(result.su().compareTo(BigDecimal.ZERO)).isLessThan(0);
-    assertThat(result.sl().compareTo(BigDecimal.ZERO)).isLessThan(0);
+    assertThat(result.upper()).isLessThan(result.lower());
+    assertThat(result.upper().compareTo(BigDecimal.ZERO)).isLessThan(0);
+    assertThat(result.lower().compareTo(BigDecimal.ZERO)).isLessThan(0);
   }
 
   @Test

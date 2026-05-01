@@ -11,7 +11,7 @@ public interface StockPricePointRepository {
 
   StockPricePoint save(StockPricePoint stockPricePoint);
 
-  Optional<StockPricePoint> findTopByStockOrderByCreatedAtDesc(Stock stock);
+  Optional<StockPricePoint> findLastStockPricePoint(Stock stock);
 
   Optional<StockPricePoint> findLatestByStock(Stock stock);
 

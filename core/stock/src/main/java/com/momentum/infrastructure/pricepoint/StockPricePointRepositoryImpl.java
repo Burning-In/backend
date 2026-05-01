@@ -27,9 +27,12 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
   }
 
   @Override
-  public Optional<StockPricePoint> findTopByStockOrderByCreatedAtDesc(Stock stock) {
+  public Optional<StockPricePoint> findLastStockPricePoint(Stock stock) {
     StockPricePoint result = jpaQueryFactory.selectFrom(stockPricePoint)
-        .where(stockPricePoint.stock.eq(stock))
+        .where(
+            stockPricePoint.stock.eq(stock),
+            stockPricePoint.deletedAt.isNotNull()
+        )
         .orderBy(stockPricePoint.createdAt.desc())
         .limit(1)
         .fetchFirst();

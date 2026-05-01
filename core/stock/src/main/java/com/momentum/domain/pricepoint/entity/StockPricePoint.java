@@ -3,6 +3,7 @@ package com.momentum.domain.pricepoint.entity;
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stockcandle.StockDailyCandle;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -41,8 +42,9 @@ public class StockPricePoint extends BaseEntity {
     this.stock = Objects.requireNonNull(stock);
   }
 
-  public static StockPricePoint create(long closingPrice, long volume, LocalDate tradeDate, Stock stock) {
-    return new StockPricePoint(closingPrice, volume, tradeDate, StockPricePointType.INIT, null, stock);
+  public static StockPricePoint initialize(StockDailyCandle stockDailyCandle) {
+    return new StockPricePoint(stockDailyCandle.getClosePrice(), stockDailyCandle.getVolume(), stockDailyCandle.getTradeDate(),
+        StockPricePointType.INIT, null, stockDailyCandle.getStock());
   }
 
   public void updateType(StockPricePointType stockPricePointType) {

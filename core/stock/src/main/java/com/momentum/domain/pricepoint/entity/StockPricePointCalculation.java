@@ -12,27 +12,25 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StockPivotCalculation extends BaseEntity {
+public class StockPricePointCalculation extends BaseEntity {
 
   private long currentPrice;
-  private BigDecimal SU_MAX;
-  private BigDecimal SL_MIN;
+  private BigDecimal slopeUpperMax;
+  private BigDecimal slopeLowerMin;
   @ManyToOne
   private StockPricePoint stockPricePoint;
 
-  private StockPivotCalculation(long currentPrice, BigDecimal SU_MAX, BigDecimal SL_MIN,
+  private StockPricePointCalculation(long currentPrice, BigDecimal slopeUpperMax, BigDecimal slopeLowerMin,
       StockPricePoint stockPricePoint) {
     this.currentPrice = currentPrice;
-    this.SU_MAX = Objects.requireNonNull(SU_MAX);
-    this.SL_MIN = Objects.requireNonNull(SL_MIN);
+    this.slopeUpperMax = Objects.requireNonNull(slopeUpperMax);
+    this.slopeLowerMin = Objects.requireNonNull(slopeLowerMin);
     this.stockPricePoint = Objects.requireNonNull(stockPricePoint);
   }
 
-  public static StockPivotCalculation create(
-      long currentPrice, BigDecimal SU_MAX, BigDecimal SL_MIN, StockPricePoint stockPricePoint
+  public static StockPricePointCalculation create(
+      long closingPrice, BigDecimal SU_MAX, BigDecimal slopeLowerMin, StockPricePoint anchorPoint
   ) {
-    return new StockPivotCalculation(
-        currentPrice, SU_MAX, SL_MIN, stockPricePoint
-    );
+    return new StockPricePointCalculation(closingPrice, SU_MAX, slopeLowerMin, anchorPoint);
   }
 }

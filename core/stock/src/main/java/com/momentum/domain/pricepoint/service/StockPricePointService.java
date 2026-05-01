@@ -2,100 +2,47 @@ package com.momentum.domain.pricepoint.service;
 
 import com.momentum.domain.pricepoint.StockPricePointCalculationRepository;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
-import com.momentum.domain.pricepoint.service.StockPricePointSlopCalculator.SlopeResult;
-import com.momentum.domain.pricepoint.entity.StockPivotCalculation;
+import com.momentum.domain.pricepoint.entity.StockPricePointCalculation;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class StockPricePointService {
 
-  private static final BigDecimal PIVOT_ERROR_PERCENT = BigDecimal.valueOf(3.0);
-
   private final StockPricePointCalculationRepository pricePointCalculationRepository;
-  private final StockCandleRepository stockCandleRepository;
   private final StockPricePointRepository stockPricePointRepository;
-  private final StockPricePointSlopCalculator stockPricePointSlopCalculator;
+  private final SwingDoorCalculator swingDoorCalculator;
 
-  @Transactional
-  public StockPricePoint resolvePricePoint(StockDailyCandle stockDailyCandle) {
-    Optional<StockPivotCalculation> calculationHistory = pricePointCalculationRepository.findTopCalculationHistory(
-        stockDailyCandle.getStock()
-    );
-    if (calculationHistory.isEmpty()) {
-      Optional<StockPricePoint> lastPricePoint = stockPricePointRepository.findTopByStockOrderByCreatedAtDesc(
-          stockDailyCandle.getStock()
-      );
-      if (lastPricePoint.isEmpty()) {
-        StockPricePoint high = StockPricePoint.create(
-            stockDailyCandle.getClosePrice(),
-            stockDailyCandle.getVolume(),
-            stockDailyCandle.getTradeDate(),
-            stockDailyCandle.getStock()
-        );
-        return stockPricePointRepository.save(high);
-      }
-      if (lastPricePoint.isPresent()) {
-        SlopeResult slope = stockPricePointSlopCalculator.calculateSlope(
-            lastPricePoint.get().getPrice(),
-            lastPricePoint.get().getTradeDate(),
-            stockDailyCandle.getClosePrice(),
-            stockDailyCandle.getTradeDate(),
-            PIVOT_ERROR_PERCENT
-        );
-        pricePointCalculationRepository.save(
-            StockPivotCalculation.create(stockDailyCandle.getClosePrice(), slope.su(), slope.sl(), lastPricePoint.get())
-        );
-      }
+  public StockPricePoint resolvePricePoint(StockDailyCandle dailyCandle) {
+    Optional<StockPricePoint> lastPricePoint = stockPricePointRepository
+        .findLastStockPricePoint(dailyCandle.getStock());
+    if (lastPricePoint.isEmpty()) {
+      return initializePricePoint(dailyCandle);
+    }
+
+    Optional<StockPricePointCalculation> lastCalculation = pricePointCalculationRepository
+        .findLastCalculationHistory(dailyCandle.getStock());
+    if (lastCalculation.isEmpty()) {
+      swingDoorCalculator.initializeCalculation(lastPricePoint.get(), dailyCandle);
       return null;
     }
 
-    BigDecimal suMax = calculationHistory.get().getSU_MAX();
-    BigDecimal slMin = calculationHistory.get().getSL_MIN();
-    SlopeResult slope = stockPricePointSlopCalculator.calculateSlope(
-        calculationHistory.get().getStockPricePoint().getPrice(),
-        calculationHistory.get().getStockPricePoint().getTradeDate(),
-        stockDailyCandle.getClosePrice(),
-        stockDailyCandle.getTradeDate(),
-        PIVOT_ERROR_PERCENT
-    );
+    return processSwingDoor(lastCalculation.get(), dailyCandle);
+  }
 
-    suMax = suMax.max(slope.su());
-    slMin = slMin.min(slope.sl());
+  private StockPricePoint initializePricePoint(StockDailyCandle dailyCandle) {
+    StockPricePoint pricePoint = StockPricePoint.initialize(dailyCandle);
+    return stockPricePointRepository.save(pricePoint);
+  }
 
-    if (suMax.compareTo(slMin) > 0) {
-      LocalDate yesterday = stockDailyCandle.getTradeDate().minusDays(1);
-      StockDailyCandle yesterdayCandle = stockCandleRepository.findByStockAndDate(stockDailyCandle.getStock(), yesterday)
-          .orElseThrow(() -> new IllegalStateException("어제 캔들 없음"));
-      StockPricePoint savedPivot = stockPricePointRepository.save(
-          StockPricePoint.create(yesterdayCandle.getClosePrice(), yesterdayCandle.getVolume(), yesterdayCandle.getTradeDate(),
-              yesterdayCandle.getStock())
-      );
-      SlopeResult recalcSlope = stockPricePointSlopCalculator.calculateSlope(
-          yesterdayCandle.getClosePrice(),
-          yesterdayCandle.getTradeDate(),
-          stockDailyCandle.getClosePrice(),
-          stockDailyCandle.getTradeDate(),
-          PIVOT_ERROR_PERCENT
-      );
-      pricePointCalculationRepository.save(
-          StockPivotCalculation.create(stockDailyCandle.getClosePrice(), recalcSlope.su(), recalcSlope.sl(), savedPivot)
-      );
-      return null;
-    }
-
-    pricePointCalculationRepository.save(
-        StockPivotCalculation.create(stockDailyCandle.getClosePrice(), suMax, slMin,
-            calculationHistory.get().getStockPricePoint())
-    );
-    return null;
+  private StockPricePoint processSwingDoor(StockPricePointCalculation lastCalculation,
+      StockDailyCandle dailyCandle) {
+    StockPricePoint newPricePoint = swingDoorCalculator.resolve(lastCalculation, dailyCandle);
+    swingDoorCalculator.initializeCalculation(newPricePoint, dailyCandle);
+    return newPricePoint;
   }
 }

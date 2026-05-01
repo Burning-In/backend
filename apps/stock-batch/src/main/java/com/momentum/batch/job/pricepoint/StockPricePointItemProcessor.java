@@ -32,7 +32,7 @@ public class StockPricePointItemProcessor implements ItemProcessor<Stock, Stock>
   public Stock process(Stock stock) throws Exception {
     LocalDate baseDate = LocalDate.parse(baseDateStr);
     StockDailyCandle candle = stockCandleRepository
-        .findByStockAndDate(stock, baseDate)
+        .findLastCandleAfterDate(stock, baseDate)
         .orElseThrow(() -> new IllegalStateException("캔들 데이터 없음: " + stock.getId()));
     /// 도메인서비스나 어플리케이션 서비스로 묶을 필요가 있지않나
     StockPricePoint stockPricePoint = stockPricePointService.resolvePricePoint(candle);

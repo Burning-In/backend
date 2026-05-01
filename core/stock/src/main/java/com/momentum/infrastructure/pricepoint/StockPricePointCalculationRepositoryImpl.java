@@ -1,9 +1,9 @@
 package com.momentum.infrastructure.pricepoint;
 
-import static com.momentum.domain.pricepoint.entity.QStockPivotCalculation.stockPivotCalculation;
+import static com.momentum.domain.pricepoint.entity.QStockPricePointCalculation.stockPricePointCalculation;
 
 import com.momentum.domain.pricepoint.StockPricePointCalculationRepository;
-import com.momentum.domain.pricepoint.entity.StockPivotCalculation;
+import com.momentum.domain.pricepoint.entity.StockPricePointCalculation;
 import com.momentum.domain.stock.Stock;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.Optional;
@@ -18,10 +18,10 @@ public class StockPricePointCalculationRepositoryImpl implements StockPricePoint
   private final JPAQueryFactory jpaQueryFactory;
 
   @Override
-  public Optional<StockPivotCalculation> findTopCalculationHistory(Stock stock) {
-    StockPivotCalculation result = jpaQueryFactory.selectFrom(stockPivotCalculation)
-        .where(stockPivotCalculation.stockPricePoint.stock.eq(stock))
-        .orderBy(stockPivotCalculation.createdAt.desc())
+  public Optional<StockPricePointCalculation> findLastCalculationHistory(Stock stock) {
+    StockPricePointCalculation result = jpaQueryFactory.selectFrom(stockPricePointCalculation)
+        .where(stockPricePointCalculation.stockPricePoint.stock.eq(stock))
+        .orderBy(stockPricePointCalculation.createdAt.desc())
         .limit(1)
         .fetchFirst();
 
@@ -29,7 +29,7 @@ public class StockPricePointCalculationRepositoryImpl implements StockPricePoint
   }
 
   @Override
-  public StockPivotCalculation save(StockPivotCalculation stockPivotCalculateHistory) {
+  public StockPricePointCalculation save(StockPricePointCalculation stockPivotCalculateHistory) {
     return stockPivotCalculateHistoryRepository.save(stockPivotCalculateHistory);
   }
 }

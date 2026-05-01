@@ -7,7 +7,7 @@ import java.time.temporal.ChronoUnit;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StockPricePointSlopCalculator {
+public class StockPricePointSlopeCalculator {
 
   public SlopeResult calculateSlope(long pivotPrice, LocalDate pivotDate, long todayPrice, LocalDate todayDate,
       BigDecimal pivotErrorPercent) {
@@ -26,7 +26,7 @@ public class StockPricePointSlopCalculator {
     return new SlopeResult(su, sl);
   }
 
-  public record SlopeResult(BigDecimal su, BigDecimal sl) {
+  public record SlopeResult(BigDecimal upper, BigDecimal lower) {
 
   }
 }
