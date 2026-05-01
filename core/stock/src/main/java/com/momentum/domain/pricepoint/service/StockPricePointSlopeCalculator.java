@@ -18,12 +18,12 @@ public class StockPricePointSlopeCalculator {
     BigDecimal priceDiff = BigDecimal.valueOf(todayPrice - pivotPrice);
     BigDecimal days = BigDecimal.valueOf(daysBetween);
 
-    BigDecimal su = priceDiff.subtract(pivotErrorPercent)
+    BigDecimal slopeUpper = priceDiff.subtract(pivotErrorPercent)
         .divide(days, 10, RoundingMode.HALF_UP);
-    BigDecimal sl = priceDiff.add(pivotErrorPercent)
+    BigDecimal slopeLower = priceDiff.add(pivotErrorPercent)
         .divide(days, 10, RoundingMode.HALF_UP);
 
-    return new SlopeResult(su, sl);
+    return new SlopeResult(slopeUpper, slopeLower);
   }
 
   public record SlopeResult(BigDecimal upper, BigDecimal lower) {
