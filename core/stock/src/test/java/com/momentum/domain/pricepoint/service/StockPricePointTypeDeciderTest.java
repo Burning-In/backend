@@ -14,10 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Transactional
 @SpringBootTest
-class StockPricePointTypeResolverTest {
+class StockPricePointTypeDeciderTest {
 
   @Autowired
-  private StockPricePointTypeResolver stockPricePointTypeResolver;
+  private StockPricePointTypeDecider stockPricePointTypeDecider;
   @Autowired
   private StockPricePointRepository stockPricePointRepository;
   @Autowired

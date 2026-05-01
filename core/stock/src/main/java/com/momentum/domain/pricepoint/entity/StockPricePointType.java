@@ -8,33 +8,35 @@ public enum StockPricePointType {
   FLAT,
   INIT;
 
-  public static StockPricePointType resolve(Long firstPrice, long middlePrice, long lastPrice) {
-    if (firstPrice == null) {
-      if (middlePrice > lastPrice) {
+  public static StockPricePointType resolve(StockPricePoint first, StockPricePoint middle, StockPricePoint last) {
+    if (first == null) {
+      if (middle.compareTo(last) > 0) {
         return PIVOT_HIGH;
       }
-      if (middlePrice < lastPrice) {
+      if (middle.compareTo(last) < 0) {
         return PIVOT_LOW;
       }
       return FLAT;
     }
-    if (middlePrice > firstPrice && middlePrice > lastPrice) {
+    if (middle.compareTo(first) > 0 && middle.compareTo(last) > 0) {
       return PIVOT_HIGH;
     }
-    if (middlePrice < firstPrice && middlePrice < lastPrice) {
+    if (middle.compareTo(first) < 0 && middle.compareTo(last) < 0) {
       return PIVOT_LOW;
     }
-    if (firstPrice < middlePrice && middlePrice < lastPrice) {
+    if (first.compareTo(middle) < 0 && middle.compareTo(last) < 0) {
       return ASCENDING;
     }
-    if (firstPrice > middlePrice && middlePrice > lastPrice) {
+    if (first.compareTo(middle) > 0 && middle.compareTo(last) > 0) {
       return DESCENDING;
     }
     return FLAT;
   }
 
   public static boolean isNonPivot(StockPricePoint point) {
-    return point.getStockPricePointType() == FLAT || point.getStockPricePointType() == INIT
-        || point.getStockPricePointType() == ASCENDING || point.getStockPricePointType() == DESCENDING;
+    return point.getStockPricePointType() == FLAT
+        || point.getStockPricePointType() == INIT
+        || point.getStockPricePointType() == ASCENDING
+        || point.getStockPricePointType() == DESCENDING;
   }
 }

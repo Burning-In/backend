@@ -4,10 +4,12 @@ import com.momentum.domain.BaseEntity;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockDailyCandle;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 import lombok.Getter;
@@ -16,12 +18,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor
-public class StockPricePoint extends BaseEntity {
+public class StockPricePoint extends BaseEntity implements Comparable<StockPricePoint> {
 
-  private long price;
   private long volume;
-
   private LocalDate tradeDate;
+
+  @Embedded
+  private StockPricePointPrice stockPricePointPrice;
 
   @Enumerated(EnumType.STRING)
   private StockPricePointType stockPricePointType;
@@ -34,7 +37,7 @@ public class StockPricePoint extends BaseEntity {
 
   public StockPricePoint(long price, long volume, LocalDate tradeDate,
       StockPricePointType stockPricePointType, StockBase stockBase, Stock stock) {
-    this.price = price;
+    this.stockPricePointPrice = new StockPricePointPrice(price);
     this.volume = volume;
     this.tradeDate = Objects.requireNonNull(tradeDate);
     this.stockPricePointType = Objects.requireNonNull(stockPricePointType);
@@ -43,8 +46,14 @@ public class StockPricePoint extends BaseEntity {
   }
 
   public static StockPricePoint initialize(StockDailyCandle stockDailyCandle) {
-    return new StockPricePoint(stockDailyCandle.getClosePrice(), stockDailyCandle.getVolume(), stockDailyCandle.getTradeDate(),
-        StockPricePointType.INIT, null, stockDailyCandle.getStock());
+    return new StockPricePoint(
+        stockDailyCandle.getClosePrice(),
+        stockDailyCandle.getVolume(),
+        stockDailyCandle.getTradeDate(),
+        StockPricePointType.INIT,
+        null,
+        stockDailyCandle.getStock()
+    );
   }
 
   public void updateType(StockPricePointType stockPricePointType) {
@@ -59,5 +68,18 @@ public class StockPricePoint extends BaseEntity {
       return;
     }
     this.stockBase = stockBase;
+  }
+
+  public boolean isFlat(StockPricePoint other, BigDecimal flatThreshold) {
+    return this.stockPricePointPrice.isFlat(other.stockPricePointPrice, flatThreshold);
+  }
+
+  @Override
+  public int compareTo(StockPricePoint other) {
+    return this.stockPricePointPrice.compareTo(other.stockPricePointPrice);
+  }
+
+  public long getPrice() {
+    return stockPricePointPrice.getPrice();
   }
 }

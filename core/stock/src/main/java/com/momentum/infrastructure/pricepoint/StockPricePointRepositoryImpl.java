@@ -6,6 +6,7 @@ import com.momentum.domain.pricepoint.StockPricePointRepository;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
 import com.momentum.domain.stock.Stock;
+import com.momentum.infrastructure.pricepoint.dto.RecentPricePoints;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -31,8 +32,7 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
     StockPricePoint result = jpaQueryFactory.selectFrom(stockPricePoint)
         .where(
             stockPricePoint.stock.eq(stock),
-            stockPricePoint.deletedAt.isNotNull()
-        )
+            stockPricePoint.deletedAt.isNull())
         .orderBy(stockPricePoint.createdAt.desc())
         .limit(1)
         .fetchFirst();
@@ -52,21 +52,29 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
   }
 
   @Override
-  public List<StockPricePoint> findTop3ByStockOrderByCreatedAtDesc(Long stockId) {
-    return jpaQueryFactory.selectFrom(stockPricePoint)
+  public Optional<RecentPricePoints> findRecentPricePoints(Long stockId) {
+    List<StockPricePoint> points = jpaQueryFactory
+        .selectFrom(stockPricePoint)
         .where(stockPricePoint.stock.id.eq(stockId))
-        .orderBy(stockPricePoint.createdAt.desc())
-        .limit(3)
-        .fetch();
-  }
-
-  @Override
-  public List<StockPricePoint> findTop4ByStockOrderByCreatedAtDesc(Long stockId) {
-    return jpaQueryFactory.selectFrom(stockPricePoint)
-        .where(stockPricePoint.stock.id.eq(stockId))
-        .orderBy(stockPricePoint.createdAt.desc())
+        .orderBy(stockPricePoint.tradeDate.desc())
         .limit(4)
         .fetch();
+
+    if (points.size() < 3) {
+      return Optional.empty();
+    }
+
+    StockPricePoint point0 = null;
+    if (points.size() == 4) {
+      point0 = points.get(3);
+    }
+
+    return Optional.of(new RecentPricePoints(
+        point0,
+        points.get(2),
+        points.get(1),
+        points.get(0)
+    ));
   }
 
   @Override
@@ -76,7 +84,7 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
             stockPricePoint.stockBase.isNull(),
             stockPricePoint.stockPricePointType.eq(StockPricePointType.PIVOT_HIGH),
             stockPricePoint.createdAt.gt(ZonedDateTime.from(currentBaseCreatedAt)),
-            stockPricePoint.price.gt(overPrice)
+            stockPricePoint.stockPricePointPrice.price.gt(overPrice)
         )
         .orderBy(stockPricePoint.tradeDate.asc())
         .fetchFirst();
@@ -91,7 +99,7 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
             stockPricePoint.stockBase.isNull(),
             stockPricePoint.stockPricePointType.eq(StockPricePointType.PIVOT_LOW),
             stockPricePoint.createdAt.gt(ZonedDateTime.from(currentBaseCreatedAt)),
-            stockPricePoint.price.lt(lowerPrice)
+            stockPricePoint.stockPricePointPrice.price.lt(lowerPrice)
         )
         .orderBy(stockPricePoint.tradeDate.asc())
         .fetchFirst();

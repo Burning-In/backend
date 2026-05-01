@@ -3,6 +3,7 @@ package com.momentum.domain.pricepoint;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
 import com.momentum.domain.stock.Stock;
+import com.momentum.infrastructure.pricepoint.dto.RecentPricePoints;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -15,9 +16,7 @@ public interface StockPricePointRepository {
 
   Optional<StockPricePoint> findLatestByStock(Stock stock);
 
-  List<StockPricePoint> findTop3ByStockOrderByCreatedAtDesc(Long stockId);
-
-  List<StockPricePoint> findTop4ByStockOrderByCreatedAtDesc(Long stockId);
+  Optional<RecentPricePoints> findRecentPricePoints(Long stockId);
 
   Optional<StockPricePoint> findUpperPricePoint(Instant currentBaseCreatedAt, long overPrice);
 

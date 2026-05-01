@@ -3,7 +3,7 @@ package com.momentum.batch.job.pricepoint;
 import com.momentum.domain.base.service.StockBaseService;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.service.StockPricePointService;
-import com.momentum.domain.pricepoint.service.StockPricePointTypeResolver;
+import com.momentum.domain.pricepoint.service.StockPricePointTypeDecider;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
@@ -22,7 +22,7 @@ public class StockPricePointItemProcessor implements ItemProcessor<Stock, Stock>
 
   private final StockPricePointService stockPricePointService;
   private final StockBaseService stockBaseService;
-  private final StockPricePointTypeResolver stockPricePointTypeResolver;
+  private final StockPricePointTypeDecider stockPricePointTypeDecider;
   private final StockCandleRepository stockCandleRepository;
 
   @Value("#{jobParameters['baseDate']}")
@@ -39,7 +39,7 @@ public class StockPricePointItemProcessor implements ItemProcessor<Stock, Stock>
     if (stockPricePoint == null) { // null주는지 체크 필요
       return null;
     }
-    List<StockPricePoint> typeConfirmedPoints = stockPricePointTypeResolver.resolveType(stock);
+    List<StockPricePoint> typeConfirmedPoints = stockPricePointTypeDecider.resolveType(stock);
     stockBaseService.resolve(typeConfirmedPoints);
     ///
     return stock;
