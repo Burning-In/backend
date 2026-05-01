@@ -1,8 +1,6 @@
 package com.momentum.batch.job.stockcandle;
 
 import com.momentum.application.StockCandleFacade;
-import com.momentum.application.StockCandleService;
-import com.momentum.application.dto.StockCandleInfo;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import com.momentum.infrastructure.dto.StockCandleRequest;
