@@ -3,6 +3,8 @@ rootProject.name = "momentum"
 include(
     ":apps:stock-api",
     ":apps:stock-batch",
+    ":apps:stock-realtime",
+    ":core:stock",
     ":modules:jpa",
     ":supports:logging",
 )
