@@ -1,5 +1,8 @@
 package com.momentum.domain.pricepoint.entity;
 
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_LOW;
+
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.stock.Stock;
@@ -81,5 +84,9 @@ public class StockPricePoint extends BaseEntity implements Comparable<StockPrice
 
   public long getPrice() {
     return stockPricePointPrice.getPrice();
+  }
+
+  public boolean isSameType(StockPricePointType stockPricePointType) {
+    return this.stockPricePointType.equals(stockPricePointType);
   }
 }

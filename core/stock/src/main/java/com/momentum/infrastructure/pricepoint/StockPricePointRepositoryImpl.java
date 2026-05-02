@@ -2,14 +2,13 @@ package com.momentum.infrastructure.pricepoint;
 
 import static com.momentum.domain.pricepoint.entity.QStockPricePoint.stockPricePoint;
 
+import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
 import com.momentum.domain.stock.Stock;
 import com.momentum.infrastructure.pricepoint.dto.RecentPricePoints;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -78,12 +77,12 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
   }
 
   @Override
-  public Optional<StockPricePoint> findUpperPricePoint(Instant currentBaseCreatedAt, long overPrice) {
+  public Optional<StockPricePoint> findHighPricePoint(StockBase currentBase, long overPrice) {
     StockPricePoint result = jpaQueryFactory.selectFrom(stockPricePoint)
         .where(
             stockPricePoint.stockBase.isNull(),
             stockPricePoint.stockPricePointType.eq(StockPricePointType.PIVOT_HIGH),
-            stockPricePoint.createdAt.gt(ZonedDateTime.from(currentBaseCreatedAt)),
+            stockPricePoint.createdAt.gt(currentBase.getCreatedAt()),
             stockPricePoint.stockPricePointPrice.price.gt(overPrice)
         )
         .orderBy(stockPricePoint.tradeDate.asc())
@@ -93,12 +92,12 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
   }
 
   @Override
-  public Optional<StockPricePoint> findLineLowerPricePoint(Instant currentBaseCreatedAt, long lowerPrice) {
+  public Optional<StockPricePoint> findLowPricePoint(StockBase currentBase, long lowerPrice) {
     StockPricePoint result = jpaQueryFactory.selectFrom(stockPricePoint)
         .where(
             stockPricePoint.stockBase.isNull(),
             stockPricePoint.stockPricePointType.eq(StockPricePointType.PIVOT_LOW),
-            stockPricePoint.createdAt.gt(ZonedDateTime.from(currentBaseCreatedAt)),
+            stockPricePoint.createdAt.gt(currentBase.getCreatedAt()),
             stockPricePoint.stockPricePointPrice.price.lt(lowerPrice)
         )
         .orderBy(stockPricePoint.tradeDate.asc())
@@ -108,7 +107,7 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
   }
 
   @Override
-  public Optional<StockPricePoint> findPricePointNoBase(StockPricePointType stockPricePointType) {
+  public Optional<StockPricePoint> findLastPricePointWithoutBase(StockPricePointType stockPricePointType) {
     StockPricePoint result = jpaQueryFactory.selectFrom(stockPricePoint)
         .where(
             stockPricePoint.stockBase.isNull(),
@@ -121,11 +120,12 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
   }
 
   @Override
-  public List<StockPricePoint> findUnassignedPointsSinceBase(Instant currentBaseCreatedAt) {
+  public List<StockPricePoint> findUnassignedPointsSinceBase(StockBase currentBase) {
     return jpaQueryFactory.selectFrom(stockPricePoint)
         .where(
             stockPricePoint.stockBase.isNull(),
-            stockPricePoint.createdAt.goe(ZonedDateTime.from(currentBaseCreatedAt)))
+            stockPricePoint.stock.id.eq(currentBase.getStock().getId()),
+            stockPricePoint.createdAt.goe(currentBase.getCreatedAt()))
         .fetch();
   }
 

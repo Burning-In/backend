@@ -13,7 +13,6 @@ public class StockBaseLineTypeConvertor {
 
   private final StockBaseRepository stockBaseRepository;
 
-  // % 반영 필요
   public void convertLineType(StockBase newBase) {
     if (newBase == null) {
       return;

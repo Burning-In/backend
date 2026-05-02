@@ -1,5 +1,8 @@
 package com.momentum.domain.base.entity;
 
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_LOW;
+
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
@@ -59,15 +62,22 @@ public class StockBase extends BaseEntity {
     this.isVcp = isVcp;
   }
 
-  public static StockBase init(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long averageDailyVolume) {
-    return StockBase.create(highPricePoint, lowPricePoint, 1, averageDailyVolume);
+  public static StockBase init(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long averageVolume) {
+    return StockBase.create(highPricePoint, lowPricePoint, 1, averageVolume);
   }
 
-  // 엔티티 안에 로직이 너무 많긴하다...
+  public static StockBase upper(StockPricePoint highPricePoint, StockPricePoint lowPricePoint,
+      long currentStageLevel, long averageVolume) {
+    return StockBase.create(highPricePoint, lowPricePoint, currentStageLevel + 1, averageVolume);
+  }
+
+  public static StockBase lower(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long averageVolume) {
+    return StockBase.create(highPricePoint, lowPricePoint, 1, averageVolume);
+  }
+
   // 고점-저점 변동성이 10% 이상이면 BASE, 미만이면 PULLBACK
   public static StockBase create(StockPricePoint highPricePoint, StockPricePoint lowPricePoint,
-      long currentStageLevel, long averageDailyVolume) {
-
+      long currentStageLevel, long averageVolume) {
     StockBaseKind kind = resolveKind(highPricePoint.getPrice(), lowPricePoint.getPrice());
     StockBase stockBase = new StockBase(
         highPricePoint.getPrice(),
@@ -81,9 +91,9 @@ public class StockBase extends BaseEntity {
         false
     );
     StockBaseLine resistance = StockBaseLine.resistance(highPricePoint.getPrice(), highPricePoint.getVolume(),
-        averageDailyVolume, stockBase);
+        averageVolume, stockBase);
     StockBaseLine support = StockBaseLine.support(lowPricePoint.getPrice(), lowPricePoint.getVolume(),
-        averageDailyVolume, stockBase);
+        averageVolume, stockBase);
     stockBase.stockBaseLines.addAll(List.of(resistance, support));
     highPricePoint.assignBase(stockBase);
     lowPricePoint.assignBase(stockBase);
@@ -97,7 +107,7 @@ public class StockBase extends BaseEntity {
   }
 
   // 점 추가 시 변동성이 10% 이상으로 바뀌면 PULLBACK → BASE로 전환
-  public void addPoints(List<StockPricePoint> points, long averageDailyVolume, double threshold) {
+  public void addPoints(List<StockPricePoint> points, long averageVolume, double priceThreshold) {
     if (points == null || points.isEmpty()) {
       return;
     }
@@ -106,11 +116,12 @@ public class StockBase extends BaseEntity {
       point.assignBase(this);
       this.stockPricePoints.add(point);
 
-      Optional<StockBaseLine> matchedLine = findMatchedLine(point, threshold);
+      // 아오...진짜...
+      Optional<StockBaseLine> matchedLine = findMatchedLine(point, priceThreshold);
       if (matchedLine.isPresent()) {
-        matchedLine.get().updateStrength(point.getVolume(), averageDailyVolume);
+        matchedLine.get().updateStrength(point.getVolume(), averageVolume);
       } else {
-        this.stockBaseLines.add(createLine(point, averageDailyVolume));
+        this.stockBaseLines.add(createLine(point, averageVolume));
       }
 
       updateBoundary(point);
@@ -119,6 +130,13 @@ public class StockBase extends BaseEntity {
     this.stockBaseKind = resolveKind(this.highestResistancePrice, this.lowestSupportLinePrice);
   }
 
+  // 고점-저점 변동성 10% 이상이면 BASE, 미만이면 PULLBACK
+  private static StockBaseKind resolveKind(long highPrice, long lowPrice) {
+    double volatility = (double) (highPrice - lowPrice) / lowPrice * 100;
+    return volatility >= BASE_VOLATILITY_THRESHOLD ? StockBaseKind.BASE : StockBaseKind.PULLBACK;
+  }
+
+  // 애도 차라리, 빼자 너무 많아 지금, 상태 그냥 주입해
   public void updateVcp(List<Long> volatilityHistories) {
     if (volatilityHistories.size() == 1) {
       this.isVcp = false;
@@ -127,12 +145,6 @@ public class StockBase extends BaseEntity {
     } else {
       this.isVcp = calculateSlope(movingAverage(volatilityHistories)) < 0;
     }
-  }
-
-  // 고점-저점 변동성 10% 이상이면 BASE, 미만이면 PULLBACK
-  private static StockBaseKind resolveKind(long highPrice, long lowPrice) {
-    double volatility = (double) (highPrice - lowPrice) / lowPrice * 100;
-    return volatility >= BASE_VOLATILITY_THRESHOLD ? StockBaseKind.BASE : StockBaseKind.PULLBACK;
   }
 
   private List<Double> movingAverage(List<Long> histories) {
@@ -201,5 +213,43 @@ public class StockBase extends BaseEntity {
         .filter(line -> line.getLineType() == StockBaseLineType.SUPPORT)
         .max(Comparator.comparing(line -> line.getStockBaseLineStrength().getStrength()))
         .ifPresent(line -> this.strongestSupportLinePrice = line.getPrice());
+  }
+
+  public boolean isFallingInBase(StockPricePoint point, double threshold) {
+    return point.isSameType(PIVOT_LOW)
+        && point.getPrice() < getResistanceLowerBound(threshold)
+        && point.getPrice() >= getSupportUpperBound(threshold);
+  }
+
+  public boolean isRaisedInBase(StockPricePoint point, double threshold) {
+    return point.isSameType(PIVOT_HIGH)
+        && point.getPrice() > getSupportUpperBound(threshold) // 이게 서로 안겹칠 수도 있지않나?
+        && point.getPrice() < getResistanceUpperBound(threshold);
+  }
+
+  public boolean isAboveResistance(StockPricePoint point, double threshold) {
+    return point.isSameType(PIVOT_LOW)
+        && point.getPrice() >= getResistanceLowerBound(threshold);
+  }
+
+  public boolean isBelowSupport(StockPricePoint point, double threshold) {
+    return point.isSameType(PIVOT_HIGH)
+        && point.getPrice() > getSupportUpperBound(threshold);
+  }
+
+  public long getResistanceUpperBound(double threshold) {
+    return (long) (getHighestResistancePrice() * (threshold / 100.0 + 1));
+  }
+
+  private long getResistanceLowerBound(double threshold) {
+    return (long) (getHighestResistancePrice() * (-threshold / 100.0 + 1));
+  }
+
+  private long getSupportUpperBound(double threshold) {
+    return (long) (getLowestSupportLinePrice() * (threshold / 100.0 + 1));
+  }
+
+  public long getSupportLowerBound(double threshold) {
+    return (long) (getLowestSupportLinePrice() * (-threshold / 100.0 + 1));
   }
 }

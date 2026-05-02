@@ -13,7 +13,7 @@ public interface StockCandleRepository {
 
   Optional<StockDailyCandle> findLastCandleAfterDate(Stock stock, LocalDate tradeDate);
 
-  Long findAvgVolume(Stock stock, LocalDate oneYearAgo);
+  Long averageVolume(Stock stock, LocalDate from, LocalDate to);
 
   List<StockDailyCandle> findRecentCandles(Long stockId, LocalDate baseDate, int limit);
 }

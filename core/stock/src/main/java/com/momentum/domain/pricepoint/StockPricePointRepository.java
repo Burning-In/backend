@@ -1,10 +1,10 @@
 package com.momentum.domain.pricepoint;
 
+import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
 import com.momentum.domain.stock.Stock;
 import com.momentum.infrastructure.pricepoint.dto.RecentPricePoints;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,13 +18,13 @@ public interface StockPricePointRepository {
 
   Optional<RecentPricePoints> findRecentPricePoints(Long stockId);
 
-  Optional<StockPricePoint> findUpperPricePoint(Instant currentBaseCreatedAt, long overPrice);
+  Optional<StockPricePoint> findHighPricePoint(StockBase currentBase, long overPrice);
 
-  Optional<StockPricePoint> findLineLowerPricePoint(Instant currentBaseCreatedAt, long lowerPrice);
+  Optional<StockPricePoint> findLowPricePoint(StockBase currentBase, long lowerPrice);
 
-  Optional<StockPricePoint> findPricePointNoBase(StockPricePointType stockPricePointType);
+  Optional<StockPricePoint> findLastPricePointWithoutBase(StockPricePointType stockPricePointType);
 
-  List<StockPricePoint> findUnassignedPointsSinceBase(Instant lastBaseCreatedAt);
+  List<StockPricePoint> findUnassignedPointsSinceBase(StockBase currentBase);
 
   List<StockPricePoint> saveAll(List<StockPricePoint> stockPricePoints);
 }
