@@ -36,7 +36,7 @@ public class StockBaseInitializer {
     long baseAverageVolume = stockCandleRepository.averageVolume(confirmedPricePoint.getStock(),
         pairedPoint.getTradeDate(),
         confirmedPricePoint.getTradeDate());
-    StockBase newBase = StockBase.init(pairedPoint, confirmedPricePoint, baseAverageVolume);
+    StockBase newBase = StockBase.initOrLower(pairedPoint, confirmedPricePoint, baseAverageVolume);
     stockBaseRepository.save(newBase);
   }
 }

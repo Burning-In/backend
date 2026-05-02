@@ -4,7 +4,6 @@ import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
-import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +15,6 @@ public class StockBaseVolatilityContractionPatternService {
 
   private final StockBaseRepository stockBaseRepository;
 
-  @Transactional
   public void calculateVolatilityContractionPattern(Long stockBaseId) {
     StockBase stockBase = stockBaseRepository.findWithPricePointsById(stockBaseId)
         .orElseThrow(IllegalArgumentException::new);
@@ -29,6 +27,12 @@ public class StockBaseVolatilityContractionPatternService {
         .filter(point -> !StockPricePointType.isNonPivot(point))
         .toList();
 
+    List<Long> volatilityHistories = calculateVolatilityHistories(stockPricePoints);
+    stockBase.update(null, volatilityHistories);
+    stockBaseRepository.save(stockBase);
+  }
+
+  private List<Long> calculateVolatilityHistories(List<StockPricePoint> stockPricePoints) {
     int left = 0;
     int right = 0;
     List<Long> volatilityHistories = new ArrayList<>();
@@ -44,8 +48,6 @@ public class StockBaseVolatilityContractionPatternService {
       }
       right++;
     }
-
-    stockBase.updateVcp(volatilityHistories);
-    stockBaseRepository.save(stockBase);
+    return volatilityHistories;
   }
 }

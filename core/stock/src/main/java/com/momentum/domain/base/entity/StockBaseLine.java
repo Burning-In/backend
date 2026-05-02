@@ -1,6 +1,10 @@
 package com.momentum.domain.base.entity;
 
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
+
 import com.momentum.domain.BaseEntity;
+import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -14,9 +18,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockBaseLine extends BaseEntity {
 
-  private Long price;
+  @Embedded
+  private StockBaseLinePrice price;
 
-  @Enumerated
+  @Embedded
   private StockBaseLineStrength stockBaseLineStrength;
 
   @Enumerated(EnumType.STRING)
@@ -25,7 +30,7 @@ public class StockBaseLine extends BaseEntity {
   @ManyToOne
   private StockBase stockBase;
 
-  private StockBaseLine(Long price, StockBaseLineStrength stockBaseLineStrength,
+  private StockBaseLine(StockBaseLinePrice price, StockBaseLineStrength stockBaseLineStrength,
       StockBaseLineType lineType, StockBase stockBase) {
     this.price = price;
     this.stockBaseLineStrength = stockBaseLineStrength;
@@ -33,9 +38,16 @@ public class StockBaseLine extends BaseEntity {
     this.stockBase = stockBase;
   }
 
+  public static StockBaseLine createLineByPointType(StockPricePoint point, long baseAverageVolume, StockBase stockBase) {
+    if (point.isSameType(PIVOT_HIGH)) {
+      return StockBaseLine.resistance(point.getPrice(), point.getVolume(), baseAverageVolume, stockBase);
+    }
+    return StockBaseLine.support(point.getPrice(), point.getVolume(), baseAverageVolume, stockBase);
+  }
+
   public static StockBaseLine resistance(long closePrice, Long currentVolume, Long averageDailyVolume, StockBase stockBase) {
     return new StockBaseLine(
-        closePrice,
+        new StockBaseLinePrice(closePrice),
         StockBaseLineStrength.create(currentVolume, averageDailyVolume),
         StockBaseLineType.RESISTANCE,
         stockBase
@@ -44,7 +56,7 @@ public class StockBaseLine extends BaseEntity {
 
   public static StockBaseLine support(long closePrice, Long currentVolume, Long averageDailyVolume, StockBase stockBase) {
     return new StockBaseLine(
-        closePrice,
+        new StockBaseLinePrice(closePrice),
         StockBaseLineStrength.create(currentVolume, averageDailyVolume),
         StockBaseLineType.SUPPORT,
         stockBase
@@ -55,12 +67,40 @@ public class StockBaseLine extends BaseEntity {
     this.stockBaseLineStrength.touch(additionalVolume, averageDailyVolume);
   }
 
-  // 저항 ↔ 지지 타입 전환
   public void convertLineType() {
     if (this.lineType == StockBaseLineType.RESISTANCE) {
       this.lineType = StockBaseLineType.SUPPORT;
     } else {
       this.lineType = StockBaseLineType.RESISTANCE;
     }
+  }
+
+  public boolean isMatched(StockPricePoint point, double threshold) {
+    return this.lineType.equals(toLineType(point))
+        && this.price.isWithinThreshold(point.getPrice(), threshold);
+  }
+
+  public boolean isStrongerThan(StockBaseLine other) {
+    return this.stockBaseLineStrength.getStrength()
+        .compareTo(other.getStockBaseLineStrength().getStrength()) > 0;
+  }
+
+  private StockBaseLineType toLineType(StockPricePoint point) {
+    if (point.isSameType(PIVOT_HIGH)) {
+      return StockBaseLineType.RESISTANCE;
+    }
+    return StockBaseLineType.SUPPORT;
+  }
+
+  public long getPrice() {
+    return this.price.getPrice();
+  }
+
+  public long getUpperBound(double threshold) {
+    return this.price.getUpperBound(threshold);
+  }
+
+  public long getLowerBound(double threshold) {
+    return this.price.getLowerBound(threshold);
   }
 }

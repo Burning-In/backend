@@ -89,4 +89,38 @@ public class StockPricePoint extends BaseEntity implements Comparable<StockPrice
   public boolean isSameType(StockPricePointType stockPricePointType) {
     return this.stockPricePointType.equals(stockPricePointType);
   }
+
+  public boolean isDroppedToPreviousBase(StockBase currentBase, StockBase previousBase, double threshold) {
+    return isSameType(PIVOT_LOW)
+        && getPrice() < currentBase.getSupportLowerBound(threshold)
+        && getPrice() < previousBase.getResistanceLowerBound(threshold);
+  }
+
+  public boolean isRaisedToPreviousBase(StockBase currentBase, StockBase previousBase, double threshold) {
+    return isSameType(PIVOT_HIGH)
+        && getPrice() >= currentBase.getResistanceUpperBound(threshold)
+        && getPrice() > previousBase.getSupportUpperBound(threshold);
+  }
+
+  public boolean isAboveResistance(StockBase base, double threshold) {
+    return isSameType(PIVOT_LOW)
+        && getPrice() >= base.getResistanceLowerBound(threshold);
+  }
+
+  public boolean isBelowSupport(StockBase base, double threshold) {
+    return isSameType(PIVOT_HIGH)
+        && getPrice() < base.getSupportUpperBound(threshold);
+  }
+
+  public boolean isFallingInBase(StockBase base, double threshold) {
+    return isSameType(PIVOT_LOW)
+        && getPrice() < base.getResistanceLowerBound(threshold)
+        && getPrice() >= base.getSupportUpperBound(threshold);
+  }
+
+  public boolean isRaisedInBase(StockBase base, double threshold) {
+    return isSameType(PIVOT_HIGH)
+        && getPrice() > base.getSupportUpperBound(threshold)
+        && getPrice() < base.getResistanceUpperBound(threshold);
+  }
 }

@@ -38,13 +38,13 @@ public class StockRegimeRealtimeFacade {
         .orElseThrow(IllegalArgumentException::new);
 
     // # 상승돌파
-    if (calculateGap(stockBase.getHighestResistancePrice(), stockTickInfo.currentPrice()) >= NOISE_THRESHOLD_PERCENT
+    if (calculateGap(stockBase.getHighestResistanceLine(), stockTickInfo.currentPrice()) >= NOISE_THRESHOLD_PERCENT
         && stock.getStockTrend().equals(StockTrend.UPTREND) && !stock.getStockRegime()
         .equals(StockRegime.BREAKOUT_START)) {
       StockTick stockTick = stockTickRepository.findDailyFirst(now).orElseThrow(IllegalStateException::new);
       Double beforeResistanceAverage = stockTickRepository.averageDailyOrderFlow(now, stockTick.getPrice(),
-          stockBase.getHighestResistancePrice() - 1);
-      Double afterResistanceAverage = stockTickRepository.averageDailyOrderFlow(now, stockBase.getHighestResistancePrice(),
+          stockBase.getHighestResistanceLine() - 1);
+      Double afterResistanceAverage = stockTickRepository.averageDailyOrderFlow(now, stockBase.getHighestResistanceLine(),
           stockTickInfo.currentPrice());
 
       if (beforeResistanceAverage < afterResistanceAverage) {
@@ -60,15 +60,15 @@ public class StockRegimeRealtimeFacade {
     // # 하락가능
     // 조건: 현재가 <= 저항선 × 0.98  AND  저항선이후 avg < 저항선이전 avg
     // 이평선/RS 불필요. BREAKOUT 상태에서도 적용 (→ 돌파 취소)
-    if (calculateGap(stockBase.getHighestResistancePrice(), stockTickInfo.currentPrice()) <= -NOISE_THRESHOLD_PERCENT &&
-        stockBase.getLowestSupportLinePrice() < stockTickInfo.currentPrice()) {
+    if (calculateGap(stockBase.getHighestResistanceLine(), stockTickInfo.currentPrice()) <= -NOISE_THRESHOLD_PERCENT &&
+        stockBase.getLowestSupportLine() < stockTickInfo.currentPrice()) {
       StockTick dailyFirstTick = stockTickRepository.findDailyFirst(now).orElseThrow(IllegalStateException::new);
       // 저항선 이전: 장 시작 ~ 저항선 아래 구간
       Double beforeResistanceAverage = stockTickRepository.averageDailyOrderFlow(
-          now, dailyFirstTick.getPrice(), stockBase.getHighestResistancePrice() - 1);
+          now, dailyFirstTick.getPrice(), stockBase.getHighestResistanceLine() - 1);
       // 저항선 이후: 저항선 이상 ~ 당일 고가 구간 (저항선 위에서 거래된 틱들)
       Double afterResistanceAverage = stockTickRepository.averageDailyOrderFlow(
-          now, stockBase.getHighestResistancePrice(), stockTickInfo.highPrice());
+          now, stockBase.getHighestResistanceLine(), stockTickInfo.highPrice());
 
       if (afterResistanceAverage < beforeResistanceAverage) {
         StockRegime prevState = stock.getStockRegime();
@@ -83,14 +83,14 @@ public class StockRegimeRealtimeFacade {
     // # 하락 붕괴 (지지선 아래)
     // 조건: 현재가 <= 지지선 × 0.98  AND  지지선이후 avg < 지지선이전 avg
     // 이평선/RS 불필요
-    if (calculateGap(stockBase.getLowestSupportLinePrice(), stockTickInfo.currentPrice()) <= -NOISE_THRESHOLD_PERCENT) {
+    if (calculateGap(stockBase.getLowestSupportLine(), stockTickInfo.currentPrice()) <= -NOISE_THRESHOLD_PERCENT) {
       StockTick dailyFirstTick = stockTickRepository.findDailyFirst(now).orElseThrow(IllegalStateException::new);
       // 지지선 이전: 지지선 위에서 거래된 틱들 (장 시작 ~ 지지선 이탈 전)
       Double beforeSupportAverage = stockTickRepository.averageDailyOrderFlow(
-          now, stockBase.getLowestSupportLinePrice() + 1, stockTickInfo.highPrice());
+          now, stockBase.getLowestSupportLine() + 1, stockTickInfo.highPrice());
       // 지지선 이후: 지지선 이하에서 거래된 틱들
       Double afterSupportAverage = stockTickRepository.averageDailyOrderFlow(
-          now, stockTickInfo.lowPrice(), stockBase.getLowestSupportLinePrice());
+          now, stockTickInfo.lowPrice(), stockBase.getLowestSupportLine());
 
       if (afterSupportAverage < beforeSupportAverage) {
         StockRegime prevState = stock.getStockRegime();

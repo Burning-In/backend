@@ -41,8 +41,8 @@ public class StockDailyRegimeService {
     }
 
     long recentPivotPrice = recentPricePointOpt.get().getPrice();
-    long resistancePrice = currentBase.getHighestResistancePrice();
-    long supportPrice = currentBase.getLowestSupportLinePrice();
+    long resistancePrice = currentBase.getHighestResistanceLine().getPrice();
+    long supportPrice = currentBase.getLowestSupportLine().getPrice();
 
     StockRegime regime = determineRegime(stock, closePrice, recentPivotPrice, resistancePrice, supportPrice, currentBase);
     stock.update(regime);
@@ -71,7 +71,7 @@ public class StockDailyRegimeService {
 
     // # 돌파준비: (상승 템플릿) AND (VCP OR (저항선 -3% 이상 AND 종가 > PP))
     if (stock.getStockTrend().equals(StockTrend.UPTREND)) {
-      boolean isVcp = currentBase.isVcp();
+      boolean isVcp = currentBase.getVcp().isVcp();
       boolean isApproaching = calculateGap(resistancePrice, closePrice) >= -APPROACH_THRESHOLD
           && closePrice > recentPivotPrice;
       if (isVcp || isApproaching) {

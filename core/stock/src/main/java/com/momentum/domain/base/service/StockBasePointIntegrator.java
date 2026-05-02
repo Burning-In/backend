@@ -20,11 +20,11 @@ public class StockBasePointIntegrator {
   private final StockCandleRepository stockCandleRepository;
 
   public void resolve(StockPricePoint confirmedPricePoint, StockBase currentBase, double baseBoundaryThreshold) {
-    if (currentBase.isFallingInBase(confirmedPricePoint, baseBoundaryThreshold)) {
+    if (confirmedPricePoint.isFallingInBase(currentBase, baseBoundaryThreshold)) {
       addUnsingedPointToCurrentBase(confirmedPricePoint, currentBase);
     }
 
-    if (currentBase.isRaisedInBase(confirmedPricePoint, baseBoundaryThreshold)) {
+    if (confirmedPricePoint.isRaisedInBase(currentBase, baseBoundaryThreshold)){
       addUnsingedPointToCurrentBase(confirmedPricePoint, currentBase);
     }
   }
@@ -34,7 +34,7 @@ public class StockBasePointIntegrator {
     long baseAverageVolume = stockCandleRepository.averageVolume(confirmedPricePoint.getStock(),
         currentBase.getCreatedAt().toLocalDate(),
         confirmedPricePoint.getTradeDate());
-    currentBase.addPoints(unassignedPoints, baseAverageVolume, PRICE_SIMILARITY_THRESHOLD);
+    currentBase.integratePoints(unassignedPoints, baseAverageVolume, PRICE_SIMILARITY_THRESHOLD);
     stockBaseRepository.save(currentBase);
   }
 }

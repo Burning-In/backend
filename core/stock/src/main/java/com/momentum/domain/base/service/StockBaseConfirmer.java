@@ -17,7 +17,7 @@ public class StockBaseConfirmer {
   private final StockCandleRepository stockCandleRepository;
 
   public StockBase resolve(StockPricePoint confirmedPricePoint, StockBase currentBase, double baseBoundaryThreshold) {
-    if (currentBase.isAboveResistance(confirmedPricePoint, baseBoundaryThreshold)) {
+    if (confirmedPricePoint.isAboveResistance(currentBase, baseBoundaryThreshold)) {
       long resistanceUpperBound = currentBase.getResistanceUpperBound(baseBoundaryThreshold);
       StockPricePoint pairedHighPoint = stockPricePointRepository.findHighPricePoint(currentBase, resistanceUpperBound)
           .orElseThrow(IllegalArgumentException::new);
@@ -26,13 +26,13 @@ public class StockBaseConfirmer {
           StockBase.upper(pairedHighPoint, confirmedPricePoint, currentBase.getStageLevel(), baseAverageVolume));
     }
 
-    if (currentBase.isBelowSupport(confirmedPricePoint, baseBoundaryThreshold)) {
+    if (confirmedPricePoint.isBelowSupport(currentBase, baseBoundaryThreshold)) {
       long supportLowerBound = currentBase.getSupportLowerBound(baseBoundaryThreshold);
       StockPricePoint pairedLowPoint = stockPricePointRepository.findLowPricePoint(currentBase, supportLowerBound)
           .orElseThrow(IllegalArgumentException::new);
       long baseAverageVolume = calculateAverageVolume(confirmedPricePoint, pairedLowPoint);
       return stockBaseRepository.save(
-          StockBase.lower(pairedLowPoint, confirmedPricePoint, baseAverageVolume));
+          StockBase.initOrLower(pairedLowPoint, confirmedPricePoint, baseAverageVolume));
     }
 
     return null;

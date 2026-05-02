@@ -21,11 +21,11 @@ public class StockBaseLineTypeConvertor {
         .orElseThrow(IllegalArgumentException::new);
     for (StockBaseLine line : previousBase.getStockBaseLines()) {
       if (line.getLineType() == StockBaseLineType.RESISTANCE
-          && line.getPrice() <= newBase.getLowestSupportLinePrice()) {
+          && line.getPrice() <= newBase.getLowestSupportLine().getPrice()) {
         line.convertLineType();
       }
       if (line.getLineType() == StockBaseLineType.SUPPORT
-          && line.getPrice() >= newBase.getHighestResistancePrice()) {
+          && line.getPrice() >= newBase.getHighestResistanceLine().getPrice()) {
         line.convertLineType();
       }
     }
