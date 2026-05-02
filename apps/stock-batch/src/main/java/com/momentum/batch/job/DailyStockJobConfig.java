@@ -4,12 +4,12 @@ import com.momentum.batch.job.pricepoint.StockPricePointItemProcessor;
 import com.momentum.batch.job.pricepoint.StockPricePointItemWriter;
 import com.momentum.batch.job.regime.StockRegimeItemProcessor;
 import com.momentum.batch.job.regime.StockRegimeItemWriter;
-import com.momentum.batch.job.score.StockRankScoreTasklet;
+import com.momentum.batch.job.score.StockRankScoreProcessor;
+import com.momentum.batch.job.score.StockRankScoreWriter;
 import com.momentum.batch.job.stockcandle.StockCandleItemProcessor;
 import com.momentum.batch.job.stockcandle.StockCandleItemWriter;
 import com.momentum.batch.job.vcp.StockVcpItemProcessor;
 import com.momentum.batch.job.vcp.StockVcpItemWriter;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import jakarta.persistence.EntityManagerFactory;
@@ -47,7 +47,9 @@ public class DailyStockJobConfig {
   private final StockRegimeItemProcessor stockRegimeItemProcessor;
   private final StockRegimeItemWriter stockRegimeItemWriter;
 
-  private final StockRankScoreTasklet stockRankScoreTasklet;
+  private final StockRankScoreProcessor stockRankScoreProcessor;
+  private final StockRankScoreWriter stockRankScoreWriter;
+
   private final EntityManagerFactory emf;
 
   @Bean
@@ -112,11 +114,13 @@ public class DailyStockJobConfig {
         .build();
   }
 
-  // Step5는 종목 단위가 아니라 전체 한번에 계산
   @Bean
   public Step stockRankScoreStep() {
     return new StepBuilder("stockRankScoreStep", jobRepository)
-        .tasklet(stockRankScoreTasklet, transactionManager)
+        .<Stock, Stock>chunk(CHUNK_SIZE, transactionManager)
+        .reader(stockItemReader())
+        .processor(stockRankScoreProcessor)
+        .writer(stockRankScoreWriter)
         .build();
   }
 }
