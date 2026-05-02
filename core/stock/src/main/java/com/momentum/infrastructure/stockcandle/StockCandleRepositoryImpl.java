@@ -45,7 +45,7 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
   }
 
   @Override
-  public Long findAvgVolumeByStockAndDateAfter(Stock stock, LocalDate oneYearAgo) {
+  public Long findAvgVolume(Stock stock, LocalDate oneYearAgo) {
     return jpaQueryFactory
         .select(stockDailyCandle.volume.avg().longValue())
         .from(stockDailyCandle)

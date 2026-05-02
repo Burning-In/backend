@@ -24,7 +24,7 @@ public class StockDailyRegimeService {
     Stock stock = stockDailyCandle.getStock();
     long closePrice = stockDailyCandle.getClosePrice();
 
-    Optional<StockBase> currentBaseOpt = stockBaseRepository.findCurrentBaseWithLines(stock.getId());
+    Optional<StockBase> currentBaseOpt = stockBaseRepository.findCurrentBaseWithLines(stock);
     if (currentBaseOpt.isEmpty()) {
       stock.update(StockRegime.UNDETERMINED);
       stockRepository.save(stock);

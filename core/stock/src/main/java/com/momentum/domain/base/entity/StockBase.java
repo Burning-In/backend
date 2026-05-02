@@ -6,6 +6,7 @@ import com.momentum.domain.pricepoint.entity.StockPricePointType;
 import com.momentum.domain.stock.Stock;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
@@ -37,10 +38,10 @@ public class StockBase extends BaseEntity {
   @ManyToOne
   private Stock stock;
 
-  @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
   private List<StockBaseLine> stockBaseLines;
 
-  @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
   private List<StockPricePoint> stockPricePoints;
 
   private StockBase(Long highestResistancePrice, Long lowestSupportLinePrice,
@@ -58,12 +59,16 @@ public class StockBase extends BaseEntity {
     this.isVcp = isVcp;
   }
 
+  public static StockBase init(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long averageDailyVolume) {
+    return StockBase.create(highPricePoint, lowPricePoint, 1, averageDailyVolume);
+  }
+
+  // 엔티티 안에 로직이 너무 많긴하다...
   // 고점-저점 변동성이 10% 이상이면 BASE, 미만이면 PULLBACK
   public static StockBase create(StockPricePoint highPricePoint, StockPricePoint lowPricePoint,
       long currentStageLevel, long averageDailyVolume) {
 
     StockBaseKind kind = resolveKind(highPricePoint.getPrice(), lowPricePoint.getPrice());
-
     StockBase stockBase = new StockBase(
         highPricePoint.getPrice(),
         lowPricePoint.getPrice(),
@@ -122,10 +127,6 @@ public class StockBase extends BaseEntity {
     } else {
       this.isVcp = calculateSlope(movingAverage(volatilityHistories)) < 0;
     }
-  }
-
-  public boolean isPullback() {
-    return this.stockBaseKind == StockBaseKind.PULLBACK;
   }
 
   // 고점-저점 변동성 10% 이상이면 BASE, 미만이면 PULLBACK

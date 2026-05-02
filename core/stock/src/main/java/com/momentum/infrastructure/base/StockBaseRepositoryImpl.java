@@ -5,6 +5,7 @@ import static com.momentum.domain.base.entity.QStockBase.stockBase;
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.base.entity.StockBaseKind;
+import com.momentum.domain.stock.Stock;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -25,12 +26,12 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
   }
 
   @Override
-  public Optional<StockBase> findCurrentBaseWithLines(Long stockId) {
+  public Optional<StockBase> findCurrentBaseWithLines(Stock stock) {
     StockBase result = queryFactory
         .selectFrom(stockBase)
         .leftJoin(stockBase.stockBaseLines).fetchJoin()
         .where(
-            stockBase.stock.id.eq(stockId),
+            stockBase.stock.id.eq(stock.getId()),
             stockBase.stockBaseKind.eq(StockBaseKind.BASE),
             stockBase.deletedAt.isNull()
         )
@@ -42,11 +43,11 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
   }
 
   @Override
-  public Optional<StockBase> findPreviousBase(Long stockId, Instant currentBaseCreatedAt) {
+  public Optional<StockBase> findPreviousBase(Stock stock, Instant currentBaseCreatedAt) {
     StockBase result = queryFactory
         .selectFrom(stockBase)
         .where(
-            stockBase.stock.id.eq(stockId),
+            stockBase.stock.id.eq(stock.getId()),
             stockBase.createdAt.lt(ZonedDateTime.from(currentBaseCreatedAt)),
             stockBase.deletedAt.isNull()
         )

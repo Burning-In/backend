@@ -1,5 +1,6 @@
 package com.momentum.domain.base.service;
 
+import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
@@ -12,22 +13,21 @@ import org.springframework.stereotype.Service;
 public class StockBaseInitializer {
 
   private final StockPricePointRepository stockPricePointRepository;
+  private final StockBaseRepository stockBaseRepository;
 
-  public StockBase resolve(StockPricePoint confirmedPricePoint, long averageDailyVolume) {
+  public void resolve(StockPricePoint confirmedPricePoint, long averageDailyVolume) {
     if (confirmedPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_LOW)) {
-      StockPricePoint highPricePoint = stockPricePointRepository
-          .findPricePointNoBase(StockPricePointType.PIVOT_HIGH)
+      StockPricePoint highPricePoint = stockPricePointRepository.findPricePointNoBase(StockPricePointType.PIVOT_HIGH)
           .orElseThrow(() -> new IllegalArgumentException("베이스가 없는 케이스에서 맞는 고점이 없습니다."));
-      return StockBase.create(highPricePoint, confirmedPricePoint, 1, averageDailyVolume);
+      StockBase newBase = StockBase.init(highPricePoint, confirmedPricePoint, averageDailyVolume);
+      stockBaseRepository.save(newBase);
     }
 
     if (confirmedPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_HIGH)) {
-      StockPricePoint lowPricePoint = stockPricePointRepository
-          .findPricePointNoBase(StockPricePointType.PIVOT_LOW)
+      StockPricePoint lowPricePoint = stockPricePointRepository.findPricePointNoBase(StockPricePointType.PIVOT_LOW)
           .orElseThrow(() -> new IllegalArgumentException("베이스가 없는 케이스에서 맞는 저점이 없습니다."));
-      return StockBase.create(lowPricePoint, confirmedPricePoint, 1, averageDailyVolume);
+      StockBase newBase = StockBase.init(lowPricePoint, confirmedPricePoint, averageDailyVolume);
+      stockBaseRepository.save(newBase);
     }
-
-    return null;
   }
 }
