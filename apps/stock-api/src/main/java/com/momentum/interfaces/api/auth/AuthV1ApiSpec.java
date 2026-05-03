@@ -1,6 +1,8 @@
 package com.momentum.interfaces.api.auth;
 
 import com.momentum.interfaces.api.ApiResponse;
+import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailRequest;
+import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginRequest;
@@ -45,8 +47,14 @@ public interface AuthV1ApiSpec {
     ApiResponse<RegisterResponse> register(RegisterRequest request);
 
     @Operation(
+        summary = "이메일 찾기",
+        description = "전화번호와 이름으로 가입된 이메일을 조회합니다."
+    )
+    ApiResponse<FindEmailResponse> findEmail(FindEmailRequest request);
+
+    @Operation(
         summary = "비밀번호 찾기",
-        description = "이메일과 전화번호로 비밀번호 재설정 요청을 합니다."
+        description = "이메일로 비밀번호 재설정 링크를 발송합니다."
     )
     ApiResponse<FindPasswordResponse> findPassword(FindPasswordRequest request);
 

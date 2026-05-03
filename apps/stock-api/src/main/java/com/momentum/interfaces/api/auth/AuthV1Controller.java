@@ -1,6 +1,8 @@
 package com.momentum.interfaces.api.auth;
 
 import com.momentum.interfaces.api.ApiResponse;
+import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailRequest;
+import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginRequest;
@@ -40,6 +42,15 @@ public class AuthV1Controller implements AuthV1ApiSpec {
     @Override
     public ApiResponse<RegisterResponse> register(
         @RequestBody RegisterRequest request
+    ) {
+        // TODO: AuthFacade 연결
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/email/find")
+    @Override
+    public ApiResponse<FindEmailResponse> findEmail(
+        @RequestBody FindEmailRequest request
     ) {
         // TODO: AuthFacade 연결
         return ApiResponse.success(null);
