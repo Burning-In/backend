@@ -19,19 +19,16 @@ public class AuthV1Dto {
         String email,
         String password,
         String passwordConfirm,
-        String phoneNumber,
-        String nickname,
-        boolean agreeToTerms, // 약관이 있었나?
-        boolean agreeToPrivacyPolicy
+        String name,
+        String phoneNumber
     ) {}
 
-//  1. 회원가입 → 바로 로그인 처리
-//  2. 회원가입 → 로그인 페이지로 이동
     public record RegisterResponse(
-        Long userId,
-        String email,
-        String nickname
+        String accessToken
     ) {}
+
+    // 이메일 찾기는 (전화번호와 이름)
+    // 비밀번호 찾기 -> 등록된 이메일로 뿌려주는걸로, 메일로
 
     // ===================== Find Password =====================
 
