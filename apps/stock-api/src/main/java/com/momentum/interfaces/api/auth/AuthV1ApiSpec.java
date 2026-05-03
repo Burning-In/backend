@@ -18,16 +18,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public interface AuthV1ApiSpec {
 
     @Operation(
+        summary = "CSRF 토큰 발급",
+        description = "페이지 진입 시 호출합니다. csrfToken을 Cookie로 발급합니다."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        headers = @Header(name = "Set-Cookie", description = "csrfToken=<token>; Path=/")
+    )
+    ApiResponse<Void> csrf();
+
+    @Operation(
         summary = "로그인",
         description = "이메일과 비밀번호로 로그인합니다. refreshToken은 HttpOnly Cookie로 내려갑니다."
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
         responseCode = "200",
-        headers = {
-            @Header(name = "Set-Cookie", description = "refreshToken=<token>; HttpOnly; Path=/api/v1/auth"),
-            @Header(name = "Set-Cookie", description = "csrfToken=<token>; Path=/")
-        }
+        headers = @Header(name = "Set-Cookie", description = "refreshToken=<token>; HttpOnly; Path=/api/v1/auth")
     )
+    @Parameter(name = "X-CSRF-Token", in = ParameterIn.HEADER, description = "CSRF 토큰", required = true)
     ApiResponse<LoginResponse> login(LoginRequest request);
 
     @Operation(
