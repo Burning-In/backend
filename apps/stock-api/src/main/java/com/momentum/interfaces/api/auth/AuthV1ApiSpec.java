@@ -9,6 +9,8 @@ import com.momentum.interfaces.api.auth.AuthV1Dto.RefreshResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Auth V1 API", description = "인증/인가 관련 API 입니다.")
@@ -36,6 +38,7 @@ public interface AuthV1ApiSpec {
         summary = "토큰 재발급",
         description = "HttpOnly Cookie의 refreshToken으로 새로운 accessToken을 발급합니다."
     )
+    @Parameter(name = "refreshToken", in = ParameterIn.COOKIE, description = "리프레시 토큰", required = true)
     ApiResponse<RefreshResponse> refresh();
 
     @Operation(
