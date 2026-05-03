@@ -5,15 +5,14 @@ public class AuthV1Dto {
     // ===================== Login =====================
 
     public record LoginRequest(
-        String id,
+        String email,
         String password
     ) {}
 
     public record LoginResponse(
         Long userId,
         String nickname,
-        String accessToken,
-        String refreshToken
+        String accessToken
     ) {}
 
     // ===================== Register =====================
@@ -43,5 +42,11 @@ public class AuthV1Dto {
 
     public record FindPasswordResponse(
         String message
+    ) {}
+
+    // ===================== Refresh =====================
+
+    public record RefreshResponse(
+        String accessToken
     ) {}
 }

@@ -5,6 +5,7 @@ import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginResponse;
+import com.momentum.interfaces.api.auth.AuthV1Dto.RefreshResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,7 +16,7 @@ public interface AuthV1ApiSpec {
 
     @Operation(
         summary = "로그인",
-        description = "ID와 비밀번호로 로그인합니다."
+        description = "이메일과 비밀번호로 로그인합니다. refreshToken은 HttpOnly Cookie로 내려갑니다."
     )
     ApiResponse<LoginResponse> login(LoginRequest request);
 
@@ -30,4 +31,16 @@ public interface AuthV1ApiSpec {
         description = "이메일과 전화번호로 비밀번호 재설정 요청을 합니다."
     )
     ApiResponse<FindPasswordResponse> findPassword(FindPasswordRequest request);
+
+    @Operation(
+        summary = "토큰 재발급",
+        description = "HttpOnly Cookie의 refreshToken으로 새로운 accessToken을 발급합니다."
+    )
+    ApiResponse<RefreshResponse> refresh();
+
+    @Operation(
+        summary = "로그아웃",
+        description = "HttpOnly Cookie의 refreshToken을 만료시킵니다. accessToken은 TTL까지 자연 만료됩니다."
+    )
+    ApiResponse<Void> logout();
 }

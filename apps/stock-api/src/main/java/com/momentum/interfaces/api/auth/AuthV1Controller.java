@@ -5,6 +5,7 @@ import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginResponse;
+import com.momentum.interfaces.api.auth.AuthV1Dto.RefreshResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterResponse;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,20 @@ public class AuthV1Controller implements AuthV1ApiSpec {
         @RequestBody FindPasswordRequest request
     ) {
         // TODO: AuthFacade 연결
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/refresh")
+    @Override
+    public ApiResponse<RefreshResponse> refresh() {
+        // TODO: AuthFacade 연결 (refreshToken은 HttpOnly Cookie에서 읽음)
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/logout")
+    @Override
+    public ApiResponse<Void> logout() {
+        // TODO: AuthFacade 연결 (refreshToken Cookie 만료 처리)
         return ApiResponse.success(null);
     }
 }
