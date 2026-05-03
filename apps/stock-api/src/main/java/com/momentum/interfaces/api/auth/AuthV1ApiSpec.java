@@ -23,7 +23,10 @@ public interface AuthV1ApiSpec {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
         responseCode = "200",
-        headers = @Header(name = "Set-Cookie", description = "refreshToken=<token>; HttpOnly; Path=/api/v1/auth")
+        headers = {
+            @Header(name = "Set-Cookie", description = "refreshToken=<token>; HttpOnly; Path=/api/v1/auth"),
+            @Header(name = "Set-Cookie", description = "csrfToken=<token>; Path=/")
+        }
     )
     ApiResponse<LoginResponse> login(LoginRequest request);
 
@@ -44,11 +47,13 @@ public interface AuthV1ApiSpec {
         description = "HttpOnly Cookie의 refreshToken으로 새로운 accessToken을 발급합니다."
     )
     @Parameter(name = "refreshToken", in = ParameterIn.COOKIE, description = "리프레시 토큰", required = true)
+    @Parameter(name = "X-CSRF-Token", in = ParameterIn.HEADER, description = "CSRF 토큰", required = true)
     ApiResponse<RefreshResponse> refresh();
 
     @Operation(
         summary = "로그아웃",
         description = "HttpOnly Cookie의 refreshToken을 만료시킵니다. accessToken은 TTL까지 자연 만료됩니다."
     )
+    @Parameter(name = "X-CSRF-Token", in = ParameterIn.HEADER, description = "CSRF 토큰", required = true)
     ApiResponse<Void> logout();
 }
