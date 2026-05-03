@@ -49,8 +49,6 @@ public class AuthV1Dto {
 
   }
 
-  // 비밀번호 찾기 -> 등록된 이메일로 뿌려주는걸로, 메일로
-
   // ===================== Find Password =====================
 
   public record FindPasswordRequest(
