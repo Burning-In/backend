@@ -11,6 +11,7 @@ import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Auth V1 API", description = "인증/인가 관련 API 입니다.")
@@ -19,6 +20,10 @@ public interface AuthV1ApiSpec {
     @Operation(
         summary = "로그인",
         description = "이메일과 비밀번호로 로그인합니다. refreshToken은 HttpOnly Cookie로 내려갑니다."
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+        responseCode = "200",
+        headers = @Header(name = "Set-Cookie", description = "refreshToken=<token>; HttpOnly; Path=/api/v1/auth")
     )
     ApiResponse<LoginResponse> login(LoginRequest request);
 
