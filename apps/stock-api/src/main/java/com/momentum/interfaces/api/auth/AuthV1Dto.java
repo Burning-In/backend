@@ -10,8 +10,6 @@ public class AuthV1Dto {
     ) {}
 
     public record LoginResponse(
-        Long userId,
-        String nickname,
         String accessToken
     ) {}
 
@@ -23,10 +21,12 @@ public class AuthV1Dto {
         String passwordConfirm,
         String phoneNumber,
         String nickname,
-        boolean agreeToTerms,
+        boolean agreeToTerms, // 약관이 있었나?
         boolean agreeToPrivacyPolicy
     ) {}
 
+//  1. 회원가입 → 바로 로그인 처리
+//  2. 회원가입 → 로그인 페이지로 이동
     public record RegisterResponse(
         Long userId,
         String email,
