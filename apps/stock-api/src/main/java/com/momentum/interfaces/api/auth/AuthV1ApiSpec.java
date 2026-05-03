@@ -4,7 +4,6 @@ import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordRequest;
-import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RefreshResponse;
@@ -56,7 +55,7 @@ public interface AuthV1ApiSpec {
         summary = "비밀번호 찾기",
         description = "이메일로 비밀번호 재설정 링크를 발송합니다."
     )
-    ApiResponse<FindPasswordResponse> findPassword(FindPasswordRequest request);
+    ApiResponse<Void> findPassword(FindPasswordRequest request);
 
     @Operation(
         summary = "토큰 재발급",

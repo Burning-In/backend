@@ -4,7 +4,6 @@ import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordRequest;
-import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RefreshResponse;
@@ -58,7 +57,7 @@ public class AuthV1Controller implements AuthV1ApiSpec {
 
     @PostMapping("/password/find")
     @Override
-    public ApiResponse<FindPasswordResponse> findPassword(
+    public ApiResponse<Void> findPassword(
         @RequestBody FindPasswordRequest request
     ) {
         // TODO: AuthFacade 연결

@@ -60,11 +60,6 @@ public class AuthV1Dto {
 
   }
 
-  public record FindPasswordResponse(
-      String message
-  ) {
-
-  }
 
   // ===================== Refresh =====================
 
