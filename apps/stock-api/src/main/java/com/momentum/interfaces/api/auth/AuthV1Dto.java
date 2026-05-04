@@ -66,4 +66,12 @@ public class AuthV1Dto {
   ) {
 
   }
+
+  // ===================== Account Area =====================
+
+  public record AccountResponse(
+      boolean isLoggedIn,
+      Long userId,
+      String nickname
+  ) {}
 }
