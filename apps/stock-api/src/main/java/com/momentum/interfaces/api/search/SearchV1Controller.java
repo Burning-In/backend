@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/search")
 public class SearchV1Controller implements SearchV1ApiSpec {
 
-    @GetMapping("/stocks")
-    @Override
-    public ApiResponse<StockSearchResponse> searchStocks(
-        @RequestParam(value = "query") String query
-    ) {
-        // TODO: SearchFacade 연결
-        return ApiResponse.success(null);
-    }
+  @GetMapping("/stocks")
+  @Override
+  public ApiResponse<StockSearchResponse> searchStocks(
+      @RequestParam(value = "query") String query
+  ) {
+    // TODO: SearchFacade 연결
+    return ApiResponse.success(null);
+  }
 }
