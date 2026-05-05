@@ -2,7 +2,6 @@ package com.momentum.interfaces.api.stock;
 
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.stock.StockDailyInfoV1Dto.DailyCandleResponse;
-import com.momentum.interfaces.api.stock.StockDailyInfoV1Dto.IntradayDailyCandleResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +21,6 @@ public class StockDailyInfoV1Controller implements StockDailyInfoV1ApiSpec {
   public ApiResponse<DailyCandleResponse> getDailyCandle(
       @PathVariable String stockCode,
       @RequestParam LocalDate from,
-      @RequestParam LocalDate to
-  ) {
-    // TODO: StockDailyInfoFacade 연결
-    return ApiResponse.success(null);
-  }
-
-  @GetMapping("/chart/intraday")
-  @Override
-  public ApiResponse<IntradayDailyCandleResponse> getIntradayDailyCandle(
-      @PathVariable String stockCode,
-      @RequestParam LocalDate tradeDate,
       @RequestParam LocalDateTime to
   ) {
     // TODO: StockDailyInfoFacade 연결
