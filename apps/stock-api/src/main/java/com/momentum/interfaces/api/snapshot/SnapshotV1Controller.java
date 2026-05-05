@@ -30,12 +30,22 @@ public class SnapshotV1Controller implements SnapshotV1ApiSpec {
     @GetMapping
     @Override
     public ApiResponse<SnapshotListResponse> getSnapshotList(
-        @RequestParam(value = "status", required = false) String status,
-        @RequestParam(value = "startDateFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDateFrom,
-        @RequestParam(value = "startDateTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDateTo,
-        @RequestParam(value = "endDateFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDateFrom,
-        @RequestParam(value = "endDateTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDateTo,
-        @RequestParam(value = "stockCode", required = false) String stockCode
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+        @RequestParam(defaultValue = "true") boolean includeOngoing,
+        @RequestParam(defaultValue = "true") boolean includeCompleted,
+        @RequestParam(defaultValue = "false") boolean breakoutStart,
+        @RequestParam(defaultValue = "false") boolean breakoutReady,
+        @RequestParam(defaultValue = "false") boolean breakoutFailed,
+        @RequestParam(defaultValue = "false") boolean downsideBreak,
+        @RequestParam(defaultValue = "false") boolean undetermined,
+        @RequestParam(defaultValue = "false") boolean momentum,
+        @RequestParam(defaultValue = "false") boolean fip,
+        @RequestParam(defaultValue = "false") boolean movingAverage,
+        @RequestParam(defaultValue = "false") boolean volume,
+        @RequestParam(defaultValue = "false") boolean eps,
+        @RequestParam(defaultValue = "false") boolean rs,
+        @RequestParam(defaultValue = "RECENT") String sort
     ) {
         // TODO: SnapshotFacade 연결
         return ApiResponse.success(null);
