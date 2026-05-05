@@ -10,4 +10,6 @@ public interface StockRepository {
   Stock save(Stock stock);
 
   List<Stock> saveAll(List<Stock> stocks);
+
+  List<Stock> search(String query);
 }
