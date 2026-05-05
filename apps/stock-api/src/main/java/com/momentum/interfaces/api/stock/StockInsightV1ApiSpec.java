@@ -11,6 +11,7 @@ import com.momentum.interfaces.api.stock.StockInsightV1Dto.VolumeResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDateTime;
 
 @Tag(name = "Stock Insight V1 API", description = "종목 지표별 인사이트 관련 API 입니다.")
 public interface StockInsightV1ApiSpec {
@@ -30,7 +31,8 @@ public interface StockInsightV1ApiSpec {
           """
   )
   ApiResponse<StockRegimeResponse> getRegime(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "조회 시점") LocalDateTime at
   );
 
   @Operation(
@@ -43,7 +45,8 @@ public interface StockInsightV1ApiSpec {
           """
   )
   ApiResponse<MovingAverageResponse> getMovingAverage(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "조회 시점") LocalDateTime at
   );
 
   @Operation(
@@ -57,7 +60,8 @@ public interface StockInsightV1ApiSpec {
           """
   )
   ApiResponse<MomentumResponse> getMomentum(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "조회 시점") LocalDateTime at
   );
 
   @Operation(
@@ -71,7 +75,8 @@ public interface StockInsightV1ApiSpec {
           """
   )
   ApiResponse<FrogInPanResponse> getFrogInPan(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "조회 시점") LocalDateTime at
   );
 
   @Operation(
@@ -85,7 +90,8 @@ public interface StockInsightV1ApiSpec {
           """
   )
   ApiResponse<VolumeResponse> getVolume(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "조회 시점") LocalDateTime at
   );
 
   @Operation(
@@ -93,7 +99,8 @@ public interface StockInsightV1ApiSpec {
       description = "KOSPI 대비 RS 값 및 상위 백분위를 조회합니다."
   )
   ApiResponse<RsResponse> getRs(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "조회 시점") LocalDateTime at
   );
 
   @Operation(
@@ -107,6 +114,7 @@ public interface StockInsightV1ApiSpec {
           """
   )
   ApiResponse<EpsResponse> getEps(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "조회 시점") LocalDateTime at
   );
 }
