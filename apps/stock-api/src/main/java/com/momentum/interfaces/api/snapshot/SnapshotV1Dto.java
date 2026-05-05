@@ -2,6 +2,7 @@ package com.momentum.interfaces.api.snapshot;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class SnapshotV1Dto {
@@ -9,27 +10,18 @@ public class SnapshotV1Dto {
     // ===================== Snapshot List Page =====================
 
     public record SnapshotListResponse(
-        List<OngoingSnapshotListItem> ongoingSnapshots,
-        List<CompletedSnapshotListItem> completedSnapshots
+        int ongoingSnapshotCount,
+        int completedSnapshotCount,
+        List<SnapshotListItem> snapshots
     ) {
-        // 진행중 스냅샷 목록 아이템
-        public record OngoingSnapshotListItem(
+        public record SnapshotListItem(
             Long snapshotId,
             String stockName,
-            LocalDate startDate,              // 생성(시작) 날짜
-            BigDecimal purchasePrice,         // 매입 시점 가격
-            BigDecimal purchaseMomentum,      // 매입 시점 모멘텀
-            String currentRecord              // 현 스냅샷 기록
-        ) {}
-
-        // 완료 스냅샷 목록 아이템
-        public record CompletedSnapshotListItem(
-            Long snapshotId,
-            String stockName,
-            String period,                    // 기간
-            BigDecimal startPrice,            // 출발 가격
-            String finalRegime,               // 최종 레짐
-            String startRegime                // 시작일 레짐
+            boolean isOngoing,
+            List<String> insights,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            BigDecimal priceChangeRate
         ) {}
     }
 

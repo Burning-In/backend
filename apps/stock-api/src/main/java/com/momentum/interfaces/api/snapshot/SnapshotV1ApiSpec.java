@@ -19,17 +19,35 @@ public interface SnapshotV1ApiSpec {
 
     @Operation(
         summary = "스냅샷 목록 조회",
-        description = "상태/기간/종목 이름 필터를 적용하여 진행중 및 완료 스냅샷 목록을 조회합니다."
+        description = """
+            기간/진행도/인사이트/정렬 필터를 적용하여 스냅샷 목록을 조회합니다.
+
+            정렬 기준 (sort):
+            - RECENT: 최근 순
+            - PERIOD: 기간 순 (기간순은 회의 후 수정)
+            - PROFIT_RATE: 수익률 순
+            """
     )
     ApiResponse<SnapshotListResponse> getSnapshotList(
-        @Schema(description = "상태 필터 (ONGOING / COMPLETED)") String status,
-        @Schema(description = "시작(생성) 기간 - 시작") LocalDate startDateFrom,
-        @Schema(description = "시작(생성) 기간 - 종료") LocalDate startDateTo,
-        @Schema(description = "완료(종료) 기간 - 시작") LocalDate endDateFrom,
-        @Schema(description = "완료(종료) 기간 - 종료") LocalDate endDateTo,
-        @Schema(description = "종목 코드") String stockCode
+        @Schema(description = "조회 시작일") LocalDate startDate,
+        @Schema(description = "조회 종료일") LocalDate endDate,
+        @Schema(description = "진행 중 포함 여부") boolean includeOngoing,
+        @Schema(description = "완료 포함 여부") boolean includeCompleted,
+        @Schema(description = "인사이트 - 돌파시작") boolean breakoutStart,
+        @Schema(description = "인사이트 - 돌파준비") boolean breakoutReady,
+        @Schema(description = "인사이트 - 돌파실패") boolean breakoutFailed,
+        @Schema(description = "인사이트 - 하방이탈") boolean downsideBreak,
+        @Schema(description = "인사이트 - 방향미정") boolean undetermined,
+        @Schema(description = "인사이트 - 1년 모멘텀") boolean momentum,
+        @Schema(description = "인사이트 - 흐름 안정도(FIP)") boolean fip,
+        @Schema(description = "인사이트 - 이동평균선") boolean movingAverage,
+        @Schema(description = "인사이트 - 거래량") boolean volume,
+        @Schema(description = "인사이트 - EPS") boolean eps,
+        @Schema(description = "인사이트 - RS") boolean rs,
+        @Schema(description = "정렬 기준 (RECENT / PERIOD / PROFIT_RATE)") String sort
     );
 
+    // 스냅샷 crud는 회의 후 진행, 세부조회도 해야함
     // ===================== Snapshot Editor Overlay =====================
 
     @Operation(
