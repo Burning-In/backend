@@ -1,4 +1,4 @@
-package com.momentum.domain.trend;
+package com.momentum.domain.ma;
 
 
 import lombok.Getter;

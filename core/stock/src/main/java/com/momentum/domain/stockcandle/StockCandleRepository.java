@@ -16,4 +16,6 @@ public interface StockCandleRepository {
   Long averageVolume(Stock stock, LocalDate from, LocalDate to);
 
   List<StockDailyCandle> findRecentCandles(Long stockId, LocalDate baseDate, int limit);
+
+  Optional<StockDailyCandle> findRecentCandle(Stock stock, LocalDate date);
 }
