@@ -55,4 +55,9 @@ public class StockRepositoryImpl implements StockRepository {
         )
         .fetch();
   }
+
+  @Override
+  public List<Stock> findAll() {
+    return stockCandleRepository.findAll();
+  }
 }

@@ -3,7 +3,6 @@ package com.momentum.infrastructure.stockcandle;
 import static com.momentum.domain.stockcandle.QStockDailyCandle.stockDailyCandle;
 
 import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stockcandle.QStockDailyCandle;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -69,5 +68,19 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
         .orderBy(stockDailyCandle.tradeDate.desc())
         .limit(limit)
         .fetch();
+  }
+
+  @Override
+  public Optional<StockDailyCandle> findRecentCandle(Stock stock, LocalDate date) {
+    StockDailyCandle result = jpaQueryFactory
+        .selectFrom(stockDailyCandle)
+        .where(
+            stockDailyCandle.stock.id.eq(stock.getId()),
+            stockDailyCandle.tradeDate.loe(date)
+        )
+        .orderBy(stockDailyCandle.tradeDate.desc())
+        .fetchFirst();
+
+    return Optional.ofNullable(result);
   }
 }

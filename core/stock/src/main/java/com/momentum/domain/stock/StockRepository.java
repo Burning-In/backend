@@ -12,4 +12,6 @@ public interface StockRepository {
   List<Stock> saveAll(List<Stock> stocks);
 
   List<Stock> search(String query);
+
+  List<Stock> findAll();
 }
