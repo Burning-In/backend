@@ -16,6 +16,7 @@ public class KOSPIRelativeStrengthService {
   private final KOSPIRepository kospiRepository;
   private final KOSPIRawScoreCalculator kOSPIRawScoreCalculator;
   private final StockRepository stockRepository;
+  private final KOSPIRelativeStrengthRepository kospiRelativeStrengthRepository;
 
   public List<KOPSIRelativeStrength> create(LocalDate today) {
     List<Stock> stocks = stockRepository.findAll();
@@ -32,6 +33,6 @@ public class KOSPIRelativeStrengthService {
       relativeStrengths.add(relativeStrength);
     }
 
-    return relativeStrengths;
+    return kospiRelativeStrengthRepository.saveAll(relativeStrengths);
   }
 }
