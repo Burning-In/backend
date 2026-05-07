@@ -9,10 +9,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @Disabled
 @SpringBootTest
-class LsKOPSIProviderTest {
+class LsKospiProviderTest {
 
   @Autowired
-  private LsKOPSIProvider provider;
+  private LsKospiProvider provider;
 
   @Test
   void 장후_KOSPI_지수를_받아온다() {

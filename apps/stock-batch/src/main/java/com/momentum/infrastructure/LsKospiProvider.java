@@ -9,7 +9,7 @@ import org.springframework.web.client.RestClient;
 
 @Component
 @RequiredArgsConstructor
-public class LsKOPSIProvider {
+public class LsKospiProvider {
 
   private final RestClient restClient;
 
