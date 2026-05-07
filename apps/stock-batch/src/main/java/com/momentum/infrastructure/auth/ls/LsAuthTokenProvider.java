@@ -1,8 +1,7 @@
-package com.momentum.infrastructure;
+package com.momentum.infrastructure.auth.ls;
 
-import com.momentum.infrastructure.dto.LsTokenRequest;
-import com.momentum.infrastructure.dto.LsTokenResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;

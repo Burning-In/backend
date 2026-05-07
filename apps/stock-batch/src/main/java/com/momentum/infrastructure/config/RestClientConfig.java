@@ -16,4 +16,12 @@ public class RestClientConfig {
         .defaultHeader("type", "application/json; charset=utf-8")
         .build();
   }
+
+  @Bean
+  public RestClient kisRestClient() {
+    return RestClient.builder()
+        .baseUrl("https://openapi.koreainvestment.com:9443")
+        .defaultHeader("content-type", "application/json; charset=utf-8")
+        .build();
+  }
 }

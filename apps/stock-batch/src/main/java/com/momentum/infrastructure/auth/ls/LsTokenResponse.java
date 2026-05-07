@@ -1,4 +1,4 @@
-package com.momentum.infrastructure.dto;
+package com.momentum.infrastructure.auth.ls;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

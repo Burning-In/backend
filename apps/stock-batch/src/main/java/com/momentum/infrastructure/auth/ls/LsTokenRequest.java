@@ -1,4 +1,4 @@
-package com.momentum.infrastructure.dto;
+package com.momentum.infrastructure.auth.ls;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
