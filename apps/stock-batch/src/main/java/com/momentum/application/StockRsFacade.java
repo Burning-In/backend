@@ -17,7 +17,7 @@ public class StockRsFacade {
   private final KOSPIRelativeStrengthService kOSPIRelativeStrengthService;
 
   public void calculate(LocalDate today) {
-    long afterMarketKospi = lsKospiProvider.getAfterMarketKospi();
+    long afterMarketKospi = lsKospiProvider.getAfterMarketKospi(today);
     kOSPIRepository.save(new KOSPI(afterMarketKospi, today));
 
     kOSPIRelativeStrengthService.create(today);
