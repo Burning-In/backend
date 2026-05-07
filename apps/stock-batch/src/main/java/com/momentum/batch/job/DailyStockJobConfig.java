@@ -1,9 +1,14 @@
 package com.momentum.batch.job;
 
+import com.momentum.batch.job.eps.StockEpsItemProcessor;
+import com.momentum.batch.job.eps.StockEpsItemWriter;
+import com.momentum.batch.job.ma.StockMaItemProcessor;
+import com.momentum.batch.job.ma.StockMaItemWriter;
 import com.momentum.batch.job.pricepoint.StockPricePointItemProcessor;
 import com.momentum.batch.job.pricepoint.StockPricePointItemWriter;
 import com.momentum.batch.job.regime.StockRegimeItemProcessor;
 import com.momentum.batch.job.regime.StockRegimeItemWriter;
+import com.momentum.batch.job.rs.StockRsTasklet;
 import com.momentum.batch.job.score.StockRankScoreProcessor;
 import com.momentum.batch.job.score.StockRankScoreWriter;
 import com.momentum.batch.job.stockcandle.StockCandleItemProcessor;
@@ -50,6 +55,14 @@ public class DailyStockJobConfig {
   private final StockRankScoreProcessor stockRankScoreProcessor;
   private final StockRankScoreWriter stockRankScoreWriter;
 
+  private final StockEpsItemProcessor stockEpsItemProcessor;
+  private final StockEpsItemWriter stockEpsItemWriter;
+
+  private final StockRsTasklet stockRsTasklet;
+
+  private final StockMaItemProcessor stockMaItemProcessor;
+  private final StockMaItemWriter stockMaItemWriter;
+
   private final EntityManagerFactory emf;
 
   @Bean
@@ -71,6 +84,9 @@ public class DailyStockJobConfig {
         .next(stockVcpStep())
         .next(stockRegimeStep())
         .next(stockRankScoreStep())
+        .next(stockEpsStep())
+        .next(stockRsStep())
+        .next(stockMaStep())
         .build();
   }
 
@@ -121,6 +137,33 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockRankScoreProcessor)
         .writer(stockRankScoreWriter)
+        .build();
+  }
+
+  @Bean
+  public Step stockEpsStep() {
+    return new StepBuilder("stockEpsStep", jobRepository)
+        .<Stock, Stock>chunk(CHUNK_SIZE, transactionManager)
+        .reader(stockItemReader())
+        .processor(stockEpsItemProcessor)
+        .writer(stockEpsItemWriter)
+        .build();
+  }
+
+  @Bean
+  public Step stockRsStep() {
+    return new StepBuilder("stockRsStep", jobRepository)
+        .tasklet(stockRsTasklet, transactionManager)
+        .build();
+  }
+
+  @Bean
+  public Step stockMaStep() {
+    return new StepBuilder("stockMaStep", jobRepository)
+        .<Stock, Stock>chunk(CHUNK_SIZE, transactionManager)
+        .reader(stockItemReader())
+        .processor(stockMaItemProcessor)
+        .writer(stockMaItemWriter)
         .build();
   }
 }
