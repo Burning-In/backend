@@ -22,6 +22,11 @@ ls-investment:
   secret-key: ${LS_SECRET_KEY:1111}
   auth-token: ${LS_AUTH_TOKEN:1111}
 
+kis-investment:
+  app-key: ${KS_APP_KEY:1111}
+  app-secret: ${KS_SECRET_KEY:1111}
+  auth-token: ${KS_OAUTH:1111}
+
 management:
   health:
     defaults:
