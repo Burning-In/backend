@@ -10,4 +10,6 @@ public interface StockEpsRepository {
   Optional<StockEps> findOneYearAgo(Stock stock, YearMonth date);
 
   List<StockEps> saveAll(List<StockEps> stockEps);
+
+  List<StockEps> findRecentByStock(Stock stock, int limit);
 }

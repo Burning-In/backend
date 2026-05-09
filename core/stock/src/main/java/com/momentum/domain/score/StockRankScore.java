@@ -2,10 +2,14 @@ package com.momentum.domain.score;
 
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stockcandle.StockDailyCandle;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,23 +19,32 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockRankScore extends BaseEntity {
 
-  private BigDecimal momentum; // 12개월 모멘텀 = (현재가 - 12개월전가) / 12개월전가
+  @Embedded
+  @AttributeOverride(name = "value", column = @Column(name = "momentum"))
+  private Momentum momentum;
 
-  private BigDecimal fip;      // FIP = Sign(12개월 수익률) × [(하락일수 / 252) - (상승일수 / 252)]
+  @Embedded
+  private FipScore fipScore;
 
-  private LocalDate baseDate; // 계산 기준일 (당일)
+  private LocalDate baseDate;
 
   @ManyToOne
   private Stock stock;
 
-  private StockRankScore(BigDecimal momentum, BigDecimal fip, LocalDate baseDate, Stock stock) {
+  private StockRankScore(Momentum momentum, FipScore fipScore, LocalDate baseDate, Stock stock) {
     this.momentum = momentum;
-    this.fip = fip;
+    this.fipScore = fipScore;
     this.baseDate = baseDate;
     this.stock = stock;
   }
 
-  public static StockRankScore create(BigDecimal momentum, BigDecimal fip, LocalDate baseDate, Stock stock) {
-    return new StockRankScore(momentum, fip, baseDate, stock);
+  public static StockRankScore create(List<StockDailyCandle> candles, LocalDate baseDate, Stock stock) {
+    Momentum momentum = Momentum.calculate(candles);
+    FipScore fipScore = FipScore.calculate(momentum, candles);
+    return new StockRankScore(momentum, fipScore, baseDate, stock);
+  }
+
+  public static StockRankScore create(Momentum momentum, FipScore fipScore, LocalDate baseDate, Stock stock) {
+    return new StockRankScore(momentum, fipScore, baseDate, stock);
   }
 }

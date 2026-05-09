@@ -36,4 +36,16 @@ public class StockEpsRepositoryImpl implements StockEpsRepository {
   public List<StockEps> saveAll(List<StockEps> stockEps) {
     return stockJpaEpsRepository.saveAll(stockEps);
   }
+
+  @Override
+  public List<StockEps> findRecentByStock(Stock stock, int limit) {
+    return jpaQueryFactory.selectFrom(stockEps)
+        .where(
+            stockEps.deletedAt.isNull(),
+            stockEps.stock.eq(stock)
+        )
+        .orderBy(stockEps.quarterlyDate.desc())
+        .limit(limit)
+        .fetch();
+  }
 }
