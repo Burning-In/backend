@@ -67,7 +67,7 @@ public class StockPricePoint extends BaseEntity implements Comparable<StockPrice
   }
 
   public void assignBase(StockBase stockBase) {
-    if (stockBase == null || this.stockBase.equals(stockBase)) {
+    if (Objects.equals(this.stockBase, stockBase)) {
       return;
     }
     this.stockBase = stockBase;
