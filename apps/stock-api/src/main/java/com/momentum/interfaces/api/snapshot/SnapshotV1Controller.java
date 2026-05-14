@@ -1,18 +1,19 @@
 package com.momentum.interfaces.api.snapshot;
 
+import com.momentum.domain.stock.StockRegime;
 import com.momentum.interfaces.api.ApiResponse;
-import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.CompletedDetailResponse;
-import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.OngoingDetailResponse;
-import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCompleteRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateResponse;
+import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotUpdateRequest;
+import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotDetailResponse;
+import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotJudgment;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotListResponse;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,20 +33,20 @@ public class SnapshotV1Controller implements SnapshotV1ApiSpec {
     public ApiResponse<SnapshotListResponse> getSnapshotList(
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-        @RequestParam(defaultValue = "true") boolean includeOngoing,
-        @RequestParam(defaultValue = "true") boolean includeCompleted,
-        @RequestParam(defaultValue = "false") boolean breakoutStart,
-        @RequestParam(defaultValue = "false") boolean breakoutReady,
-        @RequestParam(defaultValue = "false") boolean breakoutFailed,
-        @RequestParam(defaultValue = "false") boolean downsideBreak,
-        @RequestParam(defaultValue = "false") boolean undetermined,
-        @RequestParam(defaultValue = "false") boolean momentum,
-        @RequestParam(defaultValue = "false") boolean fip,
-        @RequestParam(defaultValue = "false") boolean movingAverage,
-        @RequestParam(defaultValue = "false") boolean volume,
-        @RequestParam(defaultValue = "false") boolean eps,
-        @RequestParam(defaultValue = "false") boolean rs,
-        @RequestParam(defaultValue = "RECENT") String sort
+        @RequestParam(required = false) List<SnapshotJudgment> judgments,
+        @RequestParam(required = false) List<StockRegime> regimes,
+        @RequestParam(required = false) String stockName
+    ) {
+        // TODO: SnapshotFacade 연결
+        return ApiResponse.success(null);
+    }
+
+    // ===================== Snapshot Detail =====================
+
+    @GetMapping("/{snapshotId}")
+    @Override
+    public ApiResponse<SnapshotDetailResponse> getSnapshotDetail(
+        @PathVariable Long snapshotId
     ) {
         // TODO: SnapshotFacade 연결
         return ApiResponse.success(null);
@@ -62,46 +63,14 @@ public class SnapshotV1Controller implements SnapshotV1ApiSpec {
         return ApiResponse.success(null);
     }
 
-    @PatchMapping("/{snapshotId}/complete")
+    @PatchMapping("/{snapshotId}")
     @Override
-    public ApiResponse<Void> completeSnapshot(
+    public ApiResponse<Void> updateSnapshot(
         @PathVariable Long snapshotId,
-        @RequestBody SnapshotCompleteRequest request
+        @RequestBody SnapshotUpdateRequest request
     ) {
         // TODO: SnapshotFacade 연결
         return ApiResponse.success(null);
     }
 
-    // ===================== Snapshot Ongoing Detail Page =====================
-
-    @GetMapping("/{snapshotId}/ongoing")
-    @Override
-    public ApiResponse<OngoingDetailResponse> getOngoingDetail(
-        @PathVariable Long snapshotId
-    ) {
-        // TODO: SnapshotFacade 연결
-        return ApiResponse.success(null);
-    }
-
-    // ===================== Snapshot Completed Detail Page =====================
-
-    @GetMapping("/{snapshotId}/completed")
-    @Override
-    public ApiResponse<CompletedDetailResponse> getCompletedDetail(
-        @PathVariable Long snapshotId
-    ) {
-        // TODO: SnapshotFacade 연결
-        return ApiResponse.success(null);
-    }
-
-    // ===================== 공통 =====================
-
-    @DeleteMapping("/{snapshotId}")
-    @Override
-    public ApiResponse<Void> deleteSnapshot(
-        @PathVariable Long snapshotId
-    ) {
-        // TODO: SnapshotFacade 연결
-        return ApiResponse.success(null);
-    }
 }
