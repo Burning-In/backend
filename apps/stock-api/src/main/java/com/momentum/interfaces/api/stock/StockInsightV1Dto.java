@@ -26,7 +26,17 @@ public class StockInsightV1Dto {
       Long ma50,
       Long ma150,
       Long ma200,
-      boolean isAligned
+      boolean isAboveMa50,
+      boolean isMa50AboveMa150,
+      boolean isMa150AboveMa200
+  ) {
+
+  }
+
+  // ===================== Base Stage (베이스 단계) =====================
+
+  public record BaseStageResponse(
+      Long stageLevel
   ) {
 
   }

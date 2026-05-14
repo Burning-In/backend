@@ -1,6 +1,7 @@
 package com.momentum.interfaces.api.stock;
 
 import com.momentum.interfaces.api.ApiResponse;
+import com.momentum.interfaces.api.stock.StockInsightV1Dto.BaseStageResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.EpsResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.FrogInPanResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.MomentumResponse;
@@ -17,17 +18,32 @@ import java.time.LocalDateTime;
 public interface StockInsightV1ApiSpec {
 
   @Operation(
+      summary = "베이스 단계 조회",
+      description = """
+          현재 종목의 베이스 단계(stageLevel)를 조회합니다. 베이스가 없으면 stageLevel은 null입니다.
+
+          - 1~2단계: "초기 상승 흐름이 예상됩니다." | subDescription: "초기 상승 구간, 매수 적합"
+          - 3단계 이상: "강한 시세 분출이 예상됩니다." | subDescription: "시세 분출 구간, 매도 준비 필요"
+          - 베이스 없음(null): "현재 베이스가 형성되지 않았습니다." | subDescription: null
+          """
+  )
+  ApiResponse<BaseStageResponse> getBaseStage(
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "조회 시점") LocalDateTime at
+  );
+
+  @Operation(
       summary = "레짐 조회",
       description = """
           현재 종목의 레짐 및 지지선/저항선 정보를 조회합니다. 공통 수치: 지지선, 저항선, 현재가(당일 가격).
 
           레짐별 코멘트 및 수치 기준:
           - 돌파시작: "베이스의 저항선을 뚫고 상승하기 시작한 상태입니다." | 오늘가격 > 저항선 > 지지선 | 저항선 대비 오늘가격(+)
-          - 돌파준비(저항선근접): "베이스 내에서 저항선에 근접하며 돌파를 준비 중인 상태입니다." | 저항선 > 오늘가격 > 지지선 | 저항선 대비 오늘가격(-)
+          - 돌파준비(저항선근접): "베이스 내에서 돌파 준비 중인 상태입니다." | 저항선 > 오늘가격 > 지지선 | 저항선 대비 오늘가격(-)
           - 돌파준비(VCP): "변동성이 축소되며 돌파를 준비 중인 상태입니다." | 저항선 > 오늘가격 > 지지선 | 저항선 대비 오늘가격(-)
           - 돌파실패: "저항선 돌파에 실패하고 베이스 내에서 횡보 중인 상태입니다." | 저항선 > 오늘가격 > 지지선 | 저항선 대비 오늘가격(-)
           - 하방이탈: "베이스의 지지선 아래로 이탈한 상태입니다." | 저항선 > 지지선 > 오늘가격 | 지지선 대비 오늘가격(-)
-          - 방향미정: "아직 베이스가 형성되지 않아 방향을 판단하기 어려운 상태입니다." | 수치 null
+          - 방향미정: "아직 베이스가 형성되지 않아 방향을 판단하기 어려운 상태입니다." | 수치 : null
           """
   )
   ApiResponse<StockRegimeResponse> getRegime(

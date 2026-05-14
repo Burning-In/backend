@@ -34,9 +34,13 @@ public class MovingAverageInsightService {
     Long ma150 = maMap.get(StockMovingAveragePeriod.MA_150);
     Long ma200 = maMap.get(StockMovingAveragePeriod.MA_200);
 
-    boolean isAligned = ma50 != null && ma150 != null && ma200 != null
-        && currentPrice > ma50 && ma50 > ma150 && ma150 > ma200;
+    boolean isAboveMa50 = ma50 != null && currentPrice > ma50;
+    boolean isMa50AboveMa150 = ma50 != null && ma150 != null && ma50 > ma150;
+    boolean isMa150AboveMa200 = ma150 != null && ma200 != null && ma150 > ma200;
 
-    return new MovingAverageResponse(currentPrice, ma50, ma150, ma200, isAligned);
+    return new MovingAverageResponse(
+        currentPrice, ma50, ma150, ma200,
+        isAboveMa50, isMa50AboveMa150, isMa150AboveMa200
+    );
   }
 }
