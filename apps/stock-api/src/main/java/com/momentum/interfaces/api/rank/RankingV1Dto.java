@@ -11,11 +11,10 @@ public class RankingV1Dto {
         List<BreakoutStartItem> stocks
     ) {
         public record BreakoutStartItem(
-            String stockCode,
             String stockName,
-            BigDecimal resistancePrice,
             BigDecimal currentPrice,
-            BigDecimal changeRateSinceBreakout
+            BigDecimal oneYearMomentum,
+            BigDecimal fipScore
         ) {}
     }
 
@@ -25,12 +24,10 @@ public class RankingV1Dto {
         List<BreakoutReadyItem> stocks
     ) {
         public record BreakoutReadyItem(
-            String stockCode,
             String stockName,
-            BigDecimal supportPrice,
-            BigDecimal resistancePrice,
             BigDecimal currentPrice,
-            BigDecimal changeRateToResistance
+            BigDecimal oneYearMomentum,
+            BigDecimal fipScore
         ) {}
     }
 
@@ -40,11 +37,10 @@ public class RankingV1Dto {
         List<BreakoutFailedItem> stocks
     ) {
         public record BreakoutFailedItem(
-            String stockCode,
             String stockName,
-            BigDecimal resistancePrice,
             BigDecimal currentPrice,
-            BigDecimal changeRateSinceBreakoutFailure
+            BigDecimal oneYearMomentum,
+            BigDecimal fipScore
         ) {}
     }
 }

@@ -11,11 +11,10 @@ public class RealtimeRankingV1Dto {
         List<RealtimeBreakoutStartItem> stocks
     ) {
         public record RealtimeBreakoutStartItem(
-            String stockCode,
             String stockName,
-            BigDecimal resistancePrice,
             BigDecimal currentPrice,
-            BigDecimal changeRateSinceBreakout
+            BigDecimal oneYearMomentum,
+            BigDecimal fipScore
         ) {}
     }
 
@@ -25,12 +24,10 @@ public class RealtimeRankingV1Dto {
         List<RealtimeBreakoutReadyItem> stocks
     ) {
         public record RealtimeBreakoutReadyItem(
-            String stockCode,
             String stockName,
-            BigDecimal supportPrice,
-            BigDecimal resistancePrice,
             BigDecimal currentPrice,
-            BigDecimal changeRateToResistance
+            BigDecimal oneYearMomentum,
+            BigDecimal fipScore
         ) {}
     }
 
@@ -40,11 +37,10 @@ public class RealtimeRankingV1Dto {
         List<RealtimeBreakoutFailedItem> stocks
     ) {
         public record RealtimeBreakoutFailedItem(
-            String stockCode,
             String stockName,
-            BigDecimal resistancePrice,
             BigDecimal currentPrice,
-            BigDecimal changeRateSinceBreakoutFailure
+            BigDecimal oneYearMomentum,
+            BigDecimal fipScore
         ) {}
     }
 }

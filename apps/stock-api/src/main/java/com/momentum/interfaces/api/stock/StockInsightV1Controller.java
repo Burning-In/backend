@@ -10,6 +10,7 @@ import com.momentum.application.insight.VolumeInsightService;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.interfaces.api.ApiResponse;
+import com.momentum.interfaces.api.stock.StockInsightV1Dto.BaseStageResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.EpsResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.FrogInPanResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.MomentumResponse;
@@ -39,6 +40,15 @@ public class StockInsightV1Controller implements StockInsightV1ApiSpec {
   private final VolumeInsightService volumeInsightService;
   private final RsInsightService rsInsightService;
   private final EpsInsightService epsInsightService;
+
+  @GetMapping("/base-stage")
+  @Override
+  public ApiResponse<BaseStageResponse> getBaseStage(
+      @PathVariable String stockCode,
+      @RequestParam LocalDateTime at
+  ) {
+    return ApiResponse.success(null);
+  }
 
   @GetMapping("/regime")
   @Override

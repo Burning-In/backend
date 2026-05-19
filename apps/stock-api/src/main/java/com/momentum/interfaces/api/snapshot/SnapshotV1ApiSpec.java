@@ -1,16 +1,18 @@
 package com.momentum.interfaces.api.snapshot;
 
+import com.momentum.domain.stock.StockRegime;
 import com.momentum.interfaces.api.ApiResponse;
-import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.CompletedDetailResponse;
-import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.OngoingDetailResponse;
-import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCompleteRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateResponse;
+import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotUpdateRequest;
+import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotDetailResponse;
+import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotJudgment;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
+import java.util.List;
 
 @Tag(name = "Snapshot V1 API", description = "스냅샷 관련 API 입니다.")
 public interface SnapshotV1ApiSpec {
@@ -20,80 +22,48 @@ public interface SnapshotV1ApiSpec {
     @Operation(
         summary = "스냅샷 목록 조회",
         description = """
-            기간/진행도/인사이트/정렬 필터를 적용하여 스냅샷 목록을 조회합니다.
+            기간/판단/주식 레짐/종목명 필터를 적용하여 스냅샷 목록을 조회합니다.
 
-            정렬 기준 (sort):
-            - RECENT: 최근 순
-            - PERIOD: 기간 순 (기간순은 회의 후 수정)
-            - PROFIT_RATE: 수익률 순
+            - 기간: startDate ~ endDate (년/월 단위, 미입력 시 전체)
+            - 판단(judgments): BUY(매수), SELL(매도), WATCH(관망) — 복수 선택 가능, 미입력 시 전체
+            - 주식 레짐(regimes): BREAKOUT_START(돌파시작), BREAKOUT_READY(돌파준비), BREAKOUT_FAILED(돌파실패), DOWNSIDE_BREAK(하방이탈), UNDETERMINED(방향미정) — 복수 선택 가능, 미입력 시 전체
+            - 종목명(stockName): 부분 일치 검색, 미입력 시 전체
             """
     )
     ApiResponse<SnapshotListResponse> getSnapshotList(
-        @Schema(description = "조회 시작일") LocalDate startDate,
-        @Schema(description = "조회 종료일") LocalDate endDate,
-        @Schema(description = "진행 중 포함 여부") boolean includeOngoing,
-        @Schema(description = "완료 포함 여부") boolean includeCompleted,
-        @Schema(description = "인사이트 - 돌파시작") boolean breakoutStart,
-        @Schema(description = "인사이트 - 돌파준비") boolean breakoutReady,
-        @Schema(description = "인사이트 - 돌파실패") boolean breakoutFailed,
-        @Schema(description = "인사이트 - 하방이탈") boolean downsideBreak,
-        @Schema(description = "인사이트 - 방향미정") boolean undetermined,
-        @Schema(description = "인사이트 - 1년 모멘텀") boolean momentum,
-        @Schema(description = "인사이트 - 흐름 안정도(FIP)") boolean fip,
-        @Schema(description = "인사이트 - 이동평균선") boolean movingAverage,
-        @Schema(description = "인사이트 - 거래량") boolean volume,
-        @Schema(description = "인사이트 - EPS") boolean eps,
-        @Schema(description = "인사이트 - RS") boolean rs,
-        @Schema(description = "정렬 기준 (RECENT / PERIOD / PROFIT_RATE)") String sort
+        @Schema(description = "조회 시작 날짜 (년/월)") LocalDate startDate,
+        @Schema(description = "조회 종료 날짜 (년/월)") LocalDate endDate,
+        @Schema(description = "판단 필터 (BUY, SELL, WATCH)") List<SnapshotJudgment> judgments,
+        @Schema(description = "주식 레짐 필터 (BREAKOUT_START, BREAKOUT_READY, BREAKOUT_FAILED, DOWNSIDE_BREAK, UNDETERMINED)") List<StockRegime> regimes,
+        @Schema(description = "종목명 검색어") String stockName
     );
 
-    // 스냅샷 crud는 회의 후 진행, 세부조회도 해야함
+    // ===================== Snapshot Detail =====================
+
+    @Operation(
+        summary = "스냅샷 상세 조회",
+        description = "스냅샷의 참고한 스냅샷과 기록 시점(recordedAt)과 회고(retrospective)를 조회합니다. 지표 정보는 해당 시점의 insight API를 별도 호출하여 조회합니다."
+    )
+    ApiResponse<SnapshotDetailResponse> getSnapshotDetail(
+        @Schema(description = "스냅샷 ID") Long snapshotId
+    );
+
     // ===================== Snapshot Editor Overlay =====================
 
     @Operation(
-        summary = "스냅샷 생성 (시작)",
-        description = "차트 설정 및 메모를 포함하여 시작 스냅샷을 생성합니다."
+        summary = "스냅샷 생성",
+        description = "차트 설정 및 회고를 포함하여 시작 스냅샷을 생성합니다."
     )
     ApiResponse<SnapshotCreateResponse> createSnapshot(
         SnapshotCreateRequest request
     );
 
     @Operation(
-        summary = "스냅샷 완료 처리 (완)",
-        description = "진행중인 스냅샷을 완료 처리합니다."
+        summary = "스냅샷 수정",
+        description = "판단(judgment), 참고 스냅샷 목록(referenceSnapshotIds), 회고(retrospective)를 수정합니다."
     )
-    ApiResponse<Void> completeSnapshot(
+    ApiResponse<Void> updateSnapshot(
         @Schema(description = "스냅샷 ID") Long snapshotId,
-        SnapshotCompleteRequest request
-    );
-
-    // ===================== Snapshot Ongoing Detail Page =====================
-
-    @Operation(
-        summary = "진행중 스냅샷 상세 조회",
-        description = "진행중 스냅샷의 시작 시점 기록과 현재 시점 기록을 조회합니다."
-    )
-    ApiResponse<OngoingDetailResponse> getOngoingDetail(
-        @Schema(description = "스냅샷 ID") Long snapshotId
-    );
-
-    // ===================== Snapshot Completed Detail Page =====================
-
-    @Operation(
-        summary = "완료 스냅샷 상세 조회",
-        description = "완료 스냅샷의 요약 결과, 시작 기록, 종료 기록을 조회합니다."
-    )
-    ApiResponse<CompletedDetailResponse> getCompletedDetail(
-        @Schema(description = "스냅샷 ID") Long snapshotId
-    );
-
-    // ===================== 공통 =====================
-
-    @Operation(
-        summary = "스냅샷 삭제",
-        description = "진행중 또는 완료 스냅샷을 삭제합니다."
-    )
-    ApiResponse<Void> deleteSnapshot(
-        @Schema(description = "스냅샷 ID") Long snapshotId
+        SnapshotUpdateRequest request
     );
 }
