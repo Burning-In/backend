@@ -28,7 +28,7 @@ class StockEpsServiceTest {
 
   @Test
   void YoY_데이터가_없으면_null로_저장된다() {
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
     List<StockEpsInfo> infos = List.of(
         StockEpsInfo.of(stock, "202412", "1200.0")
     );
@@ -41,7 +41,7 @@ class StockEpsServiceTest {
 
   @Test
   void YoY_데이터가_있으면_계산해서_저장된다() {
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
     stockEpsRepository.saveAll(List.of(
         new StockEps(1000.0, YearMonth.of(2023, 12), null, stock)
     ));
@@ -57,7 +57,7 @@ class StockEpsServiceTest {
 
   @Test
   void 여러_분기_EPS를_한번에_저장한다() {
-    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
     List<StockEpsInfo> infos = List.of(
         StockEpsInfo.of(stock, "202409", "1100.0"),
         StockEpsInfo.of(stock, "202412", "1200.0")

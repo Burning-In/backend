@@ -36,7 +36,7 @@ class KOSPIRelativeStrengthServiceTest {
   void create_withSingleStock_returnsRatingOne() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stock = stockRepository.save(new Stock("단일주식", "111111", StockRegime.UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("단일주식", "111111", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     rsTestSupport.setupKospi(today, 2500L);
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
@@ -53,9 +53,9 @@ class KOSPIRelativeStrengthServiceTest {
   void create_withMultipleStocks_assignsRatingsBetweenOneAndNinetyNine() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stockA = stockRepository.save(new Stock("주식A", "222222", StockRegime.UNDETERMINED, StockTrend.UPTREND));
-    Stock stockB = stockRepository.save(new Stock("주식B", "333333", StockRegime.UNDETERMINED, StockTrend.UPTREND));
-    Stock stockC = stockRepository.save(new Stock("주식C", "444444", StockRegime.UNDETERMINED, StockTrend.UPTREND));
+    Stock stockA = stockRepository.save(new Stock("주식A", "222222", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stockB = stockRepository.save(new Stock("주식B", "333333", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stockC = stockRepository.save(new Stock("주식C", "444444", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     rsTestSupport.setupKospi(today, 2500L);
     rsTestSupport.setupCandles(stockA, today, 8_000L, 10_000L, 10_000L, 10_000L, 10_000L);
@@ -74,7 +74,7 @@ class KOSPIRelativeStrengthServiceTest {
   void create_whenTodayKospiMissing_throwsException() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stock = stockRepository.save(new Stock("코스피없음", "555555", StockRegime.UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(new Stock("코스피없음", "555555", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     kospiRepository.save(new KOSPI(2500L, today.minusDays(1)));
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
@@ -89,8 +89,8 @@ class KOSPIRelativeStrengthServiceTest {
   void create_withTwoStocks_assignsCorrectRatings() {
     // given
     LocalDate today = LocalDate.now();
-    Stock weakStock = stockRepository.save(new Stock("약한주식", "666666", StockRegime.UNDETERMINED, StockTrend.UPTREND));
-    Stock strongStock = stockRepository.save(new Stock("강한주식", "777777", StockRegime.UNDETERMINED, StockTrend.UPTREND));
+    Stock weakStock = stockRepository.save(new Stock("약한주식", "666666", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock strongStock = stockRepository.save(new Stock("강한주식", "777777", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     rsTestSupport.setupKospi(today, 2500L);
     rsTestSupport.setupCandles(weakStock, today, 8_000L, 10_000L, 10_000L, 10_000L, 10_000L);

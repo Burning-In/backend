@@ -26,12 +26,12 @@ public class StockDailyRegimeService {
     Optional<StockBase> currentBaseOpt = stockBaseRepository.findCurrentBaseWithLines(stock);
     Optional<StockPricePoint> recentPricePointOpt = stockPricePointRepository.findLatestByStock(stock);
     if (currentBaseOpt.isEmpty() || recentPricePointOpt.isEmpty()) {
-      stock.update(StockRegime.UNDETERMINED);
+      stock.update(StockRegime.DIRECTION_UNDETERMINED);
       stockRepository.save(stock);
       return;
     }
 
-    StockRegime newRegime = StockRegime.determineRegime(stock,
+    StockRegime newRegime = StockRegime.determineDailyRegime(stock,
         stockDailyCandle.getClosePrice(),
         recentPricePointOpt.get(), currentBaseOpt.get(), BREAKOUT_THRESHOLD, LINE_APPROACH_THRESHOLD);
     stock.update(newRegime);

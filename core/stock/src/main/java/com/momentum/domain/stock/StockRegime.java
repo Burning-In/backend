@@ -4,13 +4,39 @@ import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 
 public enum StockRegime {
-  DOWNSIDE_BREAK,
-  BREAKOUT_FAILED,
-  BREAKOUT_START,
+  BREAKOUT_SUCCESS,
   BREAKOUT_READY,
-  UNDETERMINED;
+  BREAKOUT_FAILED,
+  DOWNSIDE_BREAK,
+  DIRECTION_UNDETERMINED, // 방향 미정 (확정된 상태)
+  UNKNOWN; // 실시간 판단 보류 — 기존 레짐 유지
 
-  public static StockRegime determineRegime(Stock stock, long closePrice, StockPricePoint recentPricePoint,
+  public static StockRegime decideRealTimeStockRegime(long currentPrice, StockBase currentStockBase, Stock stock,
+      double breakOutThreshold, long lastPricePointPrice) {
+    // # 하방이탈 : 현재가 < 지지선
+    if (currentStockBase.getLowestSupportLine() != null
+        && currentStockBase.getLowestSupportLine().getPrice() > currentPrice) {
+      return DOWNSIDE_BREAK;
+    }
+
+    // # 돌파실패
+    if (stock.getStockRegime().equals(BREAKOUT_SUCCESS) && lastPricePointPrice > currentPrice) {
+      return BREAKOUT_FAILED;
+    }
+
+    // # 돌파성공 & 돌파실패
+    long resistanceUpperBound = currentStockBase.getHighestResistanceLine()
+        .getUpperBound(breakOutThreshold);
+    if (currentStockBase.isVcp()) {
+      if (currentPrice > resistanceUpperBound) {
+        return BREAKOUT_SUCCESS;
+      }
+      return BREAKOUT_READY;
+    }
+    return UNKNOWN;
+  }
+
+  public static StockRegime determineDailyRegime(Stock stock, long closePrice, StockPricePoint recentPricePoint,
       StockBase currentBase, double breakoutThreshold, double lineApproachThreshold) {
     long resistancePrice = currentBase.getHighestResistanceLine().getPrice();
     long supportPrice = currentBase.getLowestSupportLine().getPrice();
@@ -23,12 +49,12 @@ public enum StockRegime {
       return BREAKOUT_FAILED;
     }
     if (isBreakoutStart(stock, closePrice, resistancePrice, recentPointPrice, breakoutThreshold)) {
-      return BREAKOUT_START;
+      return BREAKOUT_SUCCESS;
     }
     if (isBreakoutReady(stock, closePrice, resistancePrice, recentPointPrice, currentBase, lineApproachThreshold)) {
       return BREAKOUT_READY;
     }
-    return UNDETERMINED;
+    return DIRECTION_UNDETERMINED;
   }
 
   private static boolean isDownsideBreak(long closePrice, long supportPrice, long recentPointPrice) {

@@ -36,14 +36,14 @@ class RegimeInsightServiceTest {
   private static final LocalDate TODAY = LocalDate.now();
 
   @Test
-  @DisplayName("베이스 없으면 UNDETERMINED 반환")
+  @DisplayName("베이스 없으면 DIRECTION_UNDETERMINED 반환")
   void returnsUndeterminedWhenNoBase() {
-    Stock stock = saveStock("005930", StockRegime.UNDETERMINED, StockTrend.UPTREND);
+    Stock stock = saveStock("005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 10000L);
 
     StockRegimeResponse result = regimeInsightService.query(stock, TODAY);
 
-    assertThat(result.regime()).isEqualTo(StockRegime.UNDETERMINED);
+    assertThat(result.regime()).isEqualTo(StockRegime.DIRECTION_UNDETERMINED);
     assertThat(result.currentPrice()).isEqualTo(10000L);
     assertThat(result.supportLine()).isNull();
     assertThat(result.resistanceLine()).isNull();
@@ -53,13 +53,13 @@ class RegimeInsightServiceTest {
   @Test
   @DisplayName("BREAKOUT_START 레짐이면 저항선 대비 변동률 반환")
   void returnsChangeRateFromResistanceWhenBreakoutStart() {
-    Stock stock = saveStock("000001", StockRegime.BREAKOUT_START, StockTrend.UPTREND);
+    Stock stock = saveStock("000001", StockRegime.BREAKOUT_SUCCESS, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 11000L);
     saveBase(stock, 10000L, 8000L);
 
     StockRegimeResponse result = regimeInsightService.query(stock, TODAY);
 
-    assertThat(result.regime()).isEqualTo(StockRegime.BREAKOUT_START);
+    assertThat(result.regime()).isEqualTo(StockRegime.BREAKOUT_SUCCESS);
     assertThat(result.resistanceLine()).isEqualTo(10000L);
     assertThat(result.supportLine()).isEqualTo(8000L);
     // (11000 - 10000) / 10000 * 100 = 10.0

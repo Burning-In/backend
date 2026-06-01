@@ -153,6 +153,10 @@ public class StockBase extends BaseEntity {
     return volatility >= BASE_VOLATILITY_THRESHOLD ? StockBaseKind.BASE : StockBaseKind.PULLBACK;
   }
 
+  public boolean isVcp() {
+    return vcp.isVcp();
+  }
+
   public long getResistanceUpperBound(double threshold) {
     return highestResistanceLine.getUpperBound(threshold);
   }
