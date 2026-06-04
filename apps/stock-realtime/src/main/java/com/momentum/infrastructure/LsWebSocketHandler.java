@@ -2,6 +2,7 @@ package com.momentum.infrastructure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.momentum.domain.stock.StockCode;
+import com.momentum.application.StockRealtimeFacade;
 import com.momentum.domain.stocktick.StockRealtimeRegimeService;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class LsWebSocketHandler extends TextWebSocketHandler {
 
   private WebSocketSession currentSession;
   private final StockRealtimeRegimeService stockRealtimeRegimeService;
+  private final StockRealtimeFacade stockRealtimeFacade;
 
 
   @Override
@@ -60,16 +62,12 @@ public class LsWebSocketHandler extends TextWebSocketHandler {
     log.info("LS WS RAW MESSAGE = {}", payload);
     try {
       LsWsResponse response = objectMapper.readValue(payload, LsWsResponse.class);
-      // subscribe ACK 메시지 패스
       if (response.body() == null) {
         return;
       }
       StockTickInfo tickInfo = StockTickInfo.from(response);
-      // 1. sseEmiter로 전달
-
-      // 2. StockRealtimeRegimeFacade로 전달(우선 이것부터)
+      stockRealtimeFacade.broadcast(tickInfo);
       stockRealtimeRegimeService.resolveRealtimeRegime(tickInfo.stockCode(), tickInfo.currentPrice());
-
     } catch (Exception e) {
       log.warn("LS tick parse error payload={}", payload, e);
     }

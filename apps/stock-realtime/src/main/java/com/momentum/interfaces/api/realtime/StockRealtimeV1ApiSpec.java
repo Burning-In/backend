@@ -1,6 +1,6 @@
 package com.momentum.interfaces.api.realtime;
 
-import com.momentum.interfaces.api.realtime.StockRealtimeV1Dto.TickResponse;
+import com.momentum.infrastructure.TickResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
