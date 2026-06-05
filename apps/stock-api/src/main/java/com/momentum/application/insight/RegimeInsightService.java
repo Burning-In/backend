@@ -27,8 +27,8 @@ public class RegimeInsightService {
     long currentPrice = candle.getClosePrice();
 
     Optional<StockBase> baseOpt = stockBaseRepository.findCurrentBaseWithLines(stock);
-    if (baseOpt.isEmpty() || stock.getStockRegime() == StockRegime.UNDETERMINED) {
-      return new StockRegimeResponse(StockRegime.UNDETERMINED, currentPrice, null, null, null);
+    if (baseOpt.isEmpty() || stock.getStockRegime() == StockRegime.DIRECTION_UNDETERMINED) {
+      return new StockRegimeResponse(StockRegime.DIRECTION_UNDETERMINED, currentPrice, null, null, null);
     }
 
     StockBase base = baseOpt.get();

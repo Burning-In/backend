@@ -29,7 +29,7 @@ class StockCandleServiceTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = new Stock("삼성전자", "005930", StockRegime.UNDETERMINED, StockTrend.UPTREND);
+    Stock stock = new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND);
     stockRepository.save(stock);
     List<StockCandleDto> candleResponses = List.of(
         new StockCandleDto("20240101", 100L, 110L, 90L, 105L, 100, 100, "1"),

@@ -36,7 +36,7 @@ class MovingAverageInsightServiceTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.UNDETERMINED, StockTrend.UPTREND));
+    stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
     saveCandle(10000L);
   }
 
@@ -47,7 +47,9 @@ class MovingAverageInsightServiceTest {
 
     MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
 
-    assertThat(result.isAligned()).isTrue();
+    assertThat(result.isAboveMa50()).isTrue();
+    assertThat(result.isMa50AboveMa150()).isTrue();
+    assertThat(result.isMa150AboveMa200()).isTrue();
     assertThat(result.currentPrice()).isEqualTo(10000L);
     assertThat(result.ma50()).isEqualTo(9000L);
     assertThat(result.ma150()).isEqualTo(8000L);
@@ -61,7 +63,7 @@ class MovingAverageInsightServiceTest {
 
     MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
 
-    assertThat(result.isAligned()).isFalse();
+    assertThat(result.isAboveMa50()).isFalse();
   }
 
   @Test
@@ -71,7 +73,7 @@ class MovingAverageInsightServiceTest {
 
     MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
 
-    assertThat(result.isAligned()).isFalse();
+    assertThat(result.isMa50AboveMa150()).isFalse();
   }
 
   @Test
@@ -81,7 +83,7 @@ class MovingAverageInsightServiceTest {
 
     MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
 
-    assertThat(result.isAligned()).isFalse();
+    assertThat(result.isMa150AboveMa200()).isFalse();
   }
 
   @Test
@@ -89,7 +91,9 @@ class MovingAverageInsightServiceTest {
   void isAlignedFalseWhenNoMaData() {
     MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
 
-    assertThat(result.isAligned()).isFalse();
+    assertThat(result.isAboveMa50()).isFalse();
+    assertThat(result.isMa50AboveMa150()).isFalse();
+    assertThat(result.isMa150AboveMa200()).isFalse();
     assertThat(result.ma50()).isNull();
     assertThat(result.ma150()).isNull();
     assertThat(result.ma200()).isNull();

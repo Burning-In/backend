@@ -21,6 +21,7 @@ public class Momentum {
     this.value = value;
   }
 
+  // 수정필요
   public static Momentum calculate(List<StockDailyCandle> candles) {
     long currentPrice = candles.get(0).getClosePrice();
     long pastPrice = candles.get(candles.size() - 1).getClosePrice();
