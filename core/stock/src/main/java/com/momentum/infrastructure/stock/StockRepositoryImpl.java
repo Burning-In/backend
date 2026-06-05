@@ -26,6 +26,11 @@ public class StockRepositoryImpl implements StockRepository {
   }
 
   @Override
+  public Optional<Stock> findById(Long id) {
+    return stockCandleRepository.findById(id);
+  }
+
+  @Override
   public Stock save(Stock stock) {
     return stockCandleRepository.save(stock);
   }

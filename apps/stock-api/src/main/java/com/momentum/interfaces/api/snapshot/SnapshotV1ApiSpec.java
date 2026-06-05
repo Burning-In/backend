@@ -1,17 +1,18 @@
 package com.momentum.interfaces.api.snapshot;
 
+import com.momentum.domain.SnapshotJudgment;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateResponse;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotUpdateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotDetailResponse;
-import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotJudgment;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Tag(name = "Snapshot V1 API", description = "스냅샷 관련 API 입니다.")
@@ -26,15 +27,15 @@ public interface SnapshotV1ApiSpec {
 
             - 기간: startDate ~ endDate (년/월 단위, 미입력 시 전체)
             - 판단(judgments): BUY(매수), SELL(매도), WATCH(관망) — 복수 선택 가능, 미입력 시 전체
-            - 주식 레짐(regimes): BREAKOUT_START(돌파시작), BREAKOUT_READY(돌파준비), BREAKOUT_FAILED(돌파실패), DOWNSIDE_BREAK(하방이탈), DIRECTION_UNDETERMINED(방향미정) — 복수 선택 가능, 미입력 시 전체
+            - 주식 레짐(regimes): BREAKOUT_START(돌파시작), BREAKOUT_READY(돌파준비), BREAKOUT_FAILED(돌파실패), DOWNSIDE_BREAK(하방이탈), UNKNOWN(방향미정) — 복수 선택 가능, 미입력 시 전체
             - 종목명(stockName): 부분 일치 검색, 미입력 시 전체
             """
     )
     ApiResponse<SnapshotListResponse> getSnapshotList(
-        @Schema(description = "조회 시작 날짜 (년/월)") LocalDate startDate,
-        @Schema(description = "조회 종료 날짜 (년/월)") LocalDate endDate,
+        @Schema(description = "조회 시작 날짜 (년/월/분)") LocalDateTime startDate,
+        @Schema(description = "조회 종료 날짜 (년/월/분)") LocalDateTime endDate,
         @Schema(description = "판단 필터 (BUY, SELL, WATCH)") List<SnapshotJudgment> judgments,
-        @Schema(description = "주식 레짐 필터 (BREAKOUT_START, BREAKOUT_READY, BREAKOUT_FAILED, DOWNSIDE_BREAK, DIRECTION_UNDETERMINED)") List<StockRegime> regimes,
+        @Schema(description = "주식 레짐 필터 (BREAKOUT_START, BREAKOUT_READY, BREAKOUT_FAILED, DOWNSIDE_BREAK, UNKNOWN)") List<StockRegime> regimes,
         @Schema(description = "종목명 검색어") String stockName
     );
 
@@ -52,7 +53,7 @@ public interface SnapshotV1ApiSpec {
 
     @Operation(
         summary = "스냅샷 생성",
-        description = "차트 설정 및 회고를 포함하여 시작 스냅샷을 생성합니다."
+        description = "차트 설정 및 회고를 포함하여 스냅샷을 생성합니다."
     )
     ApiResponse<SnapshotCreateResponse> createSnapshot(
         SnapshotCreateRequest request
