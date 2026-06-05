@@ -1,14 +1,15 @@
 package com.momentum.interfaces.api.snapshot;
 
+import com.momentum.application.SnapshotService;
+import com.momentum.domain.SnapshotJudgment;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateResponse;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotUpdateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotDetailResponse;
-import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotJudgment;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotListResponse;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,19 +27,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/snapshots")
 public class SnapshotV1Controller implements SnapshotV1ApiSpec {
 
+    private final SnapshotService snapshotService;
+
     // ===================== Snapshot List Page =====================
 
     @GetMapping
     @Override
     public ApiResponse<SnapshotListResponse> getSnapshotList(
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
         @RequestParam(required = false) List<SnapshotJudgment> judgments,
         @RequestParam(required = false) List<StockRegime> regimes,
         @RequestParam(required = false) String stockName
     ) {
-        // TODO: SnapshotFacade 연결
-        return ApiResponse.success(null);
+        return ApiResponse.success(
+            snapshotService.getSnapShots(startDate, endDate, judgments, regimes, stockName));
     }
 
     // ===================== Snapshot Detail =====================
@@ -48,8 +51,7 @@ public class SnapshotV1Controller implements SnapshotV1ApiSpec {
     public ApiResponse<SnapshotDetailResponse> getSnapshotDetail(
         @PathVariable Long snapshotId
     ) {
-        // TODO: SnapshotFacade 연결
-        return ApiResponse.success(null);
+        return ApiResponse.success(snapshotService.getDetail(snapshotId));
     }
 
     // ===================== Snapshot Editor Overlay =====================
@@ -59,8 +61,7 @@ public class SnapshotV1Controller implements SnapshotV1ApiSpec {
     public ApiResponse<SnapshotCreateResponse> createSnapshot(
         @RequestBody SnapshotCreateRequest request
     ) {
-        // TODO: SnapshotFacade 연결
-        return ApiResponse.success(null);
+        return ApiResponse.success(snapshotService.create(request));
     }
 
     @PatchMapping("/{snapshotId}")
@@ -69,7 +70,7 @@ public class SnapshotV1Controller implements SnapshotV1ApiSpec {
         @PathVariable Long snapshotId,
         @RequestBody SnapshotUpdateRequest request
     ) {
-        // TODO: SnapshotFacade 연결
+        snapshotService.update(snapshotId, request);
         return ApiResponse.success(null);
     }
 
