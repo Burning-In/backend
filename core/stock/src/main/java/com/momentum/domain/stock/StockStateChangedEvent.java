@@ -1,7 +1,4 @@
-package com.momentum.domain.stocktick;
-
-
-import com.momentum.domain.stock.StockRegime;
+package com.momentum.domain.stock;
 
 public record StockStateChangedEvent(
     String stockCode,

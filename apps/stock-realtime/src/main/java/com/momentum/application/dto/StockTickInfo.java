@@ -1,5 +1,7 @@
-package com.momentum.infrastructure;
+package com.momentum.application.dto;
 
+
+import com.momentum.infrastructure.LsWsResponse;
 
 public record StockTickInfo(
     String stockCode,

@@ -27,7 +27,7 @@ class SseEmitterRegistryTest {
   }
 
   @Test
-  @DisplayName("구독자가 없는 종목코드로 broadcast해도 예외가 발생하지 않는다")
+  @DisplayName("구독자가 없는 key로 broadcast해도 예외가 발생하지 않는다")
   void broadcastWithoutSubscriberDoesNothing() {
     assertThatCode(() -> registry.broadcast("005930", "tick", "payload"))
         .doesNotThrowAnyException();
@@ -53,8 +53,8 @@ class SseEmitterRegistryTest {
   }
 
   @Test
-  @DisplayName("구독한 종목코드와 다른 종목코드로 broadcast하면 해당 구독자는 영향을 받지 않는다")
-  void broadcastIsolatesByStockCode() {
+  @DisplayName("구독한 key와 다른 key로 broadcast하면 해당 구독자는 영향을 받지 않는다")
+  void broadcastIsolatesByKey() {
     registry.create("005930");
 
     assertThatCode(() -> registry.broadcast("000660", "tick", "payload"))

@@ -1,7 +1,7 @@
 package com.momentum.application;
 
-import com.momentum.infrastructure.StockTickInfo;
-import com.momentum.infrastructure.TickResponse;
+import com.momentum.application.dto.StockTickInfo;
+import com.momentum.application.dto.TickResponse;
 import com.momentum.infrastructure.sse.SseEmitterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

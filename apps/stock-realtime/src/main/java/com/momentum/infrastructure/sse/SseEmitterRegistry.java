@@ -15,32 +15,32 @@ public class SseEmitterRegistry {
 
   private static final long DEFAULT_TIMEOUT_MILLIS = 60 * 60 * 1000L;
 
-  private final Map<String, List<SseEmitter>> emittersByStockCode = new ConcurrentHashMap<>();
+  private final Map<String, List<SseEmitter>> emittersByKey = new ConcurrentHashMap<>();
 
-  public SseEmitter create(String stockCode) {
+  public SseEmitter create(String key) {
     SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT_MILLIS);
 
     List<SseEmitter> emitters =
-        emittersByStockCode.computeIfAbsent(stockCode, code -> new CopyOnWriteArrayList<>());
+        emittersByKey.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>());
     emitters.add(emitter);
 
-    emitter.onCompletion(() -> remove(stockCode, emitter));
+    emitter.onCompletion(() -> remove(key, emitter));
     emitter.onTimeout(() -> {
-      log.debug("SSE 타임아웃 stockCode={}", stockCode);
+      log.debug("SSE 타임아웃 key={}", key);
       emitter.complete();
     });
     emitter.onError(e -> {
-      log.debug("SSE 에러 stockCode={}", stockCode, e);
-      remove(stockCode, emitter);
+      log.debug("SSE 에러 key={}", key, e);
+      remove(key, emitter);
     });
 
-    log.info("SSE 연결 등록 stockCode={}, 현재 구독자 수={}", stockCode, emitters.size());
+    log.info("SSE 연결 등록 key={}, 현재 구독자 수={}", key, emitters.size());
 
     return emitter;
   }
 
-  public void broadcast(String stockCode, String eventName, Object data) {
-    List<SseEmitter> emitters = emittersByStockCode.get(stockCode);
+  public void broadcast(String key, String eventName, Object data) {
+    List<SseEmitter> emitters = emittersByKey.get(key);
 
     if (emitters == null || emitters.isEmpty()) {
       return;
@@ -52,14 +52,14 @@ public class SseEmitterRegistry {
             .name(eventName)
             .data(data));
       } catch (IOException | IllegalStateException e) {
-        log.debug("SSE 전송 실패로 연결 제거 stockCode={}", stockCode, e);
-        remove(stockCode, emitter);
+        log.debug("SSE 전송 실패로 연결 제거 key={}", key, e);
+        remove(key, emitter);
       }
     }
   }
 
-  private void remove(String stockCode, SseEmitter emitter) {
-    List<SseEmitter> emitters = emittersByStockCode.get(stockCode);
+  private void remove(String key, SseEmitter emitter) {
+    List<SseEmitter> emitters = emittersByKey.get(key);
 
     if (emitters == null) {
       return;
@@ -68,7 +68,7 @@ public class SseEmitterRegistry {
     emitters.remove(emitter);
 
     if (emitters.isEmpty()) {
-      emittersByStockCode.remove(stockCode, emitters);
+      emittersByKey.remove(key, emitters);
     }
   }
 }

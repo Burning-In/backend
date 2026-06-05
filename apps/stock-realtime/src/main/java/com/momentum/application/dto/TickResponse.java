@@ -1,4 +1,4 @@
-package com.momentum.infrastructure;
+package com.momentum.application.dto;
 
 public record TickResponse(
     String stockCode,

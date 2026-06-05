@@ -2,12 +2,11 @@ package com.momentum.interfaces.api.realtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.momentum.application.StockRealtimeFacade;
-import com.momentum.infrastructure.StockTickInfo;
+import com.momentum.application.dto.StockTickInfo;
 import com.momentum.infrastructure.sse.SseEmitterRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

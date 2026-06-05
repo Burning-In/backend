@@ -36,12 +36,9 @@ public class StockRealtimeRegimeService {
     StockPricePoint lastPricePoint = stockPricePointRepository.findLastStockPricePoint(stock)
         .orElseThrow(IllegalStateException::new);
 
-    StockRegime stockRegime = decideRealTimeStockRegime(currentPrice, currentStockBase, stock,
+    StockRegime decided = decideRealTimeStockRegime(currentPrice, currentStockBase, stock,
         BREAKOUT_THRESHOLD_PERCENT, lastPricePoint.getPrice());
-    if (stockRegime.equals(UNKNOWN)) {
-      return;
-    }
-    stock.update(stockRegime);
+    stock.update(decided);
     stockRepository.save(stock);
   }
 }

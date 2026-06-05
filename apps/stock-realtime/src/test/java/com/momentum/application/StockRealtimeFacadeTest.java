@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.momentum.infrastructure.StockTickInfo;
-import com.momentum.infrastructure.TickResponse;
+import com.momentum.application.dto.StockTickInfo;
+import com.momentum.application.dto.TickResponse;
 import com.momentum.infrastructure.sse.SseEmitterRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

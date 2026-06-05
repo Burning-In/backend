@@ -1,6 +1,7 @@
 package com.momentum.infrastructure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.momentum.application.dto.StockTickInfo;
 import com.momentum.domain.stock.StockCode;
 import com.momentum.application.StockRealtimeFacade;
 import com.momentum.domain.stocktick.StockRealtimeRegimeService;

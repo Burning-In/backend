@@ -1,6 +1,8 @@
 package com.momentum.domain.stock;
 
-import com.momentum.domain.BaseEntity;
+import static com.momentum.domain.stock.StockRegime.UNKNOWN;
+
+import com.momentum.domain.AggregateRoot;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Stock extends BaseEntity {
+public class Stock extends AggregateRoot {
 
   private String name;
   private String code; // 수정필요
@@ -24,6 +26,11 @@ public class Stock extends BaseEntity {
   }
 
   public void update(StockRegime stockRegime) {
+    if (this.stockRegime.equals(stockRegime) || stockRegime.equals(UNKNOWN)) {
+      return;
+    }
+    StockRegime from = this.stockRegime;
     this.stockRegime = stockRegime;
+    registerEvent(new StockStateChangedEvent(code, from, stockRegime));
   }
 }
