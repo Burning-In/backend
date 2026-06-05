@@ -41,22 +41,4 @@ public record StockTickInfo(
         body.tradeStrength()
     );
   }
-
-  private static long parseLong(String v) {
-
-    if (v == null || v.isEmpty()) {
-      return 0;
-    }
-
-    return Long.parseLong(v);
-  }
-
-  private static double parseDouble(String v) {
-
-    if (v == null || v.isEmpty()) {
-      return 0.0;
-    }
-
-    return Double.parseDouble(v);
-  }
 }

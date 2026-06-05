@@ -2,7 +2,6 @@ package com.momentum.application.dto.ranking;
 
 import com.momentum.domain.score.StockRankScore;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 
 public record RealtimeBreakoutSuccessItem(
