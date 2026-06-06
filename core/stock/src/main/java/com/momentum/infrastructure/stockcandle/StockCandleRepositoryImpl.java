@@ -83,4 +83,18 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
 
     return Optional.ofNullable(result);
   }
+
+  @Override
+  public List<StockDailyCandle> findByStockAndDateRange(Stock stock, LocalDate from, LocalDate to) {
+    return jpaQueryFactory
+        .selectFrom(stockDailyCandle)
+        .where(
+            stockDailyCandle.stock.id.eq(stock.getId()),
+            stockDailyCandle.deletedAt.isNull(),
+            from == null ? null : stockDailyCandle.tradeDate.goe(from),
+            to == null ? null : stockDailyCandle.tradeDate.loe(to)
+        )
+        .orderBy(stockDailyCandle.tradeDate.asc())
+        .fetch();
+  }
 }

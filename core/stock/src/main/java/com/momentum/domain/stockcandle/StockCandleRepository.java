@@ -18,4 +18,7 @@ public interface StockCandleRepository {
   List<StockDailyCandle> findRecentCandles(Long stockId, LocalDate baseDate, int limit);
 
   Optional<StockDailyCandle> findRecentCandle(Stock stock, LocalDate date);
+
+  /** 종목의 캔들을 tradeDate 오름차순으로 조회한다. from/to가 null이면 해당 경계는 무시한다. */
+  List<StockDailyCandle> findByStockAndDateRange(Stock stock, LocalDate from, LocalDate to);
 }

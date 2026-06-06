@@ -9,6 +9,7 @@ import com.momentum.domain.stock.Stock;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,18 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
         .fetchOne();
 
     return Optional.ofNullable(result);
+  }
+
+  @Override
+  public List<StockBase> findAllByStockOrderByCreatedAt(Stock stock) {
+    return queryFactory
+        .selectFrom(stockBase)
+        .where(
+            stockBase.stock.id.eq(stock.getId()),
+            stockBase.deletedAt.isNull()
+        )
+        .orderBy(stockBase.createdAt.asc())
+        .fetch();
   }
 
   @Override
