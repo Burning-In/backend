@@ -41,7 +41,7 @@ class FrogInPanInsightServiceTest {
   void returnsFipScoreFromRankScore() {
     saveRankScore(new BigDecimal("0.9960"), 251, 0);
 
-    FrogInPanResponse result = frogInPanInsightService.query(stock, TODAY);
+    FrogInPanResponse result = frogInPanInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.fipScore()).isEqualByComparingTo(new BigDecimal("0.9960"));
   }
@@ -51,7 +51,7 @@ class FrogInPanInsightServiceTest {
   void countsUpDaysCorrectlyWhenAllDaysUp() {
     saveRankScore(new BigDecimal("0.9960"), 251, 0);
 
-    FrogInPanResponse result = frogInPanInsightService.query(stock, TODAY);
+    FrogInPanResponse result = frogInPanInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.yearlyUpDays()).isEqualTo(251);
     assertThat(result.yearlyDownDays()).isEqualTo(0);
@@ -62,7 +62,7 @@ class FrogInPanInsightServiceTest {
   void countsDownDaysCorrectlyWhenAllDaysDown() {
     saveRankScore(new BigDecimal("-0.9960"), 0, 251);
 
-    FrogInPanResponse result = frogInPanInsightService.query(stock, TODAY);
+    FrogInPanResponse result = frogInPanInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.yearlyUpDays()).isEqualTo(0);
     assertThat(result.yearlyDownDays()).isEqualTo(251);
@@ -73,7 +73,7 @@ class FrogInPanInsightServiceTest {
   void upDaysEqualsDownDaysWhenEqualUpAndDown() {
     saveRankScore(BigDecimal.ZERO, 125, 125);
 
-    FrogInPanResponse result = frogInPanInsightService.query(stock, TODAY);
+    FrogInPanResponse result = frogInPanInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.yearlyUpDays()).isEqualTo(result.yearlyDownDays());
   }

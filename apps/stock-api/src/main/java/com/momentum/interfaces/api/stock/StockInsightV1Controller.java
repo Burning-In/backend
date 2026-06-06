@@ -7,8 +7,6 @@ import com.momentum.application.insight.MovingAverageInsightService;
 import com.momentum.application.insight.RegimeInsightService;
 import com.momentum.application.insight.RsInsightService;
 import com.momentum.application.insight.VolumeInsightService;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRepository;
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.BaseStageResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.EpsResponse;
@@ -19,7 +17,6 @@ import com.momentum.interfaces.api.stock.StockInsightV1Dto.RsResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.StockRegimeResponse;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.VolumeResponse;
 import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/stocks/{stockCode}/insight")
 public class StockInsightV1Controller implements StockInsightV1ApiSpec {
 
-  private final StockRepository stockRepository;
   private final RegimeInsightService regimeInsightService;
   private final MovingAverageInsightService movingAverageInsightService;
   private final MomentumInsightService momentumInsightService;
@@ -56,7 +52,7 @@ public class StockInsightV1Controller implements StockInsightV1ApiSpec {
       @PathVariable String stockCode,
       @RequestParam LocalDateTime at
   ) {
-    return ApiResponse.success(regimeInsightService.query(findStock(stockCode), at.toLocalDate()));
+    return ApiResponse.success(regimeInsightService.query(stockCode, at.toLocalDate()));
   }
 
   @GetMapping("/moving-average")
@@ -65,7 +61,7 @@ public class StockInsightV1Controller implements StockInsightV1ApiSpec {
       @PathVariable String stockCode,
       @RequestParam LocalDateTime at
   ) {
-    return ApiResponse.success(movingAverageInsightService.query(findStock(stockCode), at.toLocalDate()));
+    return ApiResponse.success(movingAverageInsightService.query(stockCode, at.toLocalDate()));
   }
 
   @GetMapping("/momentum")
@@ -74,7 +70,7 @@ public class StockInsightV1Controller implements StockInsightV1ApiSpec {
       @PathVariable String stockCode,
       @RequestParam LocalDateTime at
   ) {
-    return ApiResponse.success(momentumInsightService.query(findStock(stockCode), at.toLocalDate()));
+    return ApiResponse.success(momentumInsightService.query(stockCode, at.toLocalDate()));
   }
 
   @GetMapping("/volume")
@@ -83,7 +79,7 @@ public class StockInsightV1Controller implements StockInsightV1ApiSpec {
       @PathVariable String stockCode,
       @RequestParam LocalDateTime at
   ) {
-    return ApiResponse.success(volumeInsightService.query(findStock(stockCode), at.toLocalDate()));
+    return ApiResponse.success(volumeInsightService.query(stockCode, at.toLocalDate()));
   }
 
   @GetMapping("/fip")
@@ -92,7 +88,7 @@ public class StockInsightV1Controller implements StockInsightV1ApiSpec {
       @PathVariable String stockCode,
       @RequestParam LocalDateTime at
   ) {
-    return ApiResponse.success(frogInPanInsightService.query(findStock(stockCode), at.toLocalDate()));
+    return ApiResponse.success(frogInPanInsightService.query(stockCode, at.toLocalDate()));
   }
 
   @GetMapping("/rs")
@@ -101,7 +97,7 @@ public class StockInsightV1Controller implements StockInsightV1ApiSpec {
       @PathVariable String stockCode,
       @RequestParam LocalDateTime at
   ) {
-    return ApiResponse.success(rsInsightService.query(findStock(stockCode), at.toLocalDate()));
+    return ApiResponse.success(rsInsightService.query(stockCode, at.toLocalDate()));
   }
 
   @GetMapping("/eps")
@@ -110,11 +106,6 @@ public class StockInsightV1Controller implements StockInsightV1ApiSpec {
       @PathVariable String stockCode,
       @RequestParam LocalDateTime at
   ) {
-    return ApiResponse.success(epsInsightService.query(findStock(stockCode), at.toLocalDate()));
-  }
-
-  private Stock findStock(String stockCode) {
-    return stockRepository.findByStockCode(stockCode)
-        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
+    return ApiResponse.success(epsInsightService.query(stockCode, at.toLocalDate()));
   }
 }

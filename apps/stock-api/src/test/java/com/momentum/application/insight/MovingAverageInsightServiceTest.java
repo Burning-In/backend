@@ -45,7 +45,7 @@ class MovingAverageInsightServiceTest {
   void isAlignedTrueWhenPricesInOrder() {
     saveMas(9000L, 8000L, 7000L);
 
-    MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
+    MovingAverageResponse result = movingAverageInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.isAboveMa50()).isTrue();
     assertThat(result.isMa50AboveMa150()).isTrue();
@@ -61,7 +61,7 @@ class MovingAverageInsightServiceTest {
   void isAlignedFalseWhenPriceBelowMa50() {
     saveMas(11000L, 8000L, 7000L);
 
-    MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
+    MovingAverageResponse result = movingAverageInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.isAboveMa50()).isFalse();
   }
@@ -71,7 +71,7 @@ class MovingAverageInsightServiceTest {
   void isAlignedFalseWhenMa50BelowMa150() {
     saveMas(9000L, 9500L, 7000L);
 
-    MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
+    MovingAverageResponse result = movingAverageInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.isMa50AboveMa150()).isFalse();
   }
@@ -81,7 +81,7 @@ class MovingAverageInsightServiceTest {
   void isAlignedFalseWhenMa150BelowMa200() {
     saveMas(9000L, 8000L, 8500L);
 
-    MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
+    MovingAverageResponse result = movingAverageInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.isMa150AboveMa200()).isFalse();
   }
@@ -89,7 +89,7 @@ class MovingAverageInsightServiceTest {
   @Test
   @DisplayName("MA 데이터 없으면 정배열 false, MA 값 null")
   void isAlignedFalseWhenNoMaData() {
-    MovingAverageResponse result = movingAverageInsightService.query(stock, TODAY);
+    MovingAverageResponse result = movingAverageInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.isAboveMa50()).isFalse();
     assertThat(result.isMa50AboveMa150()).isFalse();

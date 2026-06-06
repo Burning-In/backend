@@ -45,7 +45,7 @@ class RsInsightServiceTest {
     KOSPI kospi = kospiRepository.save(new KOSPI(2500L, LocalDate.now()));
     kospiRelativeStrengthRepository.saveAll(List.of(new KOPSIRelativeStrength(85, stock, kospi)));
 
-    RsResponse result = rsInsightService.query(stock, LocalDate.now());
+    RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());
 
     assertThat(result.rsValue()).isEqualByComparingTo(new BigDecimal("85"));
     assertThat(result.percentileRank()).isEqualByComparingTo(new BigDecimal("85"));
@@ -54,7 +54,7 @@ class RsInsightServiceTest {
   @Test
   @DisplayName("RS 데이터 없으면 예외 발생")
   void throwsExceptionWhenNoRsData() {
-    assertThatThrownBy(() -> rsInsightService.query(stock, LocalDate.now()))
+    assertThatThrownBy(() -> rsInsightService.query(stock.getCode(), LocalDate.now()))
         .isInstanceOf(NoSuchElementException.class);
   }
 
@@ -68,7 +68,7 @@ class RsInsightServiceTest {
         new KOPSIRelativeStrength(75, stock, newKospi)
     ));
 
-    RsResponse result = rsInsightService.query(stock, LocalDate.now());
+    RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());
 
     assertThat(result.rsValue()).isEqualByComparingTo(new BigDecimal("75"));
   }

@@ -3,6 +3,7 @@ package com.momentum.application.insight;
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
 import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.MomentumResponse;
@@ -23,8 +24,10 @@ public class MomentumInsightService {
 
   private final StockCandleRepository stockCandleRepository;
   private final StockRankScoreRepository stockRankScoreRepository;
+  private final StockRepository stockRepository;
 
-  public MomentumResponse query(Stock stock, LocalDate at) {
+  public MomentumResponse query(String stockCode, LocalDate at) {
+    Stock stock = findStock(stockCode);
     StockRankScore rankScore = stockRankScoreRepository.findLatestByStock(stock)
         .orElseThrow(() -> new NoSuchElementException("모멘텀 데이터가 없습니다: " + stock.getCode()));
 
@@ -50,6 +53,11 @@ public class MomentumInsightService {
         yearlyPriceChangeRate,
         percentileRank
     );
+  }
+
+  private Stock findStock(String stockCode) {
+    return stockRepository.findByStockCode(stockCode)
+        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
   }
 
   private BigDecimal computePercentile(StockRankScore myScore) {

@@ -49,7 +49,7 @@ class MomentumInsightServiceTest {
     save253Candles(10000L, 12000L);
     saveRankScore(stock, new BigDecimal("0.2000"), TODAY); // 20% as decimal
 
-    MomentumResponse result = momentumInsightService.query(stock, TODAY);
+    MomentumResponse result = momentumInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.currentPrice()).isEqualTo(12000L);
     assertThat(result.yearAgoPrice()).isEqualTo(10000L);
@@ -65,7 +65,7 @@ class MomentumInsightServiceTest {
     saveRankScore(newStock("000003"), new BigDecimal("0.30"), TODAY);
     saveRankScore(stock, new BigDecimal("0.05"), TODAY);
 
-    MomentumResponse result = momentumInsightService.query(stock, TODAY);
+    MomentumResponse result = momentumInsightService.query(stock.getCode(), TODAY);
 
     // 0.05보다 낮은 종목 = 0개 → 0/4 * 100 = 0.0%
     assertThat(result.percentileRank()).isEqualByComparingTo(new BigDecimal("0.0"));
@@ -80,7 +80,7 @@ class MomentumInsightServiceTest {
     saveRankScore(newStock("000003"), new BigDecimal("0.20"), TODAY);
     saveRankScore(stock, new BigDecimal("0.30"), TODAY);
 
-    MomentumResponse result = momentumInsightService.query(stock, TODAY);
+    MomentumResponse result = momentumInsightService.query(stock.getCode(), TODAY);
 
     // 0.30보다 낮은 종목 = 3개 → 3/4 * 100 = 75.0%
     assertThat(result.percentileRank()).isEqualByComparingTo(new BigDecimal("75.0"));

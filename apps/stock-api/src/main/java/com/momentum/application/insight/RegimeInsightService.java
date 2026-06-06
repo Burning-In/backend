@@ -4,12 +4,14 @@ import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
+import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.StockRegimeResponse;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,10 @@ public class RegimeInsightService {
 
   private final StockBaseRepository stockBaseRepository;
   private final StockCandleRepository stockCandleRepository;
+  private final StockRepository stockRepository;
 
-  public StockRegimeResponse query(Stock stock, LocalDate at) {
+  public StockRegimeResponse query(String stockCode, LocalDate at) {
+    Stock stock = findStock(stockCode);
     StockDailyCandle candle = stockCandleRepository.findRecentCandle(stock, at)
         .orElseThrow();
     long currentPrice = candle.getClosePrice();
@@ -45,6 +49,11 @@ public class RegimeInsightService {
     BigDecimal changeRate = changeRate(referenceLine, currentPrice);
 
     return new StockRegimeResponse(regime, currentPrice, support, resistance, changeRate);
+  }
+
+  private Stock findStock(String stockCode) {
+    return stockRepository.findByStockCode(stockCode)
+        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
   }
 
   private BigDecimal changeRate(long base, long current) {
