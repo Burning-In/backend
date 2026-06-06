@@ -17,7 +17,8 @@ public interface StockLikeV1ApiSpec {
   )
   @Parameter(name = "Authorization", in = ParameterIn.HEADER, description = "Bearer <accessToken>", required = true)
   ApiResponse<Void> addLike(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "회원 ID") Long memberId
   );
 
   @Operation(
@@ -26,7 +27,8 @@ public interface StockLikeV1ApiSpec {
   )
   @Parameter(name = "Authorization", in = ParameterIn.HEADER, description = "Bearer <accessToken>", required = true)
   ApiResponse<Void> removeLike(
-      @Schema(description = "종목 코드") String stockCode
+      @Schema(description = "종목 코드") String stockCode,
+      @Schema(description = "회원 ID") Long memberId
   );
 
   @Operation(
@@ -34,5 +36,7 @@ public interface StockLikeV1ApiSpec {
       description = "사이드바에 표시할 관심 종목 리스트를 조회합니다."
   )
   @Parameter(name = "Authorization", in = ParameterIn.HEADER, description = "Bearer <accessToken>", required = true)
-  ApiResponse<LikeStockResponse> getLikeStocks();
+  ApiResponse<LikeStockResponse> getLikeStocks(
+      @Schema(description = "회원 ID") Long memberId
+  );
 }
