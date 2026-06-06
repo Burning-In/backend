@@ -1,9 +1,11 @@
 package com.momentum.infrastructure.stocktick;
 
+import com.momentum.domain.stock.StockCode;
 import com.momentum.domain.stocktick.StockTick;
 import com.momentum.domain.stocktick.StockTickRepository;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -28,6 +30,13 @@ public class StockTickRepositoryImpl implements StockTickRepository {
     ZonedDateTime[] range = dailyRange(now);
     return stockTickJpaRepository
         .findFirstByCreatedAtBetweenOrderByCreatedAtAsc(range[0], range[1]);
+  }
+
+  @Override
+  public Optional<StockTick> findLatestTick(StockCode stockCode, LocalDateTime at) {
+    ZonedDateTime atKst = at.atZone(KST);
+    return stockTickJpaRepository
+        .findFirstByStockCodeAndCreatedAtLessThanEqualOrderByCreatedAtDescIdDesc(stockCode, atKst);
   }
 
   @Override

@@ -5,12 +5,12 @@ import java.util.List;
 
 public class RankingV1Dto {
 
-    // ===================== 돌파시작 (BREAKOUT_START) =====================
+    // ===================== 돌파 성공 (BREAKOUT_SUCCESS) =====================
 
-    public record BreakoutStartResponse(
-        List<BreakoutStartItem> stocks
+    public record BreakoutSuccessResponse(
+        List<BreakoutSuccessItem> stocks
     ) {
-        public record BreakoutStartItem(
+        public record BreakoutSuccessItem(
             String stockName,
             BigDecimal currentPrice,
             BigDecimal oneYearMomentum,

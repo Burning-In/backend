@@ -51,8 +51,8 @@ class RegimeInsightServiceTest {
   }
 
   @Test
-  @DisplayName("BREAKOUT_START 레짐이면 저항선 대비 변동률 반환")
-  void returnsChangeRateFromResistanceWhenBreakoutStart() {
+  @DisplayName("BREAKOUT_SUCCESS 레짐이면 저항선 대비 변동률 반환")
+  void returnsChangeRateFromResistanceWhenBreakoutSuccess() {
     Stock stock = saveStock("000001", StockRegime.BREAKOUT_SUCCESS, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 11000L);
     saveBase(stock, 10000L, 8000L);

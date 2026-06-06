@@ -27,7 +27,7 @@ public interface SnapshotV1ApiSpec {
 
             - 기간: startDate ~ endDate (년/월 단위, 미입력 시 전체)
             - 판단(judgments): BUY(매수), SELL(매도), WATCH(관망) — 복수 선택 가능, 미입력 시 전체
-            - 주식 레짐(regimes): BREAKOUT_START(돌파시작), BREAKOUT_READY(돌파준비), BREAKOUT_FAILED(돌파실패), DOWNSIDE_BREAK(하방이탈), UNKNOWN(방향미정) — 복수 선택 가능, 미입력 시 전체
+            - 주식 레짐(regimes): BREAKOUT_SUCCESS(돌파 성공), BREAKOUT_READY(돌파준비), BREAKOUT_FAILED(돌파실패), DOWNSIDE_BREAK(하방이탈), UNKNOWN(방향미정) — 복수 선택 가능, 미입력 시 전체
             - 종목명(stockName): 부분 일치 검색, 미입력 시 전체
             """
     )
@@ -35,7 +35,7 @@ public interface SnapshotV1ApiSpec {
         @Schema(description = "조회 시작 날짜 (년/월/분)") LocalDateTime startDate,
         @Schema(description = "조회 종료 날짜 (년/월/분)") LocalDateTime endDate,
         @Schema(description = "판단 필터 (BUY, SELL, WATCH)") List<SnapshotJudgment> judgments,
-        @Schema(description = "주식 레짐 필터 (BREAKOUT_START, BREAKOUT_READY, BREAKOUT_FAILED, DOWNSIDE_BREAK, UNKNOWN)") List<StockRegime> regimes,
+        @Schema(description = "주식 레짐 필터 (BREAKOUT_SUCCESS, BREAKOUT_READY, BREAKOUT_FAILED, DOWNSIDE_BREAK, UNKNOWN)") List<StockRegime> regimes,
         @Schema(description = "종목명 검색어") String stockName
     );
 

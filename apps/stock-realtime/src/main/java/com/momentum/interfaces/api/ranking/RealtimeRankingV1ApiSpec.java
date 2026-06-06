@@ -10,11 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-@Tag(name = "Realtime Ranking V1 API", description = "레짐별 실시간 랭킹 SSE API 입니다. 돌파시작/돌파준비 2개 레짐에 대해서만 제공됩니다. 기본 경로: /api/v1/realtime/ranking")
+@Tag(name = "Realtime Ranking V1 API", description = "레짐별 실시간 랭킹 SSE API 입니다. 돌파 성공/돌파준비 2개 레짐에 대해서만 제공됩니다. 기본 경로: /api/v1/realtime/ranking")
 public interface RealtimeRankingV1ApiSpec {
 
   @Operation(
-      summary = "돌파시작 랭킹 변경 구독",
+      summary = "돌파 성공 랭킹 변경 구독",
       description = """
           BREAKOUT_SUCCESS 레짐의 랭킹 변경을 SSE로 수신합니다.
           종목의 레짐 상태가 변경될 때 해당 레짐의 랭킹 구성이 재산출되어 이벤트가 발생합니다.
@@ -33,7 +33,7 @@ public interface RealtimeRankingV1ApiSpec {
           )
       }
   )
-  SseEmitter subscribeBreakoutStartRanking();
+  SseEmitter subscribeBreakoutSuccessRanking();
 
   @Operation(
       summary = "돌파준비 랭킹 변경 구독",

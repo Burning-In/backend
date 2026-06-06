@@ -26,9 +26,9 @@ class RealtimeRankingV1ControllerTest {
   private StockRankScoreRepository stockRankScoreRepository;
 
   @Test
-  @DisplayName("돌파시작 랭킹 구독 시 비동기 SSE 연결이 시작된다")
-  void subscribeBreakoutStartStartsSseStream() throws Exception {
-    mockMvc.perform(get("/api/v1/realtime/ranking/breakout-start/subscribe"))
+  @DisplayName("돌파 성공 랭킹 구독 시 비동기 SSE 연결이 시작된다")
+  void subscribeBreakoutSuccessStartsSseStream() throws Exception {
+    mockMvc.perform(get("/api/v1/realtime/ranking/breakout-success/subscribe"))
         .andExpect(status().isOk())
         .andExpect(request().asyncStarted());
   }

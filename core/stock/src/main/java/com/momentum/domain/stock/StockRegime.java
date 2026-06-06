@@ -48,7 +48,7 @@ public enum StockRegime {
     if (isBreakoutFailed(closePrice, resistancePrice, recentPointPrice)) {
       return BREAKOUT_FAILED;
     }
-    if (isBreakoutStart(stock, closePrice, resistancePrice, recentPointPrice, breakoutThreshold)) {
+    if (isBreakoutSuccess(stock, closePrice, resistancePrice, recentPointPrice, breakoutThreshold)) {
       return BREAKOUT_SUCCESS;
     }
     if (isBreakoutReady(stock, closePrice, resistancePrice, recentPointPrice, currentBase, lineApproachThreshold)) {
@@ -65,7 +65,7 @@ public enum StockRegime {
     return closePrice < resistancePrice && closePrice < recentPointPrice;
   }
 
-  private static boolean isBreakoutStart(Stock stock, long closePrice, long resistancePrice,
+  private static boolean isBreakoutSuccess(Stock stock, long closePrice, long resistancePrice,
       long recentPointPrice, double breakoutThreshold) {
     return stock.getStockTrend().equals(StockTrend.UPTREND)
         && calculateGap(resistancePrice, closePrice) > breakoutThreshold
