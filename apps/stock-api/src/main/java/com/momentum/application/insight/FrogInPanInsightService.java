@@ -4,6 +4,7 @@ import com.momentum.domain.score.FipScore;
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
 import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRepository;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.FrogInPanResponse;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,8 +20,10 @@ import org.springframework.stereotype.Service;
 public class FrogInPanInsightService {
 
   private final StockRankScoreRepository stockRankScoreRepository;
+  private final StockRepository stockRepository;
 
-  public FrogInPanResponse query(Stock stock, LocalDate at) {
+  public FrogInPanResponse query(String stockCode, LocalDate at) {
+    Stock stock = findStock(stockCode);
     StockRankScore rankScore = stockRankScoreRepository.findLatestByStock(stock)
         .orElseThrow(() -> new NoSuchElementException("FIP 데이터가 없습니다: " + stock.getCode()));
 
@@ -28,6 +31,11 @@ public class FrogInPanInsightService {
     BigDecimal percentileRank = computePercentile(rankScore);
 
     return new FrogInPanResponse(fipScore.getUpDays(), fipScore.getDownDays(), fipScore.getFip(), percentileRank);
+  }
+
+  private Stock findStock(String stockCode) {
+    return stockRepository.findByStockCode(stockCode)
+        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
   }
 
   private BigDecimal computePercentile(StockRankScore myScore) {

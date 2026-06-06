@@ -15,9 +15,9 @@ public class RealtimeRankingV1Controller implements RealtimeRankingV1ApiSpec {
 
   private final RealtimeRankingFacade realtimeRankingFacade;
 
-  @GetMapping(value = "/breakout-start/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @GetMapping(value = "/breakout-success/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   @Override
-  public SseEmitter subscribeBreakoutStartRanking() {
+  public SseEmitter subscribeBreakoutSuccessRanking() {
     return realtimeRankingFacade.subscribeBreakoutSuccess();
   }
 

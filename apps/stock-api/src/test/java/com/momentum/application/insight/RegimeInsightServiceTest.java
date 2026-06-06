@@ -41,7 +41,7 @@ class RegimeInsightServiceTest {
     Stock stock = saveStock("005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 10000L);
 
-    StockRegimeResponse result = regimeInsightService.query(stock, TODAY);
+    StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.regime()).isEqualTo(StockRegime.DIRECTION_UNDETERMINED);
     assertThat(result.currentPrice()).isEqualTo(10000L);
@@ -51,13 +51,13 @@ class RegimeInsightServiceTest {
   }
 
   @Test
-  @DisplayName("BREAKOUT_START 레짐이면 저항선 대비 변동률 반환")
-  void returnsChangeRateFromResistanceWhenBreakoutStart() {
+  @DisplayName("BREAKOUT_SUCCESS 레짐이면 저항선 대비 변동률 반환")
+  void returnsChangeRateFromResistanceWhenBreakoutSuccess() {
     Stock stock = saveStock("000001", StockRegime.BREAKOUT_SUCCESS, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 11000L);
     saveBase(stock, 10000L, 8000L);
 
-    StockRegimeResponse result = regimeInsightService.query(stock, TODAY);
+    StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.regime()).isEqualTo(StockRegime.BREAKOUT_SUCCESS);
     assertThat(result.resistanceLine()).isEqualTo(10000L);
@@ -73,7 +73,7 @@ class RegimeInsightServiceTest {
     saveCandle(stock, TODAY, 9000L);
     saveBase(stock, 12000L, 10000L);
 
-    StockRegimeResponse result = regimeInsightService.query(stock, TODAY);
+    StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.regime()).isEqualTo(StockRegime.DOWNSIDE_BREAK);
     // (9000 - 10000) / 10000 * 100 = -10.0
@@ -87,7 +87,7 @@ class RegimeInsightServiceTest {
     saveCandle(stock, TODAY, 9500L);
     saveBase(stock, 10000L, 8000L);
 
-    StockRegimeResponse result = regimeInsightService.query(stock, TODAY);
+    StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.regime()).isEqualTo(StockRegime.BREAKOUT_FAILED);
     // (9500 - 10000) / 10000 * 100 = -5.0

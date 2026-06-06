@@ -38,7 +38,7 @@ class EpsInsightServiceTest {
   @Test
   @DisplayName("EPS 데이터 없으면 빈 리스트 반환")
   void returnsEmptyListWhenNoEpsData() {
-    EpsResponse result = epsInsightService.query(stock, LocalDate.now());
+    EpsResponse result = epsInsightService.query(stock.getCode(), LocalDate.now());
 
     assertThat(result.quarterlyEps()).isEmpty();
     assertThat(result.changeRateYoY()).isNull();
@@ -49,7 +49,7 @@ class EpsInsightServiceTest {
   void returnsOnlyFiveQuartersWhenMoreExist() {
     saveQuarterlyEps(6);
 
-    EpsResponse result = epsInsightService.query(stock, LocalDate.now());
+    EpsResponse result = epsInsightService.query(stock.getCode(), LocalDate.now());
 
     assertThat(result.quarterlyEps()).hasSize(5);
   }
@@ -59,7 +59,7 @@ class EpsInsightServiceTest {
   void returnsThreeQuartersWhenOnlyThreeExist() {
     saveQuarterlyEps(3);
 
-    EpsResponse result = epsInsightService.query(stock, LocalDate.now());
+    EpsResponse result = epsInsightService.query(stock.getCode(), LocalDate.now());
 
     assertThat(result.quarterlyEps()).hasSize(3);
   }
@@ -73,7 +73,7 @@ class EpsInsightServiceTest {
         new StockEps(1200.0, latestQuarter.minusMonths(3), null, stock)
     ));
 
-    EpsResponse result = epsInsightService.query(stock, LocalDate.now());
+    EpsResponse result = epsInsightService.query(stock.getCode(), LocalDate.now());
 
     assertThat(result.changeRateYoY()).isEqualByComparingTo("0.2500");
   }
@@ -83,7 +83,7 @@ class EpsInsightServiceTest {
   void returnsQuarterNameInYearMonthFormat() {
     stockEpsRepository.saveAll(List.of(new StockEps(1000.0, YearMonth.of(2024, 3), null, stock)));
 
-    EpsResponse result = epsInsightService.query(stock, LocalDate.now());
+    EpsResponse result = epsInsightService.query(stock.getCode(), LocalDate.now());
 
     assertThat(result.quarterlyEps().get(0).quarter()).isEqualTo("2024-03");
   }

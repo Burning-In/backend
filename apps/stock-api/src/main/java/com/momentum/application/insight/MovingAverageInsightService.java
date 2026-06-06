@@ -4,6 +4,7 @@ import com.momentum.domain.ma.StockMovingAverage;
 import com.momentum.domain.ma.StockMovingAveragePeriod;
 import com.momentum.domain.ma.StockMovingAverageRepository;
 import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.MovingAverageResponse;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +22,10 @@ public class MovingAverageInsightService {
 
   private final StockMovingAverageRepository stockMovingAverageRepository;
   private final StockCandleRepository stockCandleRepository;
+  private final StockRepository stockRepository;
 
-  public MovingAverageResponse query(Stock stock, LocalDate at) {
+  public MovingAverageResponse query(String stockCode, LocalDate at) {
+    Stock stock = findStock(stockCode);
     StockDailyCandle candle = stockCandleRepository.findRecentCandle(stock, at)
         .orElseThrow();
     long currentPrice = candle.getClosePrice();
@@ -42,5 +46,10 @@ public class MovingAverageInsightService {
         currentPrice, ma50, ma150, ma200,
         isAboveMa50, isMa50AboveMa150, isMa150AboveMa200
     );
+  }
+
+  private Stock findStock(String stockCode) {
+    return stockRepository.findByStockCode(stockCode)
+        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
   }
 }

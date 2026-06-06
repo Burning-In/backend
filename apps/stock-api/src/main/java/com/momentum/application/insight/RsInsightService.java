@@ -3,6 +3,7 @@ package com.momentum.application.insight;
 import com.momentum.domain.rs.KOPSIRelativeStrength;
 import com.momentum.domain.rs.KOSPIRelativeStrengthRepository;
 import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRepository;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.RsResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,12 +16,19 @@ import org.springframework.stereotype.Service;
 public class RsInsightService {
 
   private final KOSPIRelativeStrengthRepository kospiRelativeStrengthRepository;
+  private final StockRepository stockRepository;
 
-  public RsResponse query(Stock stock, LocalDate at) {
+  public RsResponse query(String stockCode, LocalDate at) {
+    Stock stock = findStock(stockCode);
     KOPSIRelativeStrength rs = kospiRelativeStrengthRepository.findLatestByStock(stock)
         .orElseThrow(() -> new NoSuchElementException("RS 데이터가 없습니다: " + stock.getCode()));
 
     BigDecimal rsValue = BigDecimal.valueOf(rs.getRsScore());
     return new RsResponse(rsValue, rsValue);
+  }
+
+  private Stock findStock(String stockCode) {
+    return stockRepository.findByStockCode(stockCode)
+        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
   }
 }

@@ -43,7 +43,7 @@ class VolumeInsightServiceTest {
     saveHistoricalCandles(30, 1000L);
     saveCandle(TODAY, 10000L);
 
-    VolumeResponse result = volumeInsightService.query(stock, TODAY);
+    VolumeResponse result = volumeInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.currentVolume()).isEqualTo(10000L);
     assertThat(result.volumeToBaselineRatio()).isGreaterThan(BigDecimal.ONE);
@@ -55,7 +55,7 @@ class VolumeInsightServiceTest {
     saveHistoricalCandles(30, 10000L);
     saveCandle(TODAY, 1000L);
 
-    VolumeResponse result = volumeInsightService.query(stock, TODAY);
+    VolumeResponse result = volumeInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.currentVolume()).isEqualTo(1000L);
     assertThat(result.volumeToBaselineRatio()).isLessThan(BigDecimal.ONE);
@@ -67,7 +67,7 @@ class VolumeInsightServiceTest {
     saveHistoricalCandles(10, 5000L);
     saveCandle(TODAY, 5000L);
 
-    VolumeResponse result = volumeInsightService.query(stock, TODAY);
+    VolumeResponse result = volumeInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.volumeToBaselineRatio()).isEqualByComparingTo(BigDecimal.ONE);
   }
