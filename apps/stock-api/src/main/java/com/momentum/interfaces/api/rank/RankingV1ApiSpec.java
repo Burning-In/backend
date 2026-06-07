@@ -1,7 +1,6 @@
 package com.momentum.interfaces.api.rank;
 
 import com.momentum.interfaces.api.ApiResponse;
-import com.momentum.interfaces.api.rank.RankingV1Dto.BreakoutFailedResponse;
 import com.momentum.interfaces.api.rank.RankingV1Dto.BreakoutReadyResponse;
 import com.momentum.interfaces.api.rank.RankingV1Dto.BreakoutSuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 
-@Tag(name = "Ranking V1 API", description = "레짐별 랭킹 API 입니다. 돌파 성공/돌파준비/돌파실패 3개 레짐에 대해서만 랭킹을 제공합니다.")
+@Tag(name = "Ranking V1 API", description = "레짐별 랭킹 API 입니다. 돌파 성공/돌파준비 2개 레짐에 대해서만 랭킹을 제공합니다.")
 public interface RankingV1ApiSpec {
   // ===================== HTTP (스냅샷) =====================
 

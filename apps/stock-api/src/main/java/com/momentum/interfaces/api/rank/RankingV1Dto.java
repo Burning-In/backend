@@ -30,17 +30,4 @@ public class RankingV1Dto {
             BigDecimal fipScore
         ) {}
     }
-
-    // ===================== 돌파실패 (BREAKOUT_FAILED) =====================
-
-    public record BreakoutFailedResponse(
-        List<BreakoutFailedItem> stocks
-    ) {
-        public record BreakoutFailedItem(
-            String stockName,
-            BigDecimal currentPrice,
-            BigDecimal oneYearMomentum,
-            BigDecimal fipScore
-        ) {}
-    }
 }
