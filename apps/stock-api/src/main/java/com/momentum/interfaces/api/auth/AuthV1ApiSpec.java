@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Auth V1 API", description = "인증/인가 관련 API 입니다.")
 public interface AuthV1ApiSpec {
@@ -27,7 +29,7 @@ public interface AuthV1ApiSpec {
       responseCode = "200",
       headers = @Header(name = "Set-Cookie", description = "csrfToken=<token>; Path=/")
   )
-  ApiResponse<Void> csrf();
+  ResponseEntity<ApiResponse<Void>> csrf(@Parameter(hidden = true) HttpServletRequest request);
 
   @Operation(
       summary = "로그인",
@@ -38,13 +40,17 @@ public interface AuthV1ApiSpec {
       headers = @Header(name = "Set-Cookie", description = "refreshToken=<token>; HttpOnly; Path=/api/v1/auth")
   )
   @Parameter(name = "X-CSRF-Token", in = ParameterIn.HEADER, description = "CSRF 토큰", required = true)
-  ApiResponse<LoginResponse> login(LoginRequest request);
+  ResponseEntity<ApiResponse<LoginResponse>> login(LoginRequest request);
 
   @Operation(
       summary = "회원가입",
       description = "이메일, 비밀번호, 전화번호, 닉네임으로 회원가입합니다."
   )
-  ApiResponse<RegisterResponse> register(RegisterRequest request);
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      headers = @Header(name = "Set-Cookie", description = "refreshToken=<token>; HttpOnly; Path=/api/v1/auth")
+  )
+  ResponseEntity<ApiResponse<RegisterResponse>> register(RegisterRequest request);
 
   @Operation(
       summary = "이메일 찾기",
@@ -64,19 +70,23 @@ public interface AuthV1ApiSpec {
   )
   @Parameter(name = "refreshToken", in = ParameterIn.COOKIE, description = "리프레시 토큰", required = true)
   @Parameter(name = "X-CSRF-Token", in = ParameterIn.HEADER, description = "CSRF 토큰", required = true)
-  ApiResponse<RefreshResponse> refresh();
+  ApiResponse<RefreshResponse> refresh(@Parameter(hidden = true) String refreshToken);
 
   @Operation(
       summary = "로그아웃",
       description = "HttpOnly Cookie의 refreshToken을 만료시킵니다. accessToken은 TTL까지 자연 만료됩니다."
   )
+  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+      responseCode = "200",
+      headers = @Header(name = "Set-Cookie", description = "refreshToken=; HttpOnly; Path=/api/v1/auth; Max-Age=0")
+  )
   @Parameter(name = "X-CSRF-Token", in = ParameterIn.HEADER, description = "CSRF 토큰", required = true)
-  ApiResponse<Void> logout();
+  ResponseEntity<ApiResponse<Void>> logout();
 
   @Operation(
       summary = "계정 정보 조회",
       description = "사이드바에 표시할 로그인 여부 및 계정 정보를 조회합니다."
   )
   @Parameter(name = "Authorization", in = ParameterIn.HEADER, description = "Bearer <accessToken>", required = true)
-  ApiResponse<AccountResponse> getAccount();
+  ApiResponse<AccountResponse> getAccount(@Parameter(hidden = true) Long memberId);
 }
