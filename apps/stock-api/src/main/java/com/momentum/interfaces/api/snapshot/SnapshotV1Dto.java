@@ -20,6 +20,7 @@ public class SnapshotV1Dto {
     public record SnapshotListItem(
         Long snapshotId,
         String stockName,
+        String stockCode,
         StockRegime stockRegime,
         SnapshotJudgment judgment,
         LocalDateTime recordedAt,
@@ -32,6 +33,9 @@ public class SnapshotV1Dto {
   // ===================== Snapshot Detail =====================
 
   public record SnapshotDetailResponse(
+      String stockName,
+      String stockCode,
+      SnapshotJudgment judgment,
       List<Long> referenceSnapshotIds,
       LocalDateTime recordedAt,
       String retrospective
@@ -43,7 +47,7 @@ public class SnapshotV1Dto {
 
   // 스냅샷 생성 요청 (시작)
   public record SnapshotCreateRequest(
-      Long stockId,
+      String stockCode,
       SnapshotJudgment judgment,
       List<Long> referenceSnapshotIds,
       String retrospective

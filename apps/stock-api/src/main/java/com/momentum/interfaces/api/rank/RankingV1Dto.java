@@ -12,6 +12,7 @@ public class RankingV1Dto {
     ) {
         public record BreakoutSuccessItem(
             String stockName,
+            String stockCode,
             BigDecimal currentPrice,
             BigDecimal oneYearMomentum,
             BigDecimal fipScore
@@ -25,6 +26,7 @@ public class RankingV1Dto {
     ) {
         public record BreakoutReadyItem(
             String stockName,
+            String stockCode,
             BigDecimal currentPrice,
             BigDecimal oneYearMomentum,
             BigDecimal fipScore

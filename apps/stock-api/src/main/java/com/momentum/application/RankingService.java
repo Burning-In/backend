@@ -31,6 +31,7 @@ public class RankingService {
     List<BreakoutSuccessItem> stocks = findRanked(StockRegime.BREAKOUT_SUCCESS, at).stream()
         .map(score -> new BreakoutSuccessItem(
             score.getStock().getName(),
+            score.getStock().getCode(),
             currentPrice(score.getStock().getCode(), at),
             score.getMomentum().getValue(),
             score.getFipScore().getFip()))
@@ -43,6 +44,7 @@ public class RankingService {
     List<BreakoutReadyItem> stocks = findRanked(StockRegime.BREAKOUT_READY, at).stream()
         .map(score -> new BreakoutReadyItem(
             score.getStock().getName(),
+            score.getStock().getCode(),
             currentPrice(score.getStock().getCode(), at),
             score.getMomentum().getValue(),
             score.getFipScore().getFip()))

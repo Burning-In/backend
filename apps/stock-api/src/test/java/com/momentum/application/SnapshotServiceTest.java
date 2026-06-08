@@ -50,7 +50,7 @@ class SnapshotServiceTest {
   void createCapturesRegimeAndPrice() {
     Stock stock = saveStock("000001", BREAKOUT_READY);
     saveCandle(stock, 10_000L);
-    SnapshotCreateRequest request = new SnapshotCreateRequest(stock.getId(), BUY, List.of(), "회고");
+    SnapshotCreateRequest request = new SnapshotCreateRequest(stock.getCode(), BUY, List.of(), "회고");
 
     SnapshotCreateResponse response = snapshotService.create(request);
 
@@ -63,7 +63,7 @@ class SnapshotServiceTest {
   @Test
   @DisplayName("존재하지 않는 종목으로 생성하면 예외")
   void createThrowsWhenStockNotFound() {
-    SnapshotCreateRequest request = new SnapshotCreateRequest(999_999L, BUY, List.of(), "회고");
+    SnapshotCreateRequest request = new SnapshotCreateRequest("999999", BUY, List.of(), "회고");
 
     assertThatThrownBy(() -> snapshotService.create(request))
         .isInstanceOf(CoreException.class);
@@ -81,6 +81,8 @@ class SnapshotServiceTest {
 
     assertThat(detail.referenceSnapshotIds()).containsExactly(ref.getId());
     assertThat(detail.retrospective()).isEqualTo("회고내용");
+    assertThat(detail.judgment()).isEqualTo(BUY);
+    assertThat(detail.stockName()).isEqualTo(stock.getName());
   }
 
   @Test

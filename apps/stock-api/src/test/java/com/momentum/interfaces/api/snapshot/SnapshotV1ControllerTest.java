@@ -52,7 +52,7 @@ class SnapshotV1ControllerTest {
     Stock stock = saveStock("000001", BREAKOUT_READY);
     saveCandle(stock, 10_000L);
     String body = objectMapper.writeValueAsString(
-        new SnapshotCreateRequest(stock.getId(), BUY, List.of(), "회고"));
+        new SnapshotCreateRequest(stock.getCode(), BUY, List.of(), "회고"));
 
     assertThat(mockMvcTester.post()
         .uri("/api/v1/snapshots")
