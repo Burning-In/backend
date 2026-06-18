@@ -36,6 +36,13 @@ public class Member extends BaseEntity {
     return new Member(email, password, nickname, name, phoneNumber);
   }
 
+  public void changePassword(String encodedPassword) {
+    if (encodedPassword == null || encodedPassword.isBlank()) {
+      throw new IllegalArgumentException("비밀번호는 비어있을 수 없습니다.");
+    }
+    this.password = encodedPassword;
+  }
+
   @Override
   protected void guard() {
     if (email == null || email.isBlank()) {

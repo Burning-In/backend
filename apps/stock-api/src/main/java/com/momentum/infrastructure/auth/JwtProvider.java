@@ -1,42 +1,56 @@
 package com.momentum.infrastructure.auth;
 
 import com.momentum.config.JwtProperties;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 
-/**
- * accessToken / refreshToken(JWT, HS256) 발급 및 검증.
- * 토큰의 subject 에 회원 ID 를 담는다. 서버는 무상태로 서명만 검증한다.
- */
 @Component
 public class JwtProvider {
+
+  private static final String PURPOSE_CLAIM = "purpose";
+  private static final String PASSWORD_RESET_PURPOSE = "PASSWORD_RESET";
 
   private final SecretKey key;
   private final Duration accessTokenValidity;
   private final Duration refreshTokenValidity;
+  private final Duration passwordResetTokenValidity;
 
   public JwtProvider(JwtProperties jwtProperties) {
     this.key = Keys.hmacShaKeyFor(jwtProperties.secret().getBytes(StandardCharsets.UTF_8));
     this.accessTokenValidity = jwtProperties.accessTokenValidity();
     this.refreshTokenValidity = jwtProperties.refreshTokenValidity();
+    this.passwordResetTokenValidity = jwtProperties.passwordResetTokenValidity();
   }
 
-  public String createAccessToken(Long memberId) {
-    return createToken(memberId, accessTokenValidity);
+  public String createAccessToken(Long memberId, Instant now) {
+    return createToken(memberId, accessTokenValidity, now);
   }
 
-  public String createRefreshToken(Long memberId) {
-    return createToken(memberId, refreshTokenValidity);
+  public String createRefreshToken(Long memberId, Instant now) {
+    return createToken(memberId, refreshTokenValidity, now);
   }
 
-  /** 토큰이 유효하면 회원 ID 를, 만료/위변조 시 비어있는 Optional 을 반환한다. */
+  public String createPasswordResetToken(Long memberId, Instant now) {
+    return Jwts.builder()
+        .id(UUID.randomUUID().toString())
+        .subject(String.valueOf(memberId))
+        .claim(PURPOSE_CLAIM, PASSWORD_RESET_PURPOSE)
+        .issuedAt(Date.from(now))
+        .expiration(Date.from(now.plus(passwordResetTokenValidity)))
+        .signWith(key)
+        .compact();
+  }
+
   public Optional<Long> resolveMemberId(String token) {
     try {
       String subject = Jwts.parser()
@@ -51,13 +65,28 @@ public class JwtProvider {
     }
   }
 
-  private String createToken(Long memberId, Duration validity) {
-    Date now = new Date();
-    Date expiration = new Date(now.getTime() + validity.toMillis());
+  public Optional<Long> resolvePasswordResetMemberId(String token) {
+    try {
+      Claims claims = Jwts.parser()
+          .verifyWith(key)
+          .build()
+          .parseSignedClaims(token)
+          .getPayload();
+      if (!PASSWORD_RESET_PURPOSE.equals(claims.get(PURPOSE_CLAIM, String.class))) {
+        return Optional.empty();
+      }
+      return Optional.of(Long.valueOf(claims.getSubject()));
+    } catch (JwtException | IllegalArgumentException e) {
+      return Optional.empty();
+    }
+  }
+
+  private String createToken(Long memberId, Duration validity, Instant now) {
     return Jwts.builder()
+        .id(UUID.randomUUID().toString())
         .subject(String.valueOf(memberId))
-        .issuedAt(now)
-        .expiration(expiration)
+        .issuedAt(Date.from(now))
+        .expiration(Date.from(now.plus(validity)))
         .signWith(key)
         .compact();
   }

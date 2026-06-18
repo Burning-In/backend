@@ -11,12 +11,6 @@ public class AuthV1Dto {
 
   }
 
-  public record LoginResponse(
-      String accessToken
-  ) {
-
-  }
-
   // ===================== Register =====================
 
   public record RegisterRequest(
@@ -24,12 +18,6 @@ public class AuthV1Dto {
       String password,
       String name,
       String phoneNumber
-  ) {
-
-  }
-
-  public record RegisterResponse(
-      String accessToken
   ) {
 
   }
@@ -49,20 +37,18 @@ public class AuthV1Dto {
 
   }
 
-  // ===================== Find Password =====================
+  // ===================== Reset Password =====================
 
-  public record FindPasswordRequest(
+  public record ResetPasswordVerifyRequest(
       String email,
-      String name
+      String name,
+      String phoneNumber
   ) {
 
   }
 
-
-  // ===================== Refresh =====================
-
-  public record RefreshResponse(
-      String accessToken
+  public record ResetPasswordConfirmRequest(
+      String newPassword
   ) {
 
   }

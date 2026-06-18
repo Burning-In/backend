@@ -9,11 +9,14 @@ import com.momentum.infrastructure.auth.JwtProvider;
 import com.momentum.interfaces.api.auth.AuthV1Dto.AccountResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailResponse;
-import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterRequest;
+import com.momentum.interfaces.api.auth.AuthV1Dto.ResetPasswordConfirmRequest;
+import com.momentum.interfaces.api.auth.AuthV1Dto.ResetPasswordVerifyRequest;
 import com.momentum.support.error.CoreException;
 import com.momentum.support.error.ErrorType;
+import java.time.Duration;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,26 +114,139 @@ class AuthServiceTest {
   }
 
   @Test
-  @DisplayName("비밀번호 찾기는 회원 존재 여부와 무관하게 예외 없이 처리된다")
-  void findPasswordDoesNotThrow() {
-    authService.findPassword(new FindPasswordRequest("none@momentum.com", "없는사람"));
+  @DisplayName("1단계 본인확인 통과 후 2단계에서 비밀번호가 변경된다")
+  void passwordResetTwoStepChangesPassword() {
+    authService.register(new RegisterRequest("reset@momentum.com", "oldpw", "홍길동", "01099998888"));
+
+    String resetToken = authService.verifyForPasswordReset(
+        new ResetPasswordVerifyRequest("reset@momentum.com", "홍길동", "01099998888"));
+    authService.confirmPasswordReset(resetToken, new ResetPasswordConfirmRequest("newpw1234"));
+
+    Member member = memberRepository.findByEmail("reset@momentum.com").orElseThrow();
+    assertThat(passwordEncoder.matches("newpw1234", member.getPassword())).isTrue();
+    assertThat(passwordEncoder.matches("oldpw", member.getPassword())).isFalse();
   }
 
   @Test
-  @DisplayName("유효한 refreshToken으로 새 accessToken을 발급한다")
-  void refreshIssuesNewAccessToken() {
+  @DisplayName("1단계 본인확인 정보가 일치하지 않으면 NOT_FOUND")
+  void passwordResetVerifyThrowsWhenIdentityMismatch() {
+    authService.register(new RegisterRequest("reset2@momentum.com", "oldpw", "홍길동", "01099998888"));
+
+    assertThatThrownBy(() -> authService.verifyForPasswordReset(
+        new ResetPasswordVerifyRequest("reset2@momentum.com", "다른이름", "01099998888")))
+        .isInstanceOf(CoreException.class)
+        .extracting(e -> ((CoreException) e).getErrorType())
+        .isEqualTo(ErrorType.NOT_FOUND);
+  }
+
+  @Test
+  @DisplayName("2단계에서 새 비밀번호가 비어있으면 BAD_REQUEST")
+  void passwordResetConfirmThrowsWhenNewPasswordBlank() {
+    authService.register(new RegisterRequest("reset3@momentum.com", "oldpw", "홍길동", "01099998888"));
+    String resetToken = authService.verifyForPasswordReset(
+        new ResetPasswordVerifyRequest("reset3@momentum.com", "홍길동", "01099998888"));
+
+    assertThatThrownBy(() ->
+        authService.confirmPasswordReset(resetToken, new ResetPasswordConfirmRequest("  ")))
+        .isInstanceOf(CoreException.class)
+        .extracting(e -> ((CoreException) e).getErrorType())
+        .isEqualTo(ErrorType.BAD_REQUEST);
+  }
+
+  @Test
+  @DisplayName("2단계에서 재설정 토큰이 없으면 UNAUTHORIZED")
+  void passwordResetConfirmThrowsWhenTokenMissing() {
+    assertThatThrownBy(() ->
+        authService.confirmPasswordReset(null, new ResetPasswordConfirmRequest("newpw1234")))
+        .isInstanceOf(CoreException.class)
+        .extracting(e -> ((CoreException) e).getErrorType())
+        .isEqualTo(ErrorType.UNAUTHORIZED);
+  }
+
+  @Test
+  @DisplayName("재설정 토큰 대신 일반 accessToken을 쓰면(용도 불일치) UNAUTHORIZED")
+  void passwordResetConfirmRejectsNonResetToken() {
+    authService.register(new RegisterRequest("reset4@momentum.com", "oldpw", "홍길동", "01099998888"));
+    Member member = memberRepository.findByEmail("reset4@momentum.com").orElseThrow();
+    String accessToken = jwtProvider.createAccessToken(member.getId(), Instant.now());
+
+    assertThatThrownBy(() ->
+        authService.confirmPasswordReset(accessToken, new ResetPasswordConfirmRequest("newpw1234")))
+        .isInstanceOf(CoreException.class)
+        .extracting(e -> ((CoreException) e).getErrorType())
+        .isEqualTo(ErrorType.UNAUTHORIZED);
+  }
+
+  @Test
+  @DisplayName("만료된 재설정 토큰이면 UNAUTHORIZED")
+  void passwordResetConfirmThrowsWhenTokenExpired() {
+    authService.register(new RegisterRequest("reset5@momentum.com", "oldpw", "홍길동", "01099998888"));
+    Member member = memberRepository.findByEmail("reset5@momentum.com").orElseThrow();
+    // 재설정 토큰 유효기간(10분)보다 더 과거에 발급 → 이미 만료
+    String expired = jwtProvider.createPasswordResetToken(
+        member.getId(), Instant.now().minus(Duration.ofMinutes(11)));
+
+    assertThatThrownBy(() ->
+        authService.confirmPasswordReset(expired, new ResetPasswordConfirmRequest("newpw1234")))
+        .isInstanceOf(CoreException.class)
+        .extracting(e -> ((CoreException) e).getErrorType())
+        .isEqualTo(ErrorType.UNAUTHORIZED);
+  }
+
+  @Test
+  @DisplayName("유효한 refreshToken으로 새 access/refresh 토큰 쌍을 발급한다")
+  void refreshIssuesNewTokens() {
     AuthTokens tokens = authService.register(register("refresh@momentum.com", "pw1234"));
     Long memberId = jwtProvider.resolveMemberId(tokens.refreshToken()).orElseThrow();
 
-    String accessToken = authService.refreshAccessToken(tokens.refreshToken());
+    AuthTokens refreshed = authService.reissueRefreshToken(tokens.refreshToken());
 
-    assertThat(jwtProvider.resolveMemberId(accessToken)).contains(memberId);
+    assertThat(jwtProvider.resolveMemberId(refreshed.accessToken())).contains(memberId);
+    assertThat(jwtProvider.resolveMemberId(refreshed.refreshToken())).contains(memberId);
+  }
+
+  @Test
+  @DisplayName("회전(rotation) 후 기존 refreshToken은 무효화되어 재사용할 수 없다")
+  void refreshRotationInvalidatesOldToken() {
+    AuthTokens tokens = authService.register(register("rotate@momentum.com", "pw1234"));
+
+    authService.reissueRefreshToken(tokens.refreshToken());
+
+    assertThatThrownBy(() -> authService.reissueRefreshToken(tokens.refreshToken()))
+        .isInstanceOf(CoreException.class)
+        .extracting(e -> ((CoreException) e).getErrorType())
+        .isEqualTo(ErrorType.UNAUTHORIZED);
+  }
+
+  @Test
+  @DisplayName("로그아웃으로 무효화된 refreshToken이면 UNAUTHORIZED")
+  void refreshThrowsWhenTokenRevoked() {
+    AuthTokens tokens = authService.register(register("revoked@momentum.com", "pw1234"));
+    authService.logout(tokens.refreshToken());
+
+    assertThatThrownBy(() -> authService.reissueRefreshToken(tokens.refreshToken()))
+        .isInstanceOf(CoreException.class)
+        .extracting(e -> ((CoreException) e).getErrorType())
+        .isEqualTo(ErrorType.UNAUTHORIZED);
+  }
+
+  @Test
+  @DisplayName("화이트리스트에 없는(저장되지 않은) refreshToken은 서명이 유효해도 UNAUTHORIZED")
+  void refreshThrowsWhenTokenNotWhitelisted() {
+    authService.register(register("nowhitelist@momentum.com", "pw1234"));
+    Member member = memberRepository.findByEmail("nowhitelist@momentum.com").orElseThrow();
+    String unsavedRefresh = jwtProvider.createRefreshToken(member.getId(), Instant.now());
+
+    assertThatThrownBy(() -> authService.reissueRefreshToken(unsavedRefresh))
+        .isInstanceOf(CoreException.class)
+        .extracting(e -> ((CoreException) e).getErrorType())
+        .isEqualTo(ErrorType.UNAUTHORIZED);
   }
 
   @Test
   @DisplayName("유효하지 않은 refreshToken이면 UNAUTHORIZED")
   void refreshThrowsWhenTokenInvalid() {
-    assertThatThrownBy(() -> authService.refreshAccessToken("invalid.token.value"))
+    assertThatThrownBy(() -> authService.reissueRefreshToken("invalid.token.value"))
         .isInstanceOf(CoreException.class)
         .extracting(e -> ((CoreException) e).getErrorType())
         .isEqualTo(ErrorType.UNAUTHORIZED);
@@ -139,7 +255,7 @@ class AuthServiceTest {
   @Test
   @DisplayName("refreshToken이 없으면 UNAUTHORIZED")
   void refreshThrowsWhenTokenMissing() {
-    assertThatThrownBy(() -> authService.refreshAccessToken(null))
+    assertThatThrownBy(() -> authService.reissueRefreshToken(null))
         .isInstanceOf(CoreException.class);
   }
 

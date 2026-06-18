@@ -1,27 +1,25 @@
 package com.momentum.interfaces.api.auth;
 
+import static org.springframework.boot.web.server.Cookie.SameSite.STRICT;
+
 import com.momentum.application.AuthService;
 import com.momentum.application.AuthTokens;
 import com.momentum.config.JwtProperties;
+import com.momentum.infrastructure.auth.JwtAuthenticationFilter;
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.AccountResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.FindEmailResponse;
-import com.momentum.interfaces.api.auth.AuthV1Dto.FindPasswordRequest;
 import com.momentum.interfaces.api.auth.AuthV1Dto.LoginRequest;
-import com.momentum.interfaces.api.auth.AuthV1Dto.LoginResponse;
-import com.momentum.interfaces.api.auth.AuthV1Dto.RefreshResponse;
 import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterRequest;
-import com.momentum.interfaces.api.auth.AuthV1Dto.RegisterResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import com.momentum.interfaces.api.auth.AuthV1Dto.ResetPasswordConfirmRequest;
+import com.momentum.interfaces.api.auth.AuthV1Dto.ResetPasswordVerifyRequest;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,41 +32,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthV1Controller implements AuthV1ApiSpec {
 
+  private static final String ACCESS_TOKEN_COOKIE = JwtAuthenticationFilter.ACCESS_TOKEN_COOKIE;
   private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
+  private static final String PASSWORD_RESET_COOKIE = "passwordResetToken";
+  private static final String ACCESS_TOKEN_PATH = "/";
   private static final String REFRESH_TOKEN_PATH = "/api/v1/auth";
-  private static final String CSRF_COOKIE = "csrfToken";
+  private static final String PASSWORD_RESET_PATH = "/api/v1/auth/password";
 
   private final AuthService authService;
   private final JwtProperties jwtProperties;
-  private final CsrfTokenRepository csrfTokenRepository;
-
-  @GetMapping("/csrf")
-  @Override
-  public ResponseEntity<ApiResponse<Void>> csrf(HttpServletRequest request) {
-    CsrfToken token = csrfTokenRepository.generateToken(request);
-    // CSRF 토큰은 프론트가 읽어 X-CSRF-Token 헤더로 echo 해야 하므로 HttpOnly 가 아니다.
-    ResponseCookie cookie = ResponseCookie.from(CSRF_COOKIE, token.getToken())
-        .httpOnly(false)
-        .path("/")
-        .sameSite("Lax")
-        .build();
-    return withCookie(cookie, null);
-  }
 
   @PostMapping("/login")
   @Override
-  public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
-    AuthTokens tokens = authService.login(request);
-    return withCookie(refreshTokenCookie(tokens.refreshToken(), jwtProperties.refreshTokenValidity()),
-        new LoginResponse(tokens.accessToken()));
+  public ResponseEntity<ApiResponse<Void>> login(@RequestBody LoginRequest request) {
+    return issueTokenCookies(authService.login(request));
   }
 
   @PostMapping("/register")
   @Override
-  public ResponseEntity<ApiResponse<RegisterResponse>> register(@RequestBody RegisterRequest request) {
-    AuthTokens tokens = authService.register(request);
-    return withCookie(refreshTokenCookie(tokens.refreshToken(), jwtProperties.refreshTokenValidity()),
-        new RegisterResponse(tokens.accessToken()));
+  public ResponseEntity<ApiResponse<Void>> register(@RequestBody RegisterRequest request) {
+    return issueTokenCookies(authService.register(request));
   }
 
   @PostMapping("/email/find")
@@ -77,27 +60,49 @@ public class AuthV1Controller implements AuthV1ApiSpec {
     return ApiResponse.success(authService.findEmail(request));
   }
 
-  @PostMapping("/password/find")
+  @PostMapping("/password/verify")
   @Override
-  public ApiResponse<Void> findPassword(@RequestBody FindPasswordRequest request) {
-    authService.findPassword(request);
-    return ApiResponse.success(null);
+  public ResponseEntity<ApiResponse<Void>> verifyForPasswordReset(
+      @RequestBody ResetPasswordVerifyRequest request) {
+    String resetToken = authService.verifyForPasswordReset(request);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, secureCookie(PASSWORD_RESET_COOKIE, resetToken,
+            PASSWORD_RESET_PATH, jwtProperties.passwordResetTokenValidity()).toString())
+        .body(ApiResponse.success(null));
+  }
+
+  @PostMapping("/password/reset")
+  @Override
+  public ResponseEntity<ApiResponse<Void>> resetPassword(
+      @CookieValue(name = PASSWORD_RESET_COOKIE, required = false) String resetToken,
+      @RequestBody ResetPasswordConfirmRequest request) {
+    authService.confirmPasswordReset(resetToken, request);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE,
+            secureCookie(PASSWORD_RESET_COOKIE, "", PASSWORD_RESET_PATH, Duration.ZERO).toString())
+        .body(ApiResponse.success(null));
   }
 
   @PostMapping("/refresh")
   @Override
-  public ApiResponse<RefreshResponse> refresh(
+  public ResponseEntity<ApiResponse<Void>> refresh(
       @CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken
   ) {
-    String accessToken = authService.refreshAccessToken(refreshToken);
-    return ApiResponse.success(new RefreshResponse(accessToken));
+    return issueTokenCookies(authService.reissueRefreshToken(refreshToken));
   }
 
   @PostMapping("/logout")
   @Override
-  public ResponseEntity<ApiResponse<Void>> logout() {
-    // maxAge 0 인 빈 쿠키로 refreshToken 을 만료시킨다.
-    return withCookie(refreshTokenCookie("", Duration.ZERO), null);
+  public ResponseEntity<ApiResponse<Void>> logout(
+      @CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken
+  ) {
+    authService.logout(refreshToken);
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE,
+            secureCookie(ACCESS_TOKEN_COOKIE, "", ACCESS_TOKEN_PATH, Duration.ZERO).toString())
+        .header(HttpHeaders.SET_COOKIE,
+            secureCookie(REFRESH_TOKEN_COOKIE, "", REFRESH_TOKEN_PATH, Duration.ZERO).toString())
+        .body(ApiResponse.success(null));
   }
 
   @GetMapping("/account")
@@ -106,18 +111,24 @@ public class AuthV1Controller implements AuthV1ApiSpec {
     return ApiResponse.success(authService.getAccount(memberId));
   }
 
-  private ResponseCookie refreshTokenCookie(String value, Duration maxAge) {
-    return ResponseCookie.from(REFRESH_TOKEN_COOKIE, value)
-        .httpOnly(true)
-        .path(REFRESH_TOKEN_PATH)
-        .maxAge(maxAge)
-        .sameSite("Lax")
-        .build();
+  private ResponseEntity<ApiResponse<Void>> issueTokenCookies(AuthTokens tokens) {
+    ResponseCookie access = secureCookie(ACCESS_TOKEN_COOKIE, tokens.accessToken(),
+        ACCESS_TOKEN_PATH, jwtProperties.accessTokenValidity());
+    ResponseCookie refresh = secureCookie(REFRESH_TOKEN_COOKIE, tokens.refreshToken(),
+        REFRESH_TOKEN_PATH, jwtProperties.refreshTokenValidity());
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, access.toString())
+        .header(HttpHeaders.SET_COOKIE, refresh.toString())
+        .body(ApiResponse.success(null));
   }
 
-  private <T> ResponseEntity<ApiResponse<T>> withCookie(ResponseCookie cookie, T data) {
-    return ResponseEntity.ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.toString())
-        .body(ApiResponse.success(data));
+  private ResponseCookie secureCookie(String name, String value, String path, Duration maxAge) {
+    return ResponseCookie.from(name, value)
+        .httpOnly(true)
+        .secure(true)
+        .path(path)
+        .maxAge(maxAge)
+        .sameSite(STRICT.attributeValue())
+        .build();
   }
 }
