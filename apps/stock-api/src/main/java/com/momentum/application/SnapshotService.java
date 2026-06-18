@@ -32,11 +32,11 @@ public class SnapshotService {
 
   @Transactional
   public SnapshotCreateResponse create(SnapshotCreateRequest request) {
-    Stock stock = stockRepository.findById(request.stockId())
-        .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "종목을 찾을 수 없습니다: " + request.stockId()));
+    Stock stock = stockRepository.findByStockCode(request.stockCode())
+        .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "종목을 찾을 수 없습니다: " + request.stockCode()));
 
     long capturedPrice = stockCandleRepository.findRecentCandle(stock, LocalDate.now())
-        .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "최신 캔들을 찾을 수 없습니다: " + request.stockId()))
+        .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "최신 캔들을 찾을 수 없습니다: " + request.stockCode()))
         .getClosePrice();
 
     List<StockSnapShot> references = snapshotRepository.findAllByIds(request.referenceSnapshotIds());
@@ -55,7 +55,12 @@ public class SnapshotService {
     List<Long> referenceSnapshotIds = snapshot.getReferences().stream()
         .map(reference -> reference.getReferenced().getId())
         .toList();
-    return new SnapshotDetailResponse(referenceSnapshotIds, snapshot.getRecordedAt(),
+    return new SnapshotDetailResponse(
+        snapshot.getStock().getName(),
+        snapshot.getStock().getCode(),
+        snapshot.getJudgment(),
+        referenceSnapshotIds,
+        snapshot.getRecordedAt(),
         snapshot.getRetrospective());
   }
 
@@ -70,6 +75,7 @@ public class SnapshotService {
         .map(snapshot -> new SnapshotListItem(
             snapshot.getId(),
             snapshot.getStock().getName(),
+            snapshot.getStock().getCode(),
             snapshot.getCapturedRegime(),
             snapshot.getJudgment(),
             snapshot.getRecordedAt(),
