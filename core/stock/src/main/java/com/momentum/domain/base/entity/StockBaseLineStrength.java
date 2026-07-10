@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StockBaseLineStrength {
+public class StockBaseLineStrength implements Comparable<StockBaseLineStrength> {
 
   private Long touchCount;
   private Long accumulatedVolume;
@@ -39,5 +39,10 @@ public class StockBaseLineStrength {
 
     return normalizedVolume.multiply(BigDecimal.valueOf(log))
         .setScale(4, RoundingMode.HALF_UP);
+  }
+
+  @Override
+  public int compareTo(StockBaseLineStrength other) {
+    return this.strength.compareTo(other.strength);
   }
 }

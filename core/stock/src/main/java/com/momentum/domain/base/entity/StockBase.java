@@ -116,12 +116,13 @@ public class StockBase extends BaseEntity {
   }
 
   private StockBaseLine updateLineStrengthOrCreate(long averageVolume, double priceThreshold, StockPricePoint point) {
-    Optional<StockBaseLine> matchedLine = this.stockBaseLines.stream()
-        .filter(line -> line.isMatched(point, priceThreshold))
+    Optional<StockBaseLine> matchedLineOpt = this.stockBaseLines.stream()
+        .filter(line -> line.matches(point, priceThreshold))
         .findFirst();
-    if (matchedLine.isPresent()) {
-      matchedLine.get().updateStrength(point.getVolume(), averageVolume);
-      return matchedLine.get();
+    if (matchedLineOpt.isPresent()) {
+      StockBaseLine matchedLine = matchedLineOpt.get();
+      matchedLine.updateStrength(point.getVolume(), averageVolume);
+      return matchedLine;
     }
 
     StockBaseLine newLine = StockBaseLine.create(point, averageVolume, this);
@@ -130,25 +131,25 @@ public class StockBase extends BaseEntity {
   }
 
   private void updateHighestLine(StockBaseLine line) {
-    if (line.getLineType() == StockBaseLineType.RESISTANCE
+    if (line.getType() == StockBaseLineType.RESISTANCE
         && line.getPrice() > this.highestResistanceLine.getPrice()) {
       this.highestResistanceLine = line;
     }
   }
 
   private void updateLowestLine(StockBaseLine line) {
-    if (line.getLineType() == StockBaseLineType.SUPPORT
+    if (line.getType() == StockBaseLineType.SUPPORT
         && line.getPrice() < this.lowestSupportLine.getPrice()) {
       this.lowestSupportLine = line;
     }
   }
 
   private void updateStrongestLine(StockBaseLine line) {
-    if (line.getLineType() == StockBaseLineType.RESISTANCE
+    if (line.getType() == StockBaseLineType.RESISTANCE
         && line.isStrongerThan(this.strongestResistanceLine)) {
       this.strongestResistanceLine = line;
     }
-    if (line.getLineType() == StockBaseLineType.SUPPORT
+    if (line.getType() == StockBaseLineType.SUPPORT
         && line.isStrongerThan(this.strongestSupportLine)) {
       this.strongestSupportLine = line;
     }
