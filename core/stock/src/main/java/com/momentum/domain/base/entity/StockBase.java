@@ -1,6 +1,5 @@
 package com.momentum.domain.base.entity;
 
-import static com.momentum.domain.base.entity.StockBaseLine.createLineByPointType;
 import static java.util.Objects.requireNonNull;
 
 import com.momentum.domain.BaseEntity;
@@ -16,8 +15,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,10 +56,8 @@ public class StockBase extends BaseEntity {
   private List<StockPricePoint> stockPricePoints;
 
   private StockBase(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long stageLevel, long baseAverageVolume) {
-    StockBaseLine resistance = StockBaseLine.resistance(highPricePoint.getPrice(), highPricePoint.getVolume(),
-        baseAverageVolume, this);
-    StockBaseLine support = StockBaseLine.support(lowPricePoint.getPrice(), lowPricePoint.getVolume(),
-        baseAverageVolume, this);
+    StockBaseLine resistance = StockBaseLine.create(highPricePoint, baseAverageVolume, this);
+    StockBaseLine support = StockBaseLine.create(lowPricePoint, baseAverageVolume, this);
     this.stockBaseKind = requireNonNull(resolveBaseKind(highPricePoint.getPrice(), lowPricePoint.getPrice()));
     this.stageLevel = stageLevel;
     this.stock = requireNonNull(highPricePoint.getStock());
@@ -101,13 +100,17 @@ public class StockBase extends BaseEntity {
     if (points == null || points.isEmpty()) {
       return;
     }
-
+    Set<StockPricePoint> previousPoints = new HashSet<>(this.stockPricePoints);
     for (StockPricePoint point : points) {
+      if (previousPoints.contains(point)) {
+        continue;
+      }
       point.assignBase(this);
       this.stockPricePoints.add(point);
       StockBaseLine line = updateLineStrengthOrCreate(averageVolume, priceThreshold, point);
-      updateHighAndLowLine(line);
-      updateStrongestLines(line);
+      updateHighestLine(line);
+      updateLowestLine(line);
+      updateStrongestLine(line);
     }
     this.stockBaseKind = resolveBaseKind(this.highestResistanceLine.getPrice(), this.lowestSupportLine.getPrice());
   }
@@ -121,23 +124,26 @@ public class StockBase extends BaseEntity {
       return matchedLine.get();
     }
 
-    StockBaseLine newLine = createLineByPointType(point, averageVolume, this);
+    StockBaseLine newLine = StockBaseLine.create(point, averageVolume, this);
     this.stockBaseLines.add(newLine);
     return newLine;
   }
 
-  private void updateHighAndLowLine(StockBaseLine line) {
+  private void updateHighestLine(StockBaseLine line) {
     if (line.getLineType() == StockBaseLineType.RESISTANCE
         && line.getPrice() > this.highestResistanceLine.getPrice()) {
       this.highestResistanceLine = line;
     }
+  }
+
+  private void updateLowestLine(StockBaseLine line) {
     if (line.getLineType() == StockBaseLineType.SUPPORT
         && line.getPrice() < this.lowestSupportLine.getPrice()) {
       this.lowestSupportLine = line;
     }
   }
 
-  private void updateStrongestLines(StockBaseLine line) {
+  private void updateStrongestLine(StockBaseLine line) {
     if (line.getLineType() == StockBaseLineType.RESISTANCE
         && line.isStrongerThan(this.strongestResistanceLine)) {
       this.strongestResistanceLine = line;
