@@ -22,6 +22,13 @@ public class StepMonitorListener implements StepExecutionListener {
 
     @Override
     public ExitStatus afterStep(@Nonnull StepExecution stepExecution) {
+        var endTime = stepExecution.getEndTime() == null
+                ? java.time.LocalDateTime.now() : stepExecution.getEndTime();
+        long seconds = java.time.Duration.between(stepExecution.getStartTime(), endTime).getSeconds();
+        log.info("Step '{}' 종료 — {}초, read={}, write={}",
+                stepExecution.getStepName(), seconds,
+                stepExecution.getReadCount(), stepExecution.getWriteCount());
+
         if (!stepExecution.getFailureExceptions().isEmpty()) {
             var jobName = stepExecution.getJobExecution().getJobInstance().getJobName();
             var exceptions = stepExecution.getFailureExceptions().stream()

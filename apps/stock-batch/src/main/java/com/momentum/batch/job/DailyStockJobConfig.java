@@ -1,5 +1,6 @@
 package com.momentum.batch.job;
 
+import com.momentum.batch.listener.StepMonitorListener;
 import com.momentum.batch.job.eps.StockEpsItemProcessor;
 import com.momentum.batch.job.eps.StockEpsItemWriter;
 import com.momentum.batch.job.ma.StockMaItemProcessor;
@@ -60,6 +61,8 @@ public class DailyStockJobConfig {
 
   private final StockRsTasklet stockRsTasklet;
 
+  private final StepMonitorListener stepMonitorListener;
+
   private final StockMaItemProcessor stockMaItemProcessor;
   private final StockMaItemWriter stockMaItemWriter;
 
@@ -97,6 +100,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockCandleItemProcessor)
         .writer(stockCandleItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -107,6 +111,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockPricePointItemProcessor)
         .writer(stockPricePointItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -117,6 +122,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockVcpItemProcessor)
         .writer(stockVcpItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -127,6 +133,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockRegimeItemProcessor)
         .writer(stockRegimeItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -137,6 +144,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockRankScoreProcessor)
         .writer(stockRankScoreWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -147,6 +155,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockEpsItemProcessor)
         .writer(stockEpsItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -154,6 +163,7 @@ public class DailyStockJobConfig {
   public Step stockRsStep() {
     return new StepBuilder("stockRsStep", jobRepository)
         .tasklet(stockRsTasklet, transactionManager)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -164,6 +174,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockMaItemProcessor)
         .writer(stockMaItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 }
