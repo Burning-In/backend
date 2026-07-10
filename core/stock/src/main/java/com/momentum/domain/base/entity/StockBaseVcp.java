@@ -9,35 +9,55 @@ import lombok.Getter;
 @Embeddable
 public class StockBaseVcp {
 
+  private static final int MOVING_AVERAGE_WINDOW = 2;
+
   private boolean isVcp = false;
 
   public void updateVcp(List<Long> volatilityHistories) {
-    if (volatilityHistories.size() == 1) {
-      this.isVcp = false;
-    } else if (volatilityHistories.size() == 2) {
-      this.isVcp = volatilityHistories.get(0) > volatilityHistories.get(1);
-    } else {
-      this.isVcp = calculateSlope(movingAverage(volatilityHistories)) < 0;
+    if (volatilityHistories == null || volatilityHistories.size() < 2) {
+      return;
     }
+    if (volatilityHistories.size() == 2) {
+      this.isVcp = volatilityHistories.get(0) > volatilityHistories.get(1);
+      return;
+    }
+    List<Double> movingAverages = calculateMovingAverage(volatilityHistories);
+    this.isVcp = calculateMovingAverageTrendSlope(movingAverages) < 0;
   }
 
-  private List<Double> movingAverage(List<Long> histories) {
+  private List<Double> calculateMovingAverage(List<Long> histories) {
+    if (histories == null || histories.size() < MOVING_AVERAGE_WINDOW) {
+      return List.of();
+    }
     List<Double> result = new ArrayList<>();
-    for (int i = 0; i < histories.size() - 1; i++) {
-      result.add((histories.get(i) + histories.get(i + 1)) / 2.0);
+    long sum = 0;
+    for (int i = 0; i < MOVING_AVERAGE_WINDOW; i++) {
+      sum += histories.get(i);
+    }
+    result.add((double) sum / MOVING_AVERAGE_WINDOW);
+    for (int i = MOVING_AVERAGE_WINDOW; i < histories.size(); i++) {
+      sum += (int) (histories.get(i) - histories.get(i - MOVING_AVERAGE_WINDOW));
+      result.add((double) sum / MOVING_AVERAGE_WINDOW);
     }
     return result;
   }
 
-  private double calculateSlope(List<Double> values) {
-    int n = values.size();
-    double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-    for (int i = 0; i < n; i++) {
-      sumX += i;
-      sumY += values.get(i);
-      sumXY += (double) i * values.get(i);
-      sumX2 += (double) i * i;
+  private double calculateMovingAverageTrendSlope(List<Double> movingAverages) {
+    if (movingAverages == null || movingAverages.isEmpty()) {
+      return 0;
     }
-    return (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+
+    int n = movingAverages.size();
+    double indexSum = 0;
+    double valueSum = 0;
+    double indexValueProductSum = 0;
+    double indexSquareSum = 0;
+    for (int i = 0; i < n; i++) {
+      indexSum += i;
+      valueSum += movingAverages.get(i);
+      indexValueProductSum += (double) i * movingAverages.get(i);
+      indexSquareSum += (double) i * i;
+    }
+    return (n * indexValueProductSum - indexSum * valueSum) / (n * indexSquareSum - indexSum * indexSum);
   }
 }
