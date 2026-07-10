@@ -71,7 +71,7 @@ public class StockBase extends BaseEntity {
     this.stockBaseLines = new ArrayList<>(List.of(resistance, support));
   }
 
-  public static StockBase initOrLower(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long averageVolume) {
+  public static StockBase init(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long averageVolume) {
     return StockBase.create(highPricePoint, lowPricePoint, 1, averageVolume);
   }
 
@@ -150,7 +150,10 @@ public class StockBase extends BaseEntity {
 
   private StockBaseKind resolveBaseKind(long highPrice, long lowPrice) {
     double volatility = (double) (highPrice - lowPrice) / lowPrice * 100;
-    return volatility >= BASE_VOLATILITY_THRESHOLD ? StockBaseKind.BASE : StockBaseKind.PULLBACK;
+    if (volatility >= BASE_VOLATILITY_THRESHOLD) {
+      return StockBaseKind.BASE;
+    }
+    return StockBaseKind.PULLBACK;
   }
 
   public boolean isVcp() {
