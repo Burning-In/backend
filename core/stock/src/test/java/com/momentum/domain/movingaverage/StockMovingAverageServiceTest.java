@@ -1,8 +1,8 @@
-package com.momentum.domain.ma;
+package com.momentum.domain.movingaverage;
 
-import static com.momentum.domain.ma.StockMovingAveragePeriod.MA_150;
-import static com.momentum.domain.ma.StockMovingAveragePeriod.MA_200;
-import static com.momentum.domain.ma.StockMovingAveragePeriod.MA_50;
+import static com.momentum.domain.movingaverage.StockMovingAveragePeriod.MA_150;
+import static com.momentum.domain.movingaverage.StockMovingAveragePeriod.MA_200;
+import static com.momentum.domain.movingaverage.StockMovingAveragePeriod.MA_50;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.stock.Stock;

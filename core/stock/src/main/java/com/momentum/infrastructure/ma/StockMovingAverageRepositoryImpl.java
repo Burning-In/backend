@@ -1,7 +1,7 @@
 package com.momentum.infrastructure.ma;
 
-import com.momentum.domain.ma.StockMovingAverage;
-import com.momentum.domain.ma.StockMovingAverageRepository;
+import com.momentum.domain.movingaverage.StockMovingAverage;
+import com.momentum.domain.movingaverage.StockMovingAverageRepository;
 import com.momentum.domain.stock.Stock;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

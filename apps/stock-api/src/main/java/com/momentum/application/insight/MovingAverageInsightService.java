@@ -1,8 +1,8 @@
 package com.momentum.application.insight;
 
-import com.momentum.domain.ma.StockMovingAverage;
-import com.momentum.domain.ma.StockMovingAveragePeriod;
-import com.momentum.domain.ma.StockMovingAverageRepository;
+import com.momentum.domain.movingaverage.StockMovingAverage;
+import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
+import com.momentum.domain.movingaverage.StockMovingAverageRepository;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stockcandle.StockCandleRepository;

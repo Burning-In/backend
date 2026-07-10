@@ -1,4 +1,4 @@
-package com.momentum.domain.ma;
+package com.momentum.domain.movingaverage;
 
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockCandleRepository;

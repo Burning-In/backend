@@ -1,4 +1,4 @@
-package com.momentum.domain.ma;
+package com.momentum.domain.movingaverage;
 
 
 import lombok.Getter;
