@@ -49,7 +49,7 @@ class SnapshotV1ControllerTest {
   @Test
   @DisplayName("스냅샷 생성 API 해피케이스")
   void createSnapshot() throws Exception {
-    Stock stock = saveStock("000001", BREAKOUT_READY);
+    Stock stock = saveStock("000040", BREAKOUT_READY);
     saveCandle(stock, 10_000L);
     String body = objectMapper.writeValueAsString(
         new SnapshotCreateRequest(stock.getCode(), BUY, List.of(), "회고"));
@@ -66,7 +66,7 @@ class SnapshotV1ControllerTest {
   @Test
   @DisplayName("스냅샷 상세 조회 API 해피케이스")
   void getSnapshotDetail() {
-    Stock stock = saveStock("000002", BREAKOUT_READY);
+    Stock stock = saveStock("000050", BREAKOUT_READY);
     StockSnapShot snapshot = snapshotRepository.save(
         StockSnapShot.create(stock, 10_000L, BUY, List.of(), RECORDED_AT, "회고내용"));
 
@@ -79,7 +79,7 @@ class SnapshotV1ControllerTest {
   @Test
   @DisplayName("스냅샷 목록 조회 API 해피케이스 (레짐 필터 + 카운트)")
   void getSnapshotList() {
-    Stock stock = saveStock("000003", BREAKOUT_READY);
+    Stock stock = saveStock("000070", BREAKOUT_READY);
     saveSnapshot(stock, 100L, BUY);
     saveSnapshot(stock, 200L, SELL);
 
@@ -92,7 +92,7 @@ class SnapshotV1ControllerTest {
   @Test
   @DisplayName("스냅샷 수정 API 해피케이스")
   void updateSnapshot() throws Exception {
-    Stock stock = saveStock("000004", BREAKOUT_READY);
+    Stock stock = saveStock("000227", BREAKOUT_READY);
     StockSnapShot snapshot = saveSnapshot(stock, 10_000L, BUY);
     String body = objectMapper.writeValueAsString(
         new SnapshotUpdateRequest(snapshot.getId(), SELL, List.of(), "수정된 회고"));
@@ -107,7 +107,7 @@ class SnapshotV1ControllerTest {
   }
 
   private Stock saveStock(String code, StockRegime regime) {
-    return stockRepository.save(new Stock("종목" + code, code, regime, StockTrend.UPTREND));
+    return stockRepository.save(Stock.of("종목" + code, code, regime, StockTrend.UPTREND));
   }
 
   private void saveCandle(Stock stock, long closePrice) {

@@ -22,6 +22,7 @@ public class StockBaseStageLevelAdjuster {
     if (previousBaseOpt.isEmpty()) {
       return;
     }
+    // 애네도.. 그런데? 앞에 조건이 있음.. 근데 ㄷ안에 로직이 같아서 이거 그냥 앞에 가드로 넣으면 될 것 같은데?
     StockBase previousBase = previousBaseOpt.get();
     if (isLowPointDroppedToPreviousBase(confirmedPricePoint, currentBase, previousBase, baseBoundaryThreshold)) {
       currentBase.update(previousBase.getStageLevel(), null);

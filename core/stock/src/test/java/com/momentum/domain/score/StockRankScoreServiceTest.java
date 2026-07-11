@@ -39,7 +39,7 @@ class StockRankScoreServiceTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(new Stock("종목", "000001", StockRegime.BREAKOUT_READY, StockTrend.UPTREND));
+    stock = stockRepository.save(Stock.of("종목", "000040", StockRegime.BREAKOUT_READY, StockTrend.UPTREND));
   }
 
   @Test

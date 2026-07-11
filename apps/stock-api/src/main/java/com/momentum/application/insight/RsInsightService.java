@@ -21,7 +21,7 @@ public class RsInsightService {
   public RsResponse query(String stockCode, LocalDate at) {
     Stock stock = findStock(stockCode);
     KospiRelativeStrength rs = kospiRelativeStrengthRepository.findLatestByStock(stock)
-        .orElseThrow(() -> new NoSuchElementException("RS 데이터가 없습니다: " + stock.getCode()));
+        .orElseThrow(() -> new NoSuchElementException("RS 데이터가 없습니다: " + stock.getName()));
 
     BigDecimal rsValue = BigDecimal.valueOf(rs.getRsScore());
     return new RsResponse(rsValue, rsValue);

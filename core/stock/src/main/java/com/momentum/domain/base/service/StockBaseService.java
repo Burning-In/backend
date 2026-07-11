@@ -28,7 +28,7 @@ public class StockBaseService {
       throw new IllegalArgumentException("stockPricePoint cannot be null");
     }
     StockPricePoint confirmedPricePoint = typeConfirmedPoints.getFirst();
-    if (StockPricePointType.isNonPivot(confirmedPricePoint)) {
+    if (StockPricePointType.isNonPivot(confirmedPricePoint)) {// HighOrLow로 명확하게 해야함
       return;
     }
     Optional<StockBase> currentBaseOpt = stockBaseRepository.findCurrentBaseWithLines(confirmedPricePoint.getStock());
@@ -36,11 +36,16 @@ public class StockBaseService {
       stockBaseInitializer.resolve(confirmedPricePoint);
       return;
     }
-    confirmStockBase(confirmedPricePoint, currentBaseOpt.get());
-    stockBasePointIntegrator.resolve(confirmedPricePoint, currentBaseOpt.get(), BASE_BOUNDARY_THRESHOLD);
-    stockBaseStageLevelAdjuster.resolve(confirmedPricePoint, currentBaseOpt.get(), BASE_BOUNDARY_THRESHOLD);
+
+    StockBase currentBase = currentBaseOpt.get();
+    confirmStockBase(confirmedPricePoint, currentBase);
+    // if문이 여기에 있었으면 좋겠는데, 어떤 조건에서 이게 들어가는지 모르겠네
+    stockBasePointIntegrator.resolve(confirmedPricePoint, currentBase, BASE_BOUNDARY_THRESHOLD);
+    // 애도 그러고.. 어떤 조건에서 이게 있는거지?,, 근데 솔직히 몰라도 되긴한데 ㅋㅋ
+    stockBaseStageLevelAdjuster.resolve(confirmedPricePoint, currentBase, BASE_BOUNDARY_THRESHOLD);
   }
 
+  // 새로운거 만드는 건데 이게 맞나?, 살짝 어렵게 해놓았네
   private void confirmStockBase(StockPricePoint confirmedPricePoint, StockBase currentBase) {
     StockBase newBase = stockBaseConfirmer.resolve(confirmedPricePoint, currentBase, BASE_BOUNDARY_THRESHOLD);
     stockBaseLineTypeConvertor.convertLineType(newBase);

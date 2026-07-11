@@ -53,7 +53,7 @@ class RegimeInsightServiceTest {
   @Test
   @DisplayName("BREAKOUT_SUCCESS 레짐이면 저항선 대비 변동률 반환")
   void returnsChangeRateFromResistanceWhenBreakoutSuccess() {
-    Stock stock = saveStock("000001", StockRegime.BREAKOUT_SUCCESS, StockTrend.UPTREND);
+    Stock stock = saveStock("000040", StockRegime.BREAKOUT_SUCCESS, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 11000L);
     saveBase(stock, 10000L, 8000L);
 
@@ -69,7 +69,7 @@ class RegimeInsightServiceTest {
   @Test
   @DisplayName("DOWNSIDE_BREAK 레짐이면 지지선 대비 변동률 반환")
   void returnsChangeRateFromSupportWhenDownsideBreak() {
-    Stock stock = saveStock("000002", StockRegime.DOWNSIDE_BREAK, StockTrend.UPTREND);
+    Stock stock = saveStock("000050", StockRegime.DOWNSIDE_BREAK, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 9000L);
     saveBase(stock, 12000L, 10000L);
 
@@ -83,7 +83,7 @@ class RegimeInsightServiceTest {
   @Test
   @DisplayName("BREAKOUT_FAILED 레짐이면 저항선 대비 음수 변동률 반환")
   void returnsNegativeChangeRateFromResistanceWhenBreakoutFailed() {
-    Stock stock = saveStock("000003", StockRegime.BREAKOUT_FAILED, StockTrend.UPTREND);
+    Stock stock = saveStock("000070", StockRegime.BREAKOUT_FAILED, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 9500L);
     saveBase(stock, 10000L, 8000L);
 
@@ -95,7 +95,7 @@ class RegimeInsightServiceTest {
   }
 
   private Stock saveStock(String code, StockRegime regime, StockTrend trend) {
-    return stockRepository.save(new Stock("테스트종목", code, regime, trend));
+    return stockRepository.save(Stock.of("테스트종목", code, regime, trend));
   }
 
   private void saveCandle(Stock stock, LocalDate date, long closePrice) {

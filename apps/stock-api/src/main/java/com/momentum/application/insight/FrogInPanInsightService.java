@@ -25,7 +25,7 @@ public class FrogInPanInsightService {
   public FrogInPanResponse query(String stockCode, LocalDate at) {
     Stock stock = findStock(stockCode);
     StockRankScore rankScore = stockRankScoreRepository.findLatestByStock(stock)
-        .orElseThrow(() -> new NoSuchElementException("FIP 데이터가 없습니다: " + stock.getCode()));
+        .orElseThrow(() -> new NoSuchElementException("FIP 데이터가 없습니다: " + stock.getName()));
 
     FrogInPanScore frogInPanScore = rankScore.getFrogInPanScore();
     BigDecimal percentileRank = computePercentile(rankScore);

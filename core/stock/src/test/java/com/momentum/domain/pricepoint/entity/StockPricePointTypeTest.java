@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 class StockPricePointTypeTest {
 
-  private final Stock stock = new Stock("종목", "000001", StockRegime.BREAKOUT_READY, StockTrend.UPTREND);
+  private final Stock stock = Stock.of("종목", "000040", StockRegime.BREAKOUT_READY, StockTrend.UPTREND);
 
   @Test
   @DisplayName("직전 값이 없고 target이 직후보다 크면 HIGH")

@@ -11,20 +11,20 @@ import org.junit.jupiter.api.Test;
 class StockTest {
 
   @Test
-  @DisplayName("레짐이 실제로 바뀌면 StockStateChangedEvent를 도메인 이벤트로 등록한다")
+  @DisplayName("레짐이 바뀌면 StockStateChangedEvent를 도메인 이벤트로 등록한다")
   void registersEventWhenRegimeChanges() {
-    Stock stock = new Stock("종목", "000001", BREAKOUT_READY, StockTrend.UPTREND);
+    Stock stock = Stock.of("종목", "000040", BREAKOUT_READY, StockTrend.UPTREND);
 
     stock.update(BREAKOUT_SUCCESS);
 
     assertThat(stock.domainEvents())
-        .containsExactly(new StockStateChangedEvent("000001", BREAKOUT_READY, BREAKOUT_SUCCESS));
+        .containsExactly(new StockStateChangedEvent("000040", BREAKOUT_READY, BREAKOUT_SUCCESS));
   }
 
   @Test
   @DisplayName("같은 레짐으로 update하면 이벤트를 등록하지 않는다")
   void noEventWhenSameRegime() {
-    Stock stock = new Stock("종목", "000001", BREAKOUT_READY, StockTrend.UPTREND);
+    Stock stock = Stock.of("종목", "000040", BREAKOUT_READY, StockTrend.UPTREND);
 
     stock.update(BREAKOUT_READY);
 
@@ -34,7 +34,7 @@ class StockTest {
   @Test
   @DisplayName("UNKNOWN으로 update하면 기존 레짐을 유지하고 이벤트도 등록하지 않는다")
   void noEventWhenUnknown() {
-    Stock stock = new Stock("종목", "000001", BREAKOUT_READY, StockTrend.UPTREND);
+    Stock stock = Stock.of("종목", "000040", BREAKOUT_READY, StockTrend.UPTREND);
 
     stock.update(UNKNOWN);
 

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 class StockPricePointTest {
 
-  private final Stock stock = new Stock("종목", "000001", StockRegime.BREAKOUT_READY, StockTrend.UPTREND);
+  private final Stock stock = Stock.of("종목", "000040", StockRegime.BREAKOUT_READY, StockTrend.UPTREND);
 
   @Test
   @DisplayName("일봉으로 초기 특이점을 생성하면 종가/거래량/거래일을 그대로 가지고 타입은 INIT이다")

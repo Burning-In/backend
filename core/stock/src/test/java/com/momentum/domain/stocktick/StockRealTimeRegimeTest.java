@@ -5,12 +5,12 @@ import static com.momentum.domain.stock.StockRegime.BREAKOUT_READY;
 import static com.momentum.domain.stock.StockRegime.BREAKOUT_SUCCESS;
 import static com.momentum.domain.stock.StockRegime.DOWNSIDE_BREAK;
 import static com.momentum.domain.stock.StockRegime.UNKNOWN;
-import static com.momentum.domain.stock.StockRegime.decideRealTimeStockRegime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
+import com.momentum.domain.stock.RealtimeRegimePolicy;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockTrend;
@@ -23,13 +23,15 @@ class StockRealTimeRegimeTest {
 
   private static final double BREAKOUT_THRESHOLD = 5.0;
 
+  private final RealtimeRegimePolicy policy = new RealtimeRegimePolicy();
+
   @Test
   @DisplayName("현재가가 지지선보다 낮으면 DOWNSIDE_BREAK")
   void downsideBreak() {
     Stock stock = stockWithRegime(BREAKOUT_READY);
     StockBase stockBase = baseOf(stock, 12_000L, 10_000L);
 
-    StockRegime result = decideRealTimeStockRegime(9_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_500L);
+    StockRegime result = policy.decide(9_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_500L);
 
     assertThat(result).isEqualTo(DOWNSIDE_BREAK);
   }
@@ -40,7 +42,7 @@ class StockRealTimeRegimeTest {
     Stock stock = stockWithRegime(BREAKOUT_SUCCESS);
     StockBase stockBase = baseOf(stock, 10_000L, 8_000L);
 
-    StockRegime result = decideRealTimeStockRegime(9_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_500L);
+    StockRegime result = policy.decide(9_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_500L);
 
     assertThat(result).isEqualTo(BREAKOUT_FAILED);
   }
@@ -53,7 +55,7 @@ class StockRealTimeRegimeTest {
     markVcp(stockBase);
 
     // 저항선 상단 = 10_000 * 1.05 = 10_500, 현재가 11_000 > 10_500
-    StockRegime result = decideRealTimeStockRegime(11_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_000L);
+    StockRegime result = policy.decide(11_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_000L);
 
     assertThat(result).isEqualTo(BREAKOUT_SUCCESS);
   }
@@ -66,7 +68,7 @@ class StockRealTimeRegimeTest {
     markVcp(stockBase);
 
     // 저항선 상단 = 10_500, 현재가 10_000 <= 10_500
-    StockRegime result = decideRealTimeStockRegime(10_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_000L);
+    StockRegime result = policy.decide(10_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_000L);
 
     assertThat(result).isEqualTo(BREAKOUT_READY);
   }
@@ -77,13 +79,13 @@ class StockRealTimeRegimeTest {
     Stock stock = stockWithRegime(BREAKOUT_READY);
     StockBase stockBase = baseOf(stock, 10_000L, 8_000L);
 
-    StockRegime result = decideRealTimeStockRegime(10_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_000L);
+    StockRegime result = policy.decide(10_000L, stockBase, stock, BREAKOUT_THRESHOLD, 9_000L);
 
     assertThat(result).isEqualTo(UNKNOWN);
   }
 
   private Stock stockWithRegime(StockRegime regime) {
-    return new Stock("테스트종목", "005930", regime, StockTrend.UPTREND);
+    return Stock.of("테스트종목", "005930", regime, StockTrend.UPTREND);
   }
 
   private StockBase baseOf(Stock stock, long resistancePrice, long supportPrice) {

@@ -4,7 +4,7 @@ package com.momentum.domain.stockcandle;
 import lombok.Getter;
 
 @Getter
-public enum StockCandleTrend {
+public enum StockCandleTrend { // 이거는 날려야겠다 쓸모가 없음
 
   UPPER_LIMIT(1, "상한"),
   UP(2, "상승"),

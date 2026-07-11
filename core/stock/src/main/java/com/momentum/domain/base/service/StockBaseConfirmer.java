@@ -19,6 +19,8 @@ public class StockBaseConfirmer {
   private final StockPricePointRepository stockPricePointRepository;
   private final StockCandleRepository stockCandleRepository;
 
+  // 이거 너무 길긴함, 그리고 가독성도 그렇게 좋지가 않아서, 리펙토링 아이디어가 있어야되는데...
+  // 그리고 null을 주는게 맞냐고 하면 그건 아니잖아.. 생각을 좀 해봐야 되는데..
   public StockBase resolve(StockPricePoint confirmedPricePoint, StockBase currentBase, double baseBoundaryThreshold) {
     if (isLowPointAboveBase(confirmedPricePoint, currentBase, baseBoundaryThreshold)) {
       long resistanceUpperBound = currentBase.getResistanceUpperBound(baseBoundaryThreshold);

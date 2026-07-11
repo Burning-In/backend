@@ -4,13 +4,11 @@ import static com.momentum.domain.stock.QStock.stock;
 
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
-import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor

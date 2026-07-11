@@ -86,6 +86,6 @@ class StockSnapShotTest {
   }
 
   private Stock stock(StockRegime regime) {
-    return new Stock("테스트종목", "005930", regime, StockTrend.UPTREND);
+    return Stock.of("테스트종목", "005930", regime, StockTrend.UPTREND);
   }
 }

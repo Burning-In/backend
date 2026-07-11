@@ -69,8 +69,8 @@ class RealtimeRankingFacadeTest {
   @SuppressWarnings("unchecked")
   void updateRankingBroadcastsRegimeRanking() {
     // 정렬/필터/limit은 리포지토리(쿼리)가 담당 → 이미 정렬된 순서로 반환된다고 가정
-    StockRankScore first = score("종목B", "000002", BREAKOUT_SUCCESS);
-    StockRankScore second = score("종목A", "000001", BREAKOUT_SUCCESS);
+    StockRankScore first = score("종목B", "000050", BREAKOUT_SUCCESS);
+    StockRankScore second = score("종목A", "000040", BREAKOUT_SUCCESS);
     when(stockRankScoreRepository.findLastStockRankScore(eq(BREAKOUT_SUCCESS), any(), anyLong()))
         .thenReturn(List.of(first, second));
 
@@ -81,7 +81,7 @@ class RealtimeRankingFacadeTest {
 
     List<RealtimeBreakoutSuccessItem> response = (List<RealtimeBreakoutSuccessItem>) payload.getValue();
     assertThat(response).extracting(RealtimeBreakoutSuccessItem::stockCode)
-        .containsExactly("000002", "000001");
+        .containsExactly("000050", "000040");
   }
 
   @Test
@@ -105,7 +105,7 @@ class RealtimeRankingFacadeTest {
   }
 
   private StockRankScore score(String name, String code, StockRegime regime) {
-    Stock stock = new Stock(name, code, regime, StockTrend.UPTREND);
+    Stock stock = Stock.of(name, code, regime, StockTrend.UPTREND);
     return StockRankScore.create(List.of(12_000L, 10_000L), LocalDate.now(), stock);
   }
 }

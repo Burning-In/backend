@@ -22,6 +22,7 @@ public class StockBasePointIntegrator {
   private final StockPricePointRepository stockPricePointRepository;
   private final StockCandleRepository stockCandleRepository;
 
+  // 이거 같은거 아님?, 이거 앞에 그냥 가드 세워야 겠는데
   public void resolve(StockPricePoint confirmedPricePoint, StockBase currentBase, double baseBoundaryThreshold) {
     if (isLowPointInsideBase(confirmedPricePoint, currentBase, baseBoundaryThreshold)) {
       addUnsingedPointToCurrentBase(confirmedPricePoint, currentBase);

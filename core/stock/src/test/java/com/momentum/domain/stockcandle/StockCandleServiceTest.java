@@ -6,6 +6,7 @@ import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stock.StockTrend;
+import java.time.LocalDate;
 import java.util.List;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ class StockCandleServiceTest {
     // given
     String stockCode = "005930";
 
-    Stock stock = new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND);
+    Stock stock = Stock.of("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND);
     stockRepository.save(stock);
     List<StockCandleDto> candleResponses = List.of(
         new StockCandleDto("20240101", 100L, 110L, 90L, 105L, 100, 100, "1"),
@@ -46,8 +47,8 @@ class StockCandleServiceTest {
             s -> s.getStock().getCode()
         )
         .containsExactlyInAnyOrder(
-            Tuple.tuple("20240101", stockCode),
-            Tuple.tuple("20240102", stockCode)
+            Tuple.tuple(LocalDate.of(2024, 1, 1), stockCode),
+            Tuple.tuple(LocalDate.of(2024, 1, 2), stockCode)
         );
   }
 }

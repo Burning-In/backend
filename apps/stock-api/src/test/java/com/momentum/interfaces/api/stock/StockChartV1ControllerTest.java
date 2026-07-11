@@ -40,12 +40,12 @@ class StockChartV1ControllerTest {
   @Test
   @DisplayName("일봉 조회 API 해피케이스")
   void getDailyCandle() {
-    Stock stock = saveStock("000012");
+    Stock stock = saveStock("000520");
     saveCandle(stock, LocalDate.of(2026, 5, 1), 100L);
     saveCandle(stock, LocalDate.of(2026, 5, 2), 200L);
     saveCandle(stock, LocalDate.of(2026, 5, 3), 300L);
 
-    assertThat(mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/daily", "000012")
+    assertThat(mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/daily", "000520")
         .param("from", "2026-05-02")
         .param("to", "2026-05-03T00:00:00"))
         .hasStatusOk()
@@ -56,14 +56,14 @@ class StockChartV1ControllerTest {
   @Test
   @DisplayName("이평선 조회 API 해피케이스 — 롤링 SMA")
   void getMovingAverages() {
-    Stock stock = saveStock("000010");
+    Stock stock = saveStock("000080");
     LocalDate start = LocalDate.of(2026, 1, 1);
     for (int i = 0; i < 50; i++) {
       saveCandle(stock, start.plusDays(i), 1_000L);   // index 0~49
     }
     saveCandle(stock, start.plusDays(50), 2_000L);     // index 50
 
-    var result = mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/moving-averages", "000010")
+    var result = mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/moving-averages", "000080")
         .param("period", "MA_50")
         .param("from", "2026-02-19")
         .param("to", "2026-02-20T00:00:00")
@@ -77,10 +77,10 @@ class StockChartV1ControllerTest {
   @Test
   @DisplayName("베이스 조회 API 해피케이스")
   void getBases() {
-    Stock stock = saveStock("000013");
+    Stock stock = saveStock("000540");
     saveBase(stock, 10_000L, 8_000L);
 
-    var result = mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/bases", "000013")
+    var result = mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/bases", "000540")
         .param("from", "2000-01-01")
         .param("to", "2100-01-01T00:00:00")
         .exchange();
@@ -91,7 +91,7 @@ class StockChartV1ControllerTest {
   }
 
   private Stock saveStock(String code) {
-    return stockRepository.save(new Stock("종목" + code, code, BREAKOUT_READY, StockTrend.UPTREND));
+    return stockRepository.save(Stock.of("종목" + code, code, BREAKOUT_READY, StockTrend.UPTREND));
   }
 
   private void saveCandle(Stock stock, LocalDate date, long close) {

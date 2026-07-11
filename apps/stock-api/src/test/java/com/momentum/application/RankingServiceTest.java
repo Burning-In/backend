@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
 import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockCode;
+import com.momentum.domain.stock.TrackedStock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stock.StockTrend;
@@ -140,7 +140,7 @@ class RankingServiceTest {
   }
 
   private Stock saveStock(String code, StockRegime regime) {
-    return stockRepository.save(new Stock("종목" + code, code, regime, StockTrend.UPTREND));
+    return stockRepository.save(Stock.of("종목" + code, code, regime, StockTrend.UPTREND));
   }
 
   private void saveScore(Stock stock, double momentum, double fip) {
@@ -163,6 +163,6 @@ class RankingServiceTest {
 
   private void saveTick(String code, long price) {
     stockTickRepository.save(
-        new StockTick("090000", price, 1L, 1L, 1.0, StockCode.getCode(code)));
+        new StockTick("090000", price, 1L, 1L, 1.0, TrackedStock.fromCode(code)));
   }
 }

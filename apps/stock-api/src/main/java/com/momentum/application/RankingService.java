@@ -2,7 +2,7 @@ package com.momentum.application;
 
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
-import com.momentum.domain.stock.StockCode;
+import com.momentum.domain.stock.TrackedStock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stocktick.StockTick;
 import com.momentum.domain.stocktick.StockTickRepository;
@@ -56,8 +56,8 @@ public class RankingService {
     return stockRankScoreRepository.findLastStockRankScore(regime, at.toLocalDate(), RANKING_LIMIT);
   }
 
-  private BigDecimal getLastPrice(String stockCode, LocalDateTime at) {
-    return stockTickRepository.findLatestTick(StockCode.getCode(stockCode), at)
+  private BigDecimal getLastPrice(String code, LocalDateTime at) {
+    return stockTickRepository.findLatestTick(TrackedStock.fromCode(code), at)
         .map(StockTick::getPrice)
         .map(BigDecimal::valueOf)
         .orElse(null);

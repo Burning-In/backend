@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 class StockBaseLineTest {
 
-  private final Stock stock = new Stock("종목", "000001", StockRegime.BREAKOUT_READY, StockTrend.UPTREND);
+  private final Stock stock = Stock.of("종목", "000040", StockRegime.BREAKOUT_READY, StockTrend.UPTREND);
 
   @Test
   @DisplayName("고점이면 저항선(RESISTANCE)을 생성한다")

@@ -38,7 +38,7 @@ class MomentumScoreInsightServiceTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
   }
 
   @Test
@@ -58,9 +58,9 @@ class MomentumScoreInsightServiceTest {
   @DisplayName("모멘텀이 하위권이면 낮은 퍼센타일 반환")
   void returnsLowPercentileWhenMomentumIsLow() {
     save253Candles(10000L, 10500L);
-    saveRankScore(newStock("000001"), new BigDecimal("0.10"), TODAY);
-    saveRankScore(newStock("000002"), new BigDecimal("0.20"), TODAY);
-    saveRankScore(newStock("000003"), new BigDecimal("0.30"), TODAY);
+    saveRankScore(newStock("000040"), new BigDecimal("0.10"), TODAY);
+    saveRankScore(newStock("000050"), new BigDecimal("0.20"), TODAY);
+    saveRankScore(newStock("000070"), new BigDecimal("0.30"), TODAY);
     saveRankScore(stock, new BigDecimal("0.05"), TODAY);
 
     MomentumResponse result = momentumInsightService.query(stock.getCode(), TODAY);
@@ -73,9 +73,9 @@ class MomentumScoreInsightServiceTest {
   @DisplayName("모멘텀이 상위권이면 높은 퍼센타일 반환")
   void returnsHighPercentileWhenMomentumIsHigh() {
     save253Candles(10000L, 13000L);
-    saveRankScore(newStock("000001"), new BigDecimal("0.05"), TODAY);
-    saveRankScore(newStock("000002"), new BigDecimal("0.10"), TODAY);
-    saveRankScore(newStock("000003"), new BigDecimal("0.20"), TODAY);
+    saveRankScore(newStock("000040"), new BigDecimal("0.05"), TODAY);
+    saveRankScore(newStock("000050"), new BigDecimal("0.10"), TODAY);
+    saveRankScore(newStock("000070"), new BigDecimal("0.20"), TODAY);
     saveRankScore(stock, new BigDecimal("0.30"), TODAY);
 
     MomentumResponse result = momentumInsightService.query(stock.getCode(), TODAY);
@@ -100,7 +100,7 @@ class MomentumScoreInsightServiceTest {
   }
 
   private Stock newStock(String code) {
-    return stockRepository.save(new Stock("테스트종목", code, StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    return stockRepository.save(Stock.of("테스트종목", code, StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
   }
 
   private void saveRankScore(Stock s, BigDecimal momentum, LocalDate baseDate) {

@@ -38,7 +38,7 @@ class KospiRawScoreCalculatorTest {
   void calculateScores_whenAllPricesFlat_returnsHundred() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stock = stockRepository.save(new Stock("테스트주식", "000001", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(Stock.of("테스트주식", "000040", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     rsTestSupport.setupKospi(today, 2500L);
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
@@ -56,7 +56,7 @@ class KospiRawScoreCalculatorTest {
   void calculateScores_whenStockStrongerThanIndex_returnsAboveHundred() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stock = stockRepository.save(new Stock("강한주식", "000002", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(Stock.of("강한주식", "000050", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     rsTestSupport.setupKospi(today, 2500L);
     rsTestSupport.setupCandles(stock, today, 12_000L, 10_000L, 10_000L, 10_000L, 10_000L);
@@ -74,7 +74,7 @@ class KospiRawScoreCalculatorTest {
   void calculateScores_whenStockWeakerThanIndex_returnsBelowHundred() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stock = stockRepository.save(new Stock("약한주식", "000003", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(Stock.of("약한주식", "000070", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     // Kospi 상승, 주식 횡보
     kospiRepository.save(new Kospi(3000L, today));
@@ -94,8 +94,8 @@ class KospiRawScoreCalculatorTest {
   void calculateScores_withMultipleStocks_returnsScoreForEach() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stockA = stockRepository.save(new Stock("주식A", "000010", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
-    Stock stockB = stockRepository.save(new Stock("주식B", "000011", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stockA = stockRepository.save(Stock.of("주식A", "000080", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stockB = stockRepository.save(Stock.of("주식B", "000100", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     rsTestSupport.setupKospi(today, 2500L);
     rsTestSupport.setupCandles(stockA, today, 12_000L, 10_000L, 10_000L, 10_000L, 10_000L);
@@ -116,7 +116,7 @@ class KospiRawScoreCalculatorTest {
   void calculateScores_whenCandleMissing_throwsException() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stock = stockRepository.save(new Stock("데이터없음", "999999", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(Stock.of("데이터없음", "000270", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     rsTestSupport.setupKospi(today, 2500L);
 
@@ -130,7 +130,7 @@ class KospiRawScoreCalculatorTest {
   void calculateScores_whenKospiMissing_throwsException() {
     // given
     LocalDate today = LocalDate.now();
-    Stock stock = stockRepository.save(new Stock("코스피없음", "888888", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    Stock stock = stockRepository.save(Stock.of("코스피없음", "000240", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 

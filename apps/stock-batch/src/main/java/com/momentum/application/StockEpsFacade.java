@@ -17,7 +17,7 @@ public class StockEpsFacade {
   private final StockEpsService stockEpsService;
 
   public void record(Stock stock) {
-    List<Output> quarterlyEps = epsProvider.getQuarterlyEps(stock.getCode());
+    List<Output> quarterlyEps = epsProvider.getQuarterlyEps(stock.getName());
     stockEpsService.create(fromResponse(stock, quarterlyEps));
   }
 

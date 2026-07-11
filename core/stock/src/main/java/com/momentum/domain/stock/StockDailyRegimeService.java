@@ -19,6 +19,7 @@ public class StockDailyRegimeService {
   private final StockRepository stockRepository;
   private final StockBaseRepository stockBaseRepository;
   private final StockPricePointRepository stockPricePointRepository;
+  private final DailyRegimePolicy dailyRegimePolicy;
 
   public void finalizeDailyState(StockDailyCandle stockDailyCandle) {
     Stock stock = stockDailyCandle.getStock();
@@ -31,7 +32,7 @@ public class StockDailyRegimeService {
       return;
     }
 
-    StockRegime newRegime = StockRegime.determineDailyRegime(stock,
+    StockRegime newRegime = dailyRegimePolicy.determine(stock,
         stockDailyCandle.getClosePrice(),
         recentPricePointOpt.get(), currentBaseOpt.get(), BREAKOUT_THRESHOLD, LINE_APPROACH_THRESHOLD);
     stock.update(newRegime);

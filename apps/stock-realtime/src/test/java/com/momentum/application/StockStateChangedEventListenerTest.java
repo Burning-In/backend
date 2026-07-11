@@ -24,7 +24,7 @@ class StockStateChangedEventListenerTest {
   @Test
   @DisplayName("레짐 변경 시 빠진 레짐(from)과 들어온 레짐(to) 랭킹을 모두 갱신한다")
   void updatesBothFromAndToRankings() {
-    listener.on(new StockStateChangedEvent("000001", BREAKOUT_READY, BREAKOUT_SUCCESS));
+    listener.on(new StockStateChangedEvent("000040", BREAKOUT_READY, BREAKOUT_SUCCESS));
 
     verify(realtimeRankingFacade).updateRanking(BREAKOUT_READY);
     verify(realtimeRankingFacade).updateRanking(BREAKOUT_SUCCESS);

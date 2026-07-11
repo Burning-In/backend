@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class StockRankScoreTest {
 
-  private final Stock stock = new Stock("종목", "000001", StockRegime.BREAKOUT_READY, StockTrend.UPTREND);
+  private final Stock stock = Stock.of("종목", "000040", StockRegime.BREAKOUT_READY, StockTrend.UPTREND);
 
   @Test
   @DisplayName("종가들을 받아 모멘텀과 FIP를 계산한다.")

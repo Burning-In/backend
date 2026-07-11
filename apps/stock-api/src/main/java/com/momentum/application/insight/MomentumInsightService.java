@@ -29,7 +29,7 @@ public class MomentumInsightService {
   public MomentumResponse query(String stockCode, LocalDate at) {
     Stock stock = findStock(stockCode);
     StockRankScore rankScore = stockRankScoreRepository.findLatestByStock(stock)
-        .orElseThrow(() -> new NoSuchElementException("모멘텀 데이터가 없습니다: " + stock.getCode()));
+        .orElseThrow(() -> new NoSuchElementException("모멘텀 데이터가 없습니다: " + stock.getName()));
 
     // momentum은 소수 비율(0.20 = 20%)로 저장됨
     BigDecimal yearlyPriceChangeRate = rankScore.getMomentumScore().getValue()

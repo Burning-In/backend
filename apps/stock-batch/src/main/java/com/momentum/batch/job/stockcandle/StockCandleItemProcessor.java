@@ -25,7 +25,7 @@ public class StockCandleItemProcessor implements ItemProcessor<Stock, StockDaily
   @Override
   public StockDailyCandle process(Stock stock) throws Exception {
     LocalDate baseDate = LocalDate.parse(baseDateStr);
-    StockCandleRequest stockCandleRequest = StockCandleRequest.of(stock.getCode(), baseDate);
+    StockCandleRequest stockCandleRequest = StockCandleRequest.of(stock.getName(), baseDate);
     List<StockDailyCandle> stockDailyCandles = stockCandleFacade.create(stockCandleRequest);
     return stockDailyCandles.getFirst();
   }
