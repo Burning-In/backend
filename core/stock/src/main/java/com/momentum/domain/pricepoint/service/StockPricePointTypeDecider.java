@@ -19,7 +19,7 @@ public class StockPricePointTypeDecider {
   private final StockPricePointTypeFlatResolver flatResolver;
   private final StockPricePointTypeNormalResolver normalResolver;
 
-  public List<StockPricePoint> resolveType(Stock stock) {
+  public List<StockPricePoint> resolvePointTypes(Stock stock) {
     RecentPricePoints points = stockPricePointRepository.findRecentPricePoints(stock.getId())
         .orElseThrow(() -> new IllegalArgumentException("PricePoint가 3개 미만입니다. stockId: " + stock.getId()));
 

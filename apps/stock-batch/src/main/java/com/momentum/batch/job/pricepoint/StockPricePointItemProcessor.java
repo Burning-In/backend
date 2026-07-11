@@ -39,7 +39,7 @@ public class StockPricePointItemProcessor implements ItemProcessor<Stock, Stock>
     if (stockPricePoint == null) { // null주는지 체크 필요
       return null;
     }
-    List<StockPricePoint> typeConfirmedPoints = stockPricePointTypeDecider.resolveType(stock);
+    List<StockPricePoint> typeConfirmedPoints = stockPricePointTypeDecider.resolvePointTypes(stock);
     stockBaseService.resolve(typeConfirmedPoints);
     ///
     return stock;
