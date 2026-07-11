@@ -57,8 +57,8 @@ public class StockRankScoreRepositoryImpl implements StockRankScoreRepository {
             )
         )
         .orderBy(
-            stockRankScore.momentum.value.desc(),
-            stockRankScore.fipScore.fip.asc()
+            stockRankScore.momentumScore.value.desc(),
+            stockRankScore.frogInPanScore.value.asc()
         )
         .limit(limit)
         .fetch();

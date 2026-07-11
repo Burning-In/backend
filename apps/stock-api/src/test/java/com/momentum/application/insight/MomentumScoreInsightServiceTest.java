@@ -2,8 +2,6 @@ package com.momentum.application.insight;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.domain.score.FipScore;
-import com.momentum.domain.score.Momentum;
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
 import com.momentum.domain.stock.Stock;
@@ -28,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SpringBootTest
-class MomentumInsightServiceTest {
+class MomentumScoreInsightServiceTest {
 
   @Autowired MomentumInsightService momentumInsightService;
   @Autowired StockRepository stockRepository;
@@ -106,6 +104,9 @@ class MomentumInsightServiceTest {
   }
 
   private void saveRankScore(Stock s, BigDecimal momentum, LocalDate baseDate) {
-    stockRankScoreRepository.save(StockRankScore.create(Momentum.of(momentum), FipScore.of(BigDecimal.ZERO, 0, 0), baseDate, s));
+    // momentum = (today - yearAgo) / yearAgo 가 되도록 종가 2개 구성
+    long yearAgo = 100_000L;
+    long today = momentum.add(BigDecimal.ONE).multiply(BigDecimal.valueOf(yearAgo)).longValue();
+    stockRankScoreRepository.save(StockRankScore.create(List.of(today, yearAgo), baseDate, s));
   }
 }

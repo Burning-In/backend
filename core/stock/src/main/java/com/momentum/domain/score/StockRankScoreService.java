@@ -20,12 +20,14 @@ public class StockRankScoreService {
   public void calculateDailyRankScores(Stock stock, LocalDate baseDate) {
     List<StockDailyCandle> candles = stockCandleRepository
         .findRecentCandles(stock.getId(), baseDate, TRADING_DAYS_PER_YEAR);
-
     if (candles.size() < TRADING_DAYS_PER_YEAR) {
       return;
     }
 
-    StockRankScore rankScore = StockRankScore.create(candles, baseDate, stock);
+    List<Long> closePrices = candles.stream()
+        .map(StockDailyCandle::getClosePrice)
+        .toList();
+    StockRankScore rankScore = StockRankScore.create(closePrices, baseDate, stock);
     stockRankScoreRepository.save(rankScore);
   }
 }

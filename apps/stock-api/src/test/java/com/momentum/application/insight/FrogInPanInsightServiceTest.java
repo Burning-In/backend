@@ -2,8 +2,6 @@ package com.momentum.application.insight;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.domain.score.FipScore;
-import com.momentum.domain.score.Momentum;
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
 import com.momentum.domain.stock.Stock;
@@ -13,6 +11,8 @@ import com.momentum.domain.stock.StockTrend;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.FrogInPanResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,17 +39,17 @@ class FrogInPanInsightServiceTest {
   @Test
   @DisplayName("저장된 FIP 점수 반환")
   void returnsFipScoreFromRankScore() {
-    saveRankScore(new BigDecimal("0.9960"), 251, 0);
+    saveRankScore(251, 0);
 
     FrogInPanResponse result = frogInPanInsightService.query(stock.getCode(), TODAY);
 
-    assertThat(result.fipScore()).isEqualByComparingTo(new BigDecimal("0.9960"));
+    assertThat(result.fipScore()).isEqualByComparingTo(new BigDecimal("0.996032"));
   }
 
   @Test
   @DisplayName("252일 모두 상승이면 upDays = 251, downDays = 0")
   void countsUpDaysCorrectlyWhenAllDaysUp() {
-    saveRankScore(new BigDecimal("0.9960"), 251, 0);
+    saveRankScore(251, 0);
 
     FrogInPanResponse result = frogInPanInsightService.query(stock.getCode(), TODAY);
 
@@ -60,7 +60,7 @@ class FrogInPanInsightServiceTest {
   @Test
   @DisplayName("252일 모두 하락이면 upDays = 0, downDays = 251")
   void countsDownDaysCorrectlyWhenAllDaysDown() {
-    saveRankScore(new BigDecimal("-0.9960"), 0, 251);
+    saveRankScore(0, 251);
 
     FrogInPanResponse result = frogInPanInsightService.query(stock.getCode(), TODAY);
 
@@ -71,14 +71,28 @@ class FrogInPanInsightServiceTest {
   @Test
   @DisplayName("상승일과 하락일이 절반씩이면 upDays = downDays")
   void upDaysEqualsDownDaysWhenEqualUpAndDown() {
-    saveRankScore(BigDecimal.ZERO, 125, 125);
+    saveRankScore(125, 125);
 
     FrogInPanResponse result = frogInPanInsightService.query(stock.getCode(), TODAY);
 
     assertThat(result.yearlyUpDays()).isEqualTo(result.yearlyDownDays());
   }
 
-  private void saveRankScore(BigDecimal fip, int upDays, int downDays) {
-    stockRankScoreRepository.save(StockRankScore.create(Momentum.of(BigDecimal.ONE), FipScore.of(fip, upDays, downDays), TODAY, stock));
+  private void saveRankScore(int upDays, int downDays) {
+    stockRankScoreRepository.save(StockRankScore.create(closePrices(upDays, downDays), TODAY, stock));
+  }
+
+  // 최신순 종가: 상승일 upDays개 + 하락일 downDays개
+  private static List<Long> closePrices(int upDays, int downDays) {
+    List<Long> prices = new ArrayList<>();
+    long price = 1_000_000L;
+    prices.add(price);
+    for (int i = 0; i < upDays; i++) {
+      prices.add(--price); // 최신(앞)이 더 큼 → 상승일
+    }
+    for (int i = 0; i < downDays; i++) {
+      prices.add(++price); // 최신(앞)이 더 작음 → 하락일
+    }
+    return prices;
   }
 }

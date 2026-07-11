@@ -9,7 +9,7 @@ public record RealtimeBreakoutSuccessItem(
     String stockCode,
     BigDecimal currentPrice,
     BigDecimal oneYearMomentum,
-    BigDecimal fipScore
+    BigDecimal frogInPanScore
 ) {
 
   public static List<RealtimeBreakoutSuccessItem> from(List<StockRankScore> ranked) {
@@ -18,8 +18,8 @@ public record RealtimeBreakoutSuccessItem(
             score.getStock().getName(),
             score.getStock().getCode(),
             null,
-            score.getMomentum().getValue(),
-            score.getFipScore().getFip()))
+            score.getMomentumScore().getValue(),
+            score.getFrogInPanScore().getValue()))
         .toList();
   }
 }

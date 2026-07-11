@@ -18,8 +18,8 @@ public record RealtimeBreakoutReadyItem(
             score.getStock().getName(),
             score.getStock().getCode(),
             null,
-            score.getMomentum().getValue(),
-            score.getFipScore().getFip()))
+            score.getMomentumScore().getValue(),
+            score.getFrogInPanScore().getValue()))
         .toList();
   }
 }

@@ -32,7 +32,7 @@ public class MomentumInsightService {
         .orElseThrow(() -> new NoSuchElementException("모멘텀 데이터가 없습니다: " + stock.getCode()));
 
     // momentum은 소수 비율(0.20 = 20%)로 저장됨
-    BigDecimal yearlyPriceChangeRate = rankScore.getMomentum().getValue()
+    BigDecimal yearlyPriceChangeRate = rankScore.getMomentumScore().getValue()
         .multiply(BigDecimal.valueOf(100))
         .setScale(4, RoundingMode.HALF_UP);
 
@@ -63,13 +63,13 @@ public class MomentumInsightService {
   private BigDecimal computePercentile(StockRankScore myScore) {
     List<StockRankScore> allScores = stockRankScoreRepository.findAllByBaseDate(myScore.getBaseDate());
     List<BigDecimal> nonNull = allScores.stream()
-        .map(s -> s.getMomentum().getValue())
+        .map(s -> s.getMomentumScore().getValue())
         .filter(Objects::nonNull)
         .toList();
     if (nonNull.isEmpty()) {
       return null;
     }
-    long below = nonNull.stream().filter(v -> v.compareTo(myScore.getMomentum().getValue()) < 0).count();
+    long below = nonNull.stream().filter(v -> v.compareTo(myScore.getMomentumScore().getValue()) < 0).count();
     return BigDecimal.valueOf((double) below / nonNull.size() * 100).setScale(1, RoundingMode.HALF_UP);
   }
 }
