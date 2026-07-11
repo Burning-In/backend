@@ -102,7 +102,7 @@ class MovingAverageInsightServiceTest {
   private void saveCandle(long closePrice) {
     String rawDate = TODAY.format(DateTimeFormatter.BASIC_ISO_DATE);
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L, "2")
+        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L)
     );
   }
 

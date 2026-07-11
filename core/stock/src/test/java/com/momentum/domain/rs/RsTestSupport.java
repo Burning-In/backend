@@ -29,14 +29,14 @@ public class RsTestSupport {
 
   public void setupCandles(Stock stock, LocalDate today, long todayPrice, long threeMo, long sixMo, long nineMo, long twelveMo) {
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, today.format(FMT), todayPrice, todayPrice, todayPrice, todayPrice, 1000L, "2"));
+        StockDailyCandle.create(stock, today.format(FMT), todayPrice, todayPrice, todayPrice, todayPrice, 1000L));
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, today.minusMonths(3).format(FMT), threeMo, threeMo, threeMo, threeMo, 1000L, "2"));
+        StockDailyCandle.create(stock, today.minusMonths(3).format(FMT), threeMo, threeMo, threeMo, threeMo, 1000L));
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, today.minusMonths(6).format(FMT), sixMo, sixMo, sixMo, sixMo, 1000L, "2"));
+        StockDailyCandle.create(stock, today.minusMonths(6).format(FMT), sixMo, sixMo, sixMo, sixMo, 1000L));
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, today.minusMonths(9).format(FMT), nineMo, nineMo, nineMo, nineMo, 1000L, "2"));
+        StockDailyCandle.create(stock, today.minusMonths(9).format(FMT), nineMo, nineMo, nineMo, nineMo, 1000L));
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, today.minusMonths(12).format(FMT), twelveMo, twelveMo, twelveMo, twelveMo, 1000L, "2"));
+        StockDailyCandle.create(stock, today.minusMonths(12).format(FMT), twelveMo, twelveMo, twelveMo, twelveMo, 1000L));
   }
 }

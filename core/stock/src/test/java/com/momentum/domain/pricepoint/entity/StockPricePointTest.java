@@ -28,7 +28,7 @@ class StockPricePointTest {
     long candleVolume = 1_000L;
     String signUp = "2";
     StockDailyCandle candle = StockDailyCandle.create(
-        stock, tradeDateRaw, openPrice, highPrice, lowPrice, closePrice, candleVolume, signUp);
+        stock, tradeDateRaw, openPrice, highPrice, lowPrice, closePrice, candleVolume);
 
     StockPricePoint point = StockPricePoint.init(
         candle.getClosePrice(), candle.getVolume(), candle.getTradeDate(), candle.getStock());

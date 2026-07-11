@@ -93,8 +93,7 @@ class StockMovingAverageServiceTest {
         .mapToObj(i -> StockDailyCandle.create(
             stock,
             LocalDate.now().minusDays(count - i + 1).format(DateTimeFormatter.BASIC_ISO_DATE),
-            closePrice, closePrice, closePrice, closePrice, 1000L, "2"
-        ))
+            closePrice, closePrice, closePrice, closePrice, 1000L))
         .toList();
     stockCandleRepository.saveAll(candles);
   }
@@ -104,8 +103,7 @@ class StockMovingAverageServiceTest {
         .mapToObj(i -> StockDailyCandle.create(
             stock,
             LocalDate.now().minusDays(startDaysAgo - i).format(DateTimeFormatter.BASIC_ISO_DATE),
-            closePrice, closePrice, closePrice, closePrice, 1000L, "2"
-        ))
+            closePrice, closePrice, closePrice, closePrice, 1000L))
         .toList();
     stockCandleRepository.saveAll(candles);
   }

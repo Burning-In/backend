@@ -96,7 +96,7 @@ class StockChartV1ControllerTest {
 
   private void saveCandle(Stock stock, LocalDate date, long close) {
     stockCandleRepository.save(StockDailyCandle.create(
-        stock, date.format(DateTimeFormatter.BASIC_ISO_DATE), close, close, close, close, 1_000L, "2"));
+        stock, date.format(DateTimeFormatter.BASIC_ISO_DATE), close, close, close, close, 1_000L));
   }
 
   private void saveBase(Stock stock, long resistancePrice, long supportPrice) {

@@ -96,7 +96,7 @@ class MomentumScoreInsightServiceTest {
 
   private StockDailyCandle candle(LocalDate date, long closePrice) {
     String rawDate = date.format(DateTimeFormatter.BASIC_ISO_DATE);
-    return StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L, "2");
+    return StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L);
   }
 
   private Stock newStock(String code) {

@@ -3,8 +3,6 @@ package com.momentum.domain.stockcandle;
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.stock.Stock;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,20 +22,16 @@ public class StockDailyCandle extends BaseEntity {
   private long closePrice;
   private long volume;
 
-  @Enumerated(EnumType.STRING)
-  private StockCandleTrend stockCandleTrend;
   @ManyToOne
   private Stock stock;
 
-  private StockDailyCandle(LocalDate tradeDate, Long openPrice, Long highPrice, Long lowPrice, Long closePrice, Long volume,
-      StockCandleTrend stockCandleTrend, Stock stock) {
+  private StockDailyCandle(LocalDate tradeDate, Long openPrice, Long highPrice, Long lowPrice, Long closePrice, Long volume, Stock stock) {
     this.tradeDate = tradeDate;
     this.openPrice = openPrice;
     this.highPrice = highPrice;
     this.lowPrice = lowPrice;
     this.closePrice = closePrice;
     this.volume = volume;
-    this.stockCandleTrend = stockCandleTrend;
     this.stock = stock;
   }
 
@@ -48,8 +42,7 @@ public class StockDailyCandle extends BaseEntity {
       long highPrice,
       long lowPrice,
       long closePrice,
-      long volume,
-      String priceChangeSign) {
+      long volume) {
     return new StockDailyCandle(
         LocalDate.parse(rawDate, DateTimeFormatter.BASIC_ISO_DATE),
         openPrice,
@@ -57,7 +50,6 @@ public class StockDailyCandle extends BaseEntity {
         lowPrice,
         closePrice,
         volume,
-        StockCandleTrend.getValue(priceChangeSign),
         stock
     );
   }

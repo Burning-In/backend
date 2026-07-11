@@ -18,10 +18,9 @@ class StockDailyCandleTest {
     long lowPrice = 90L;
     long closePrice = 105L;
     long volume = 1_000L;
-    String signUp = "2";
 
     StockDailyCandle candle = StockDailyCandle.create(
-        null, tradeDateRaw, openPrice, highPrice, lowPrice, closePrice, volume, signUp);
+        null, tradeDateRaw, openPrice, highPrice, lowPrice, closePrice, volume);
 
     assertSoftly(softly -> {
       softly.assertThat(candle.getTradeDate()).isEqualTo(tradeDate);
@@ -30,30 +29,6 @@ class StockDailyCandleTest {
       softly.assertThat(candle.getLowPrice()).isEqualTo(lowPrice);
       softly.assertThat(candle.getClosePrice()).isEqualTo(closePrice);
       softly.assertThat(candle.getVolume()).isEqualTo(volume);
-    });
-  }
-
-  @Test
-  @DisplayName("create는 priceChangeSign 코드로 추세를 매핑한다")
-  void createMapsTrend() {
-    String tradeDateRaw = "20240115";
-    long openPrice = 100L;
-    long highPrice = 110L;
-    long lowPrice = 90L;
-    long volume = 1_000L;
-    long closePriceUp = 105L;
-    long closePriceDown = 95L;
-    String signUp = "2";
-    String signDown = "5";
-
-    StockDailyCandle up = StockDailyCandle.create(
-        null, tradeDateRaw, openPrice, highPrice, lowPrice, closePriceUp, volume, signUp);
-    StockDailyCandle down = StockDailyCandle.create(
-        null, tradeDateRaw, openPrice, highPrice, lowPrice, closePriceDown, volume, signDown);
-
-    assertSoftly(softly -> {
-      softly.assertThat(up.getStockCandleTrend()).isEqualTo(StockCandleTrend.UP);
-      softly.assertThat(down.getStockCandleTrend()).isEqualTo(StockCandleTrend.DOWN);
     });
   }
 }

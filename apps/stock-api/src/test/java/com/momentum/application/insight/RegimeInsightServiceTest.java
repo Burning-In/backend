@@ -101,7 +101,7 @@ class RegimeInsightServiceTest {
   private void saveCandle(Stock stock, LocalDate date, long closePrice) {
     String rawDate = date.format(DateTimeFormatter.BASIC_ISO_DATE);
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L, "2")
+        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L)
     );
   }
 

@@ -109,7 +109,7 @@ class StockChartServiceTest {
 
   private StockDailyCandle saveCandle(Stock stock, LocalDate date, long close) {
     return stockCandleRepository.save(StockDailyCandle.create(
-        stock, date.format(DateTimeFormatter.BASIC_ISO_DATE), close, close, close, close, 1_000L, "2"));
+        stock, date.format(DateTimeFormatter.BASIC_ISO_DATE), close, close, close, close, 1_000L));
   }
 
   private void saveCandles(Stock stock, LocalDate start, int count, IntToLongFunction closeFn) {

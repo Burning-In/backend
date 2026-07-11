@@ -85,6 +85,6 @@ class VolumeInsightServiceTest {
 
   private StockDailyCandle candle(LocalDate date, long volume) {
     String rawDate = date.format(DateTimeFormatter.BASIC_ISO_DATE);
-    return StockDailyCandle.create(stock, rawDate, 10000L, 10000L, 10000L, 10000L, volume, "2");
+    return StockDailyCandle.create(stock, rawDate, 10000L, 10000L, 10000L, 10000L, volume);
   }
 }

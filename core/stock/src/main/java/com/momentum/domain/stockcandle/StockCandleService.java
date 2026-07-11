@@ -33,8 +33,7 @@ public class StockCandleService {
         candle.highPrice(),
         candle.lowPrice(),
         candle.closePrice(),
-        candle.volume(),
-        candle.priceChangeSign()
+        candle.volume()
     );
   }
 }

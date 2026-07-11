@@ -134,7 +134,7 @@ class SnapshotServiceTest {
 
   private void saveCandle(Stock stock, long closePrice) {
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20260510", closePrice, closePrice, closePrice, closePrice, 1_000L, "2"));
+        StockDailyCandle.create(stock, "20260510", closePrice, closePrice, closePrice, closePrice, 1_000L));
   }
 
   private StockSnapShot saveSnapshot(Stock stock, long price, SnapshotJudgment judgment) {

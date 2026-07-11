@@ -47,7 +47,7 @@ class StockPricePointServiceTest {
   void resolvePivot_firstPoint_noPivotNoHistory() {
     // given
     StockDailyCandle candle = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10500L, 1000L, "2")
+        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10500L, 1000L)
     );
 
     // when
@@ -68,13 +68,13 @@ class StockPricePointServiceTest {
     // given
     // 피벗 먼저 저장 (A 포인트 역할)
     StockDailyCandle pivotCandle = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L, "2")
+        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L)
     );
     stockPricePointService.resolvePricePoint(pivotCandle); // 피벗만 저장됨
 
     // 다음 포인트 (B 포인트 역할)
     StockDailyCandle nextCandle = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10500L, 1200L, "2")
+        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10500L, 1200L)
     );
 
     // when
@@ -94,19 +94,19 @@ class StockPricePointServiceTest {
     // given
     // A 포인트
     StockDailyCandle candleA = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L, "2")
+        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L)
     );
     stockPricePointService.resolvePricePoint(candleA);
 
     // B 포인트
     StockDailyCandle candleB = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10500L, 1200L, "2")
+        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10500L, 1200L)
     );
     stockPricePointService.resolvePricePoint(candleB);
 
     // C 포인트 (도어 안에 들어오는 포인트)
     StockDailyCandle candleC = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240103", 10300L, 10900L, 9900L, 10600L, 1100L, "2")
+        StockDailyCandle.create(stock, "20240103", 10300L, 10900L, 9900L, 10600L, 1100L)
     );
 
     // when
@@ -125,19 +125,19 @@ class StockPricePointServiceTest {
     // given
     // A 포인트
     StockDailyCandle candleA = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L, "2")
+        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L)
     );
     stockPricePointService.resolvePricePoint(candleA);
 
     // B 포인트
     StockDailyCandle candleB = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10200L, 1200L, "2")
+        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10200L, 1200L)
     );
     stockPricePointService.resolvePricePoint(candleB);
 
     // C 포인트 (도어 안에 들어오는 포인트)
     StockDailyCandle candleC = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240103", 10300L, 10900L, 9900L, 10500L, 1100L, "2")
+        StockDailyCandle.create(stock, "20240103", 10300L, 10900L, 9900L, 10500L, 1100L)
     );
 
     // when
@@ -157,25 +157,25 @@ class StockPricePointServiceTest {
     // given
     // A 포인트 (피벗, 가격 10000)
     StockDailyCandle candleA = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L, "2")
+        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L)
     );
     stockPricePointService.resolvePricePoint(candleA);
 
     // B 포인트
     StockDailyCandle candleB = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10300L, 1200L, "2")
+        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10300L, 1200L)
     );
     stockPricePointService.resolvePricePoint(candleB);
 
     // G 포인트 (마지막 범위내 포인트 역할, 내일이 H가 됨)
     StockDailyCandle candleG = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240103", 10400L, 11000L, 10000L, 10500L, 1300L, "2")
+        StockDailyCandle.create(stock, "20240103", 10400L, 11000L, 10000L, 10500L, 1300L)
     );
     stockPricePointService.resolvePricePoint(candleG);
 
     // H 포인트 (역전 유발, 급등)
     StockDailyCandle candleH = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240104", 13000L, 15000L, 12000L, 14000L, 5000L, "2")
+        StockDailyCandle.create(stock, "20240104", 13000L, 15000L, 12000L, 14000L, 5000L)
     );
 
     // when
