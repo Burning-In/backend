@@ -39,11 +39,11 @@ public class StockBaseVolatilityContractionPatternService {
     while (left <= right && right < stockPricePoints.size()) {
       StockPricePoint leftPricePoint = stockPricePoints.get(left);
       StockPricePoint rightPricePoint = stockPricePoints.get(right);
-      if (rightPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_HIGH)) {
+      if (rightPricePoint.getType().equals(StockPricePointType.HIGH)) {
         left = right;
       }
-      if (leftPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_HIGH) &&
-          rightPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_LOW)) {
+      if (leftPricePoint.getType().equals(StockPricePointType.HIGH) &&
+          rightPricePoint.getType().equals(StockPricePointType.LOW)) {
         volatilityHistories.add(leftPricePoint.getPrice() - rightPricePoint.getPrice());
       }
       right++;

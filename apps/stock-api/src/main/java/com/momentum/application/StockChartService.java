@@ -2,7 +2,7 @@ package com.momentum.application;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.ma.StockMovingAveragePeriod;
+import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stockcandle.StockCandleRepository;

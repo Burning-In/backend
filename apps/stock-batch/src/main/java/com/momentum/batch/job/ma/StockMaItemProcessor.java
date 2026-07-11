@@ -1,6 +1,6 @@
 package com.momentum.batch.job.ma;
 
-import com.momentum.domain.ma.StockMovingAverageService;
+import com.momentum.domain.movingaverage.StockMovingAverageService;
 import com.momentum.domain.stock.Stock;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;

@@ -107,12 +107,12 @@ class RegimeInsightServiceTest {
 
   private void saveBase(Stock stock, long highPrice, long lowPrice) {
     StockPricePoint high = stockPricePointRepository.save(
-        new StockPricePoint(highPrice, 100000L, TODAY.minusDays(10), StockPricePointType.PIVOT_HIGH, null, stock)
+        new StockPricePoint(highPrice, 100000L, TODAY.minusDays(10), StockPricePointType.HIGH, null, stock)
     );
     StockPricePoint low = stockPricePointRepository.save(
-        new StockPricePoint(lowPrice, 100000L, TODAY.minusDays(20), StockPricePointType.PIVOT_LOW, null, stock)
+        new StockPricePoint(lowPrice, 100000L, TODAY.minusDays(20), StockPricePointType.LOW, null, stock)
     );
-    StockBase base = StockBase.initOrLower(high, low, 100000L);
+    StockBase base = StockBase.init(high, low, 100000L);
     stockBaseRepository.save(base);
   }
 }
