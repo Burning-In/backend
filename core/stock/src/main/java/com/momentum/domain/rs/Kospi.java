@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class KOSPI extends BaseEntity {
+public class Kospi extends BaseEntity {
 
   @Column(name = "kospi_value")
   private Long value;
   private LocalDate recordDate;
 
-  public KOSPI(Long value, LocalDate recordDate) {
+  public Kospi(Long value, LocalDate recordDate) {
     this.value = value;
     this.recordDate = recordDate;
   }

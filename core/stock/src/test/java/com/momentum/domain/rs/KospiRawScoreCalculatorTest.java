@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
-import com.momentum.domain.rs.KOSPIRawScoreCalculator.RSRawScore;
+import com.momentum.domain.rs.KospiRawScoreCalculator.RSRawScore;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -19,16 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class KOSPIRawScoreCalculatorTest {
+class KospiRawScoreCalculatorTest {
 
   @Autowired
-  private KOSPIRawScoreCalculator calculator;
+  private KospiRawScoreCalculator calculator;
 
   @Autowired
   private StockRepository stockRepository;
 
   @Autowired
-  private KOSPIRepository kospiRepository;
+  private KospiRepository kospiRepository;
 
   @Autowired
   private RsTestSupport rsTestSupport;
@@ -76,8 +76,8 @@ class KOSPIRawScoreCalculatorTest {
     LocalDate today = LocalDate.now();
     Stock stock = stockRepository.save(new Stock("약한주식", "000003", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
-    // KOSPI 상승, 주식 횡보
-    kospiRepository.save(new KOSPI(3000L, today));
+    // Kospi 상승, 주식 횡보
+    kospiRepository.save(new Kospi(3000L, today));
     rsTestSupport.setupKospi(today.minusMonths(3), 2500L);
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 

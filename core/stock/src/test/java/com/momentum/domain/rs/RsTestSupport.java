@@ -15,16 +15,16 @@ public class RsTestSupport {
   private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
   @Autowired
-  private KOSPIRepository kospiRepository;
+  private KospiRepository kospiRepository;
   @Autowired
   private StockCandleRepository stockCandleRepository;
 
   public void setupKospi(LocalDate today, long value) {
-    kospiRepository.save(new KOSPI(value, today));
-    kospiRepository.save(new KOSPI(value, today.minusMonths(3)));
-    kospiRepository.save(new KOSPI(value, today.minusMonths(6)));
-    kospiRepository.save(new KOSPI(value, today.minusMonths(9)));
-    kospiRepository.save(new KOSPI(value, today.minusMonths(12)));
+    kospiRepository.save(new Kospi(value, today));
+    kospiRepository.save(new Kospi(value, today.minusMonths(3)));
+    kospiRepository.save(new Kospi(value, today.minusMonths(6)));
+    kospiRepository.save(new Kospi(value, today.minusMonths(9)));
+    kospiRepository.save(new Kospi(value, today.minusMonths(12)));
   }
 
   public void setupCandles(Stock stock, LocalDate today, long todayPrice, long threeMo, long sixMo, long nineMo, long twelveMo) {

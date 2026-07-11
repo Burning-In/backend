@@ -11,16 +11,16 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class KOPSIRelativeStrength extends BaseEntity {
+public class KospiRelativeStrength extends BaseEntity {
 
   private int rsScore;
 
   @ManyToOne
   private Stock stock;
   @ManyToOne
-  private KOSPI kospi;
+  private Kospi kospi;
 
-  public KOPSIRelativeStrength(int rsScore, Stock stock, KOSPI kospi) {
+  public KospiRelativeStrength(int rsScore, Stock stock, Kospi kospi) {
     this.rsScore = rsScore;
     this.stock = stock;
     this.kospi = kospi;

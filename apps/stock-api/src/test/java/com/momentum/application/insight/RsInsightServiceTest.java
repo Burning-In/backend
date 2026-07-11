@@ -3,10 +3,10 @@ package com.momentum.application.insight;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.momentum.domain.rs.KOSPI;
-import com.momentum.domain.rs.KOPSIRelativeStrength;
-import com.momentum.domain.rs.KOSPIRelativeStrengthRepository;
-import com.momentum.domain.rs.KOSPIRepository;
+import com.momentum.domain.rs.Kospi;
+import com.momentum.domain.rs.KospiRelativeStrength;
+import com.momentum.domain.rs.KospiRelativeStrengthRepository;
+import com.momentum.domain.rs.KospiRepository;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -29,8 +29,8 @@ class RsInsightServiceTest {
 
   @Autowired RsInsightService rsInsightService;
   @Autowired StockRepository stockRepository;
-  @Autowired KOSPIRepository kospiRepository;
-  @Autowired KOSPIRelativeStrengthRepository kospiRelativeStrengthRepository;
+  @Autowired KospiRepository kospiRepository;
+  @Autowired KospiRelativeStrengthRepository kospiRelativeStrengthRepository;
 
   private Stock stock;
 
@@ -42,8 +42,8 @@ class RsInsightServiceTest {
   @Test
   @DisplayName("RS 점수 반환")
   void returnsRsScore() {
-    KOSPI kospi = kospiRepository.save(new KOSPI(2500L, LocalDate.now()));
-    kospiRelativeStrengthRepository.saveAll(List.of(new KOPSIRelativeStrength(85, stock, kospi)));
+    Kospi kospi = kospiRepository.save(new Kospi(2500L, LocalDate.now()));
+    kospiRelativeStrengthRepository.saveAll(List.of(new KospiRelativeStrength(85, stock, kospi)));
 
     RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());
 
@@ -61,11 +61,11 @@ class RsInsightServiceTest {
   @Test
   @DisplayName("여러 RS 기록 중 최신 기록 반환")
   void returnsLatestRsWhenMultipleRecordsExist() {
-    KOSPI oldKospi = kospiRepository.save(new KOSPI(2400L, LocalDate.now().minusDays(30)));
-    KOSPI newKospi = kospiRepository.save(new KOSPI(2500L, LocalDate.now()));
+    Kospi oldKospi = kospiRepository.save(new Kospi(2400L, LocalDate.now().minusDays(30)));
+    Kospi newKospi = kospiRepository.save(new Kospi(2500L, LocalDate.now()));
     kospiRelativeStrengthRepository.saveAll(List.of(
-        new KOPSIRelativeStrength(50, stock, oldKospi),
-        new KOPSIRelativeStrength(75, stock, newKospi)
+        new KospiRelativeStrength(50, stock, oldKospi),
+        new KospiRelativeStrength(75, stock, newKospi)
     ));
 
     RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());

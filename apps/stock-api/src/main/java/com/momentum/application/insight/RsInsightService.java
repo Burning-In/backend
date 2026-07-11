@@ -1,7 +1,7 @@
 package com.momentum.application.insight;
 
-import com.momentum.domain.rs.KOPSIRelativeStrength;
-import com.momentum.domain.rs.KOSPIRelativeStrengthRepository;
+import com.momentum.domain.rs.KospiRelativeStrength;
+import com.momentum.domain.rs.KospiRelativeStrengthRepository;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.RsResponse;
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RsInsightService {
 
-  private final KOSPIRelativeStrengthRepository kospiRelativeStrengthRepository;
+  private final KospiRelativeStrengthRepository kospiRelativeStrengthRepository;
   private final StockRepository stockRepository;
 
   public RsResponse query(String stockCode, LocalDate at) {
     Stock stock = findStock(stockCode);
-    KOPSIRelativeStrength rs = kospiRelativeStrengthRepository.findLatestByStock(stock)
+    KospiRelativeStrength rs = kospiRelativeStrengthRepository.findLatestByStock(stock)
         .orElseThrow(() -> new NoSuchElementException("RS 데이터가 없습니다: " + stock.getCode()));
 
     BigDecimal rsValue = BigDecimal.valueOf(rs.getRsScore());

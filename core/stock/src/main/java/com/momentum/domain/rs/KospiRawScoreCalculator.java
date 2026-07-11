@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class KOSPIRawScoreCalculator {
+public class KospiRawScoreCalculator {
 
   private final StockCandleRepository stockCandleRepository;
-  private final KOSPIRepository kospiRepository;
+  private final KospiRepository kospiRepository;
 
   public List<RSRawScore> calculateScores(List<Stock> stocks, LocalDate today) {
     List<RSRawScore> rawScores = new ArrayList<>();
@@ -25,7 +25,6 @@ public class KOSPIRawScoreCalculator {
 
     return rawScores;
   }
-
 
   private double calculateStockScore(Stock stock, LocalDate today) {
     double todayPrice = getCandleFrom(0, stock, today).getClosePrice();
@@ -58,9 +57,9 @@ public class KOSPIRawScoreCalculator {
   }
 
 
-  private KOSPI getIndexFrom(int month, Stock stock, LocalDate today) {
+  private Kospi getIndexFrom(int month, Stock stock, LocalDate today) {
     LocalDate monthAgo = today.minusMonths(month);
-    return kospiRepository.findRecentKOSPI(monthAgo)
+    return kospiRepository.findRecentKospi(monthAgo)
         .orElseThrow(IllegalArgumentException::new);
   }
 

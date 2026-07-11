@@ -17,16 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-class KOSPIRelativeStrengthServiceTest {
+class KospiRelativeStrengthServiceTest {
 
   @Autowired
-  private KOSPIRelativeStrengthService service;
+  private KospiRelativeStrengthService service;
 
   @Autowired
   private StockRepository stockRepository;
 
   @Autowired
-  private KOSPIRepository kospiRepository;
+  private KospiRepository kospiRepository;
 
   @Autowired
   private RsTestSupport rsTestSupport;
@@ -42,7 +42,7 @@ class KOSPIRelativeStrengthServiceTest {
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when
-    List<KOPSIRelativeStrength> result = service.create(today);
+    List<KospiRelativeStrength> result = service.create(today);
 
     // then
     assertThat(result).hasSize(1);
@@ -63,7 +63,7 @@ class KOSPIRelativeStrengthServiceTest {
     rsTestSupport.setupCandles(stockC, today, 13_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when
-    List<KOPSIRelativeStrength> result = service.create(today);
+    List<KospiRelativeStrength> result = service.create(today);
 
     // then
     assertThat(result).hasSize(3);
@@ -76,7 +76,7 @@ class KOSPIRelativeStrengthServiceTest {
     LocalDate today = LocalDate.now();
     Stock stock = stockRepository.save(new Stock("코스피없음", "555555", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
 
-    kospiRepository.save(new KOSPI(2500L, today.minusDays(1)));
+    kospiRepository.save(new Kospi(2500L, today.minusDays(1)));
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when & then
@@ -97,13 +97,13 @@ class KOSPIRelativeStrengthServiceTest {
     rsTestSupport.setupCandles(strongStock, today, 13_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when
-    List<KOPSIRelativeStrength> result = service.create(today);
+    List<KospiRelativeStrength> result = service.create(today);
 
     // then
     // 정렬 후 i=0 → rsRating=1, i=1 → rsRating=round(1/2 * 98)+1=50
     assertThat(result).hasSize(2);
     List<Integer> ratings = result.stream()
-        .map(KOPSIRelativeStrength::getRsScore)
+        .map(KospiRelativeStrength::getRsScore)
         .sorted()
         .toList();
     assertThat(ratings).containsExactly(1, 50);
