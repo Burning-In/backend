@@ -19,7 +19,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class StockRealTimeRegimeTest {
+class StockRealTimeRegimePolicyTest {
 
   private static final double BREAKOUT_THRESHOLD = 5.0;
 

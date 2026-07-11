@@ -39,13 +39,6 @@ public class StockTickRepositoryImpl implements StockTickRepository {
         .findFirstByStockNameAndCreatedAtLessThanEqualOrderByCreatedAtDescIdDesc(stockName, atKst);
   }
 
-  @Override
-  public Double averageDailyOrderFlow(Instant now, long fromPrice, long toPrice) {
-    ZonedDateTime[] range = dailyRange(now);
-    return stockTickJpaRepository
-        .findAverageContractPowerByDateAndPriceRange(range[0], range[1], fromPrice, toPrice);
-  }
-
   /**
    * now 기준 당일 시작(00:00:00) ~ 다음 날 시작(00:00:00) KST ZonedDateTime 배열 반환
    */

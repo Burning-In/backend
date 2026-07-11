@@ -163,6 +163,6 @@ class RankingServiceTest {
 
   private void saveTick(String code, long price) {
     stockTickRepository.save(
-        new StockTick("090000", price, 1L, 1L, 1.0, TrackedStock.fromCode(code)));
+        StockTick.create(LocalDate.of(2024, 1, 1), "090000", price, 1L, 1L, TrackedStock.fromCode(code)));
   }
 }
