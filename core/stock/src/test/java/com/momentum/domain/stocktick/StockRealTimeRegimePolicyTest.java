@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.entity.StockPricePointType;
-import com.momentum.domain.stock.RealtimeRegimePolicy;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockTrend;

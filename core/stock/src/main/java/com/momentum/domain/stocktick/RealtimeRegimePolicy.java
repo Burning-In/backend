@@ -1,4 +1,4 @@
-package com.momentum.domain.stock;
+package com.momentum.domain.stocktick;
 
 import static com.momentum.domain.stock.StockRegime.BREAKOUT_FAILED;
 import static com.momentum.domain.stock.StockRegime.BREAKOUT_READY;
@@ -7,6 +7,8 @@ import static com.momentum.domain.stock.StockRegime.DOWNSIDE_BREAK;
 import static com.momentum.domain.stock.StockRegime.UNKNOWN;
 
 import com.momentum.domain.base.entity.StockBase;
+import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRegime;
 import org.springframework.stereotype.Component;
 
 @Component

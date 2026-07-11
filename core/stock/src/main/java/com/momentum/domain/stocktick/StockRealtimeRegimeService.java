@@ -5,7 +5,6 @@ import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.service.StockPricePointTypeDecider;
-import com.momentum.domain.stock.RealtimeRegimePolicy;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;

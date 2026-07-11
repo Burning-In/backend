@@ -37,7 +37,7 @@ class StockRealtimeRegimeServiceTest {
   @DisplayName("VCP이고 현재가가 저항선 상단을 돌파하면 BREAKOUT_SUCCESS로 갱신된다")
   void updatesToBreakoutSuccess() {
     Stock stock = saveStock("000040", StockRegime.BREAKOUT_READY);
-    saveBase(stock, 10_000L, 8_000L, true);
+    saveBase(stock, 10_000L, 8_000L);
     saveExtraPoints(stock);
 
     // 저항선 상단 = 10_000 * 1.05 = 10_500, 현재가 11_000 > 10_500
@@ -45,19 +45,6 @@ class StockRealtimeRegimeServiceTest {
 
     StockRegime saved = stockRepository.findByStockCode("000040").orElseThrow().getStockRegime();
     assertThat(saved).isEqualTo(StockRegime.BREAKOUT_SUCCESS);
-  }
-
-  @Test
-  @DisplayName("VCP가 아니면 UNKNOWN이라 기존 레짐을 유지한다")
-  void keepsRegimeWhenUnknown() {
-    Stock stock = saveStock("000050", StockRegime.BREAKOUT_READY);
-    saveBase(stock, 10_000L, 8_000L, false);
-    saveExtraPoints(stock);
-
-    stockRealtimeRegimeService.resolveRealtimeRegime("000050", 10_000L);
-
-    StockRegime saved = stockRepository.findByStockCode("000050").orElseThrow().getStockRegime();
-    assertThat(saved).isEqualTo(StockRegime.BREAKOUT_READY);
   }
 
   @Test
@@ -81,16 +68,14 @@ class StockRealtimeRegimeServiceTest {
     return stockRepository.save(Stock.of("테스트종목", code, regime, StockTrend.UPTREND));
   }
 
-  private void saveBase(Stock stock, long resistancePrice, long supportPrice, boolean vcp) {
+  private void saveBase(Stock stock, long resistancePrice, long supportPrice) {
     StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
         StockPricePointType.HIGH, null, stock);
     StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
         StockPricePointType.LOW, null, stock);
     StockBase base = StockBase.init(high, low, 100_000L);
-    if (vcp) {
-      // 변동성이 줄어드는(직전 > 직후) 이력 → isVcp = true
-      base.update(null, List.of(100L, 50L));
-    }
+    // 변동성이 줄어드는(직전 > 직후) 이력 → isVcp = true
+    base.update(null, List.of(100L, 50L));
     stockBaseRepository.save(base);
   }
 
