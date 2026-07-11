@@ -88,10 +88,10 @@ class StockRealTimeRegimeTest {
 
   private StockBase baseOf(Stock stock, long resistancePrice, long supportPrice) {
     StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now(),
-        StockPricePointType.PIVOT_HIGH, null, stock);
+        StockPricePointType.HIGH, null, stock);
     StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now(),
-        StockPricePointType.PIVOT_LOW, null, stock);
-    return StockBase.initOrLower(high, low, 100_000L);
+        StockPricePointType.LOW, null, stock);
+    return StockBase.init(high, low, 100_000L);
   }
 
   private void markVcp(StockBase stockBase) {

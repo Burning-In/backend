@@ -1,5 +1,8 @@
 package com.momentum.domain.base.service;
 
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.HIGH;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.LOW;
+
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
@@ -17,7 +20,7 @@ public class StockBaseConfirmer {
   private final StockCandleRepository stockCandleRepository;
 
   public StockBase resolve(StockPricePoint confirmedPricePoint, StockBase currentBase, double baseBoundaryThreshold) {
-    if (confirmedPricePoint.isAboveResistance(currentBase, baseBoundaryThreshold)) {
+    if (isLowPointAboveBase(confirmedPricePoint, currentBase, baseBoundaryThreshold)) {
       long resistanceUpperBound = currentBase.getResistanceUpperBound(baseBoundaryThreshold);
       StockPricePoint pairedHighPoint = stockPricePointRepository.findHighPricePoint(currentBase, resistanceUpperBound)
           .orElseThrow(IllegalArgumentException::new);
@@ -26,13 +29,13 @@ public class StockBaseConfirmer {
           StockBase.upper(pairedHighPoint, confirmedPricePoint, currentBase.getStageLevel(), baseAverageVolume));
     }
 
-    if (confirmedPricePoint.isBelowSupport(currentBase, baseBoundaryThreshold)) {
+    if (isHighPointBelowBase(confirmedPricePoint, currentBase, baseBoundaryThreshold)) {
       long supportLowerBound = currentBase.getSupportLowerBound(baseBoundaryThreshold);
       StockPricePoint pairedLowPoint = stockPricePointRepository.findLowPricePoint(currentBase, supportLowerBound)
           .orElseThrow(IllegalArgumentException::new);
       long baseAverageVolume = calculateAverageVolume(confirmedPricePoint, pairedLowPoint);
       return stockBaseRepository.save(
-          StockBase.initOrLower(pairedLowPoint, confirmedPricePoint, baseAverageVolume));
+          StockBase.init(pairedLowPoint, confirmedPricePoint, baseAverageVolume));
     }
 
     return null;
@@ -43,5 +46,15 @@ public class StockBaseConfirmer {
         confirmedPricePoint.getStock(),
         pairedPoint.getTradeDate(),
         confirmedPricePoint.getTradeDate());
+  }
+
+  private boolean isLowPointAboveBase(StockPricePoint point, StockBase base, double threshold) {
+    return point.isSameType(LOW)
+        && point.getPrice() >= base.getResistanceLowerBound(threshold);
+  }
+
+  private boolean isHighPointBelowBase(StockPricePoint point, StockBase base, double threshold) {
+    return point.isSameType(HIGH)
+        && point.getPrice() < base.getSupportUpperBound(threshold);
   }
 }

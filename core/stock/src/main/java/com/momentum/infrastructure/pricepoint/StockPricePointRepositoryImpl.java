@@ -81,9 +81,9 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
     StockPricePoint result = jpaQueryFactory.selectFrom(stockPricePoint)
         .where(
             stockPricePoint.stockBase.isNull(),
-            stockPricePoint.stockPricePointType.eq(StockPricePointType.PIVOT_HIGH),
+            stockPricePoint.type.eq(StockPricePointType.HIGH),
             stockPricePoint.createdAt.gt(currentBase.getCreatedAt()),
-            stockPricePoint.stockPricePointPrice.price.gt(overPrice)
+            stockPricePoint.price.price.gt(overPrice)
         )
         .orderBy(stockPricePoint.tradeDate.asc())
         .fetchFirst();
@@ -96,9 +96,9 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
     StockPricePoint result = jpaQueryFactory.selectFrom(stockPricePoint)
         .where(
             stockPricePoint.stockBase.isNull(),
-            stockPricePoint.stockPricePointType.eq(StockPricePointType.PIVOT_LOW),
+            stockPricePoint.type.eq(StockPricePointType.LOW),
             stockPricePoint.createdAt.gt(currentBase.getCreatedAt()),
-            stockPricePoint.stockPricePointPrice.price.lt(lowerPrice)
+            stockPricePoint.price.price.lt(lowerPrice)
         )
         .orderBy(stockPricePoint.tradeDate.asc())
         .fetchFirst();
@@ -111,7 +111,7 @@ public class StockPricePointRepositoryImpl implements StockPricePointRepository 
     StockPricePoint result = jpaQueryFactory.selectFrom(stockPricePoint)
         .where(
             stockPricePoint.stockBase.isNull(),
-            stockPricePoint.stockPricePointType.eq(stockPricePointType)
+            stockPricePoint.type.eq(stockPricePointType)
         )
         .orderBy(stockPricePoint.tradeDate.desc())
         .fetchFirst();

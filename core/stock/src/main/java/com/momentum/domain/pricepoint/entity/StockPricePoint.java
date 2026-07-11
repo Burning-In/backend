@@ -1,18 +1,13 @@
 package com.momentum.domain.pricepoint.entity;
 
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_LOW;
-
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stockcandle.StockDailyCandle;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 import lombok.Getter;
@@ -27,10 +22,10 @@ public class StockPricePoint extends BaseEntity implements Comparable<StockPrice
   private LocalDate tradeDate;
 
   @Embedded
-  private StockPricePointPrice stockPricePointPrice;
+  private StockPricePointPrice price;
 
   @Enumerated(EnumType.STRING)
-  private StockPricePointType stockPricePointType;
+  private StockPricePointType type;
 
   @ManyToOne(optional = true)
   private StockBase stockBase;
@@ -39,88 +34,46 @@ public class StockPricePoint extends BaseEntity implements Comparable<StockPrice
   private Stock stock;
 
   public StockPricePoint(long price, long volume, LocalDate tradeDate,
-      StockPricePointType stockPricePointType, StockBase stockBase, Stock stock) {
-    this.stockPricePointPrice = new StockPricePointPrice(price);
+      StockPricePointType type, StockBase stockBase, Stock stock) {
+    this.price = new StockPricePointPrice(price);
     this.volume = volume;
     this.tradeDate = Objects.requireNonNull(tradeDate);
-    this.stockPricePointType = Objects.requireNonNull(stockPricePointType);
+    this.type = Objects.requireNonNull(type);
     this.stockBase = stockBase;
     this.stock = Objects.requireNonNull(stock);
   }
 
-  public static StockPricePoint initialize(StockDailyCandle stockDailyCandle) {
-    return new StockPricePoint(
-        stockDailyCandle.getClosePrice(),
-        stockDailyCandle.getVolume(),
-        stockDailyCandle.getTradeDate(),
-        StockPricePointType.INIT,
-        null,
-        stockDailyCandle.getStock()
-    );
+  public static StockPricePoint init(long closePrice, long volume, LocalDate tradeDate, Stock stock) {
+    return new StockPricePoint(closePrice, volume, tradeDate, StockPricePointType.UNKNOWN, null, stock);
   }
 
   public void updateType(StockPricePointType stockPricePointType) {
-    if (stockPricePointType == null || this.stockPricePointType.equals(stockPricePointType)) {
+    if (stockPricePointType == null || this.type.equals(stockPricePointType)) {
       return;
     }
-    this.stockPricePointType = stockPricePointType;
+    this.type = stockPricePointType;
   }
 
   public void assignBase(StockBase stockBase) {
-    if (Objects.equals(this.stockBase, stockBase)) {
+    if (stockBase == null || stockBase.equals(this.stockBase)) {
       return;
     }
     this.stockBase = stockBase;
   }
 
-  public boolean isFlat(StockPricePoint other, BigDecimal flatThreshold) {
-    return this.stockPricePointPrice.isFlat(other.stockPricePointPrice, flatThreshold);
-  }
-
   @Override
   public int compareTo(StockPricePoint other) {
-    return this.stockPricePointPrice.compareTo(other.stockPricePointPrice);
+    return this.price.compareTo(other.price);
   }
 
   public long getPrice() {
-    return stockPricePointPrice.getPrice();
+    return price.getPrice();
   }
 
   public boolean isSameType(StockPricePointType stockPricePointType) {
-    return this.stockPricePointType.equals(stockPricePointType);
-  }
-
-  public boolean isDroppedToPreviousBase(StockBase currentBase, StockBase previousBase, double threshold) {
-    return isSameType(PIVOT_LOW)
-        && getPrice() < currentBase.getSupportLowerBound(threshold)
-        && getPrice() < previousBase.getResistanceLowerBound(threshold);
-  }
-
-  public boolean isRaisedToPreviousBase(StockBase currentBase, StockBase previousBase, double threshold) {
-    return isSameType(PIVOT_HIGH)
-        && getPrice() >= currentBase.getResistanceUpperBound(threshold)
-        && getPrice() > previousBase.getSupportUpperBound(threshold);
-  }
-
-  public boolean isAboveResistance(StockBase base, double threshold) {
-    return isSameType(PIVOT_LOW)
-        && getPrice() >= base.getResistanceLowerBound(threshold);
-  }
-
-  public boolean isBelowSupport(StockBase base, double threshold) {
-    return isSameType(PIVOT_HIGH)
-        && getPrice() < base.getSupportUpperBound(threshold);
-  }
-
-  public boolean isFallingInBase(StockBase base, double threshold) {
-    return isSameType(PIVOT_LOW)
-        && getPrice() < base.getResistanceLowerBound(threshold)
-        && getPrice() >= base.getSupportUpperBound(threshold);
-  }
-
-  public boolean isRaisedInBase(StockBase base, double threshold) {
-    return isSameType(PIVOT_HIGH)
-        && getPrice() > base.getSupportUpperBound(threshold)
-        && getPrice() < base.getResistanceUpperBound(threshold);
+    if (stockPricePointType == null) {
+      return false;
+    }
+    return this.type.equals(stockPricePointType);
   }
 }

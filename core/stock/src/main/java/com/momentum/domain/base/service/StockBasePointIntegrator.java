@@ -1,5 +1,8 @@
 package com.momentum.domain.base.service;
 
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.HIGH;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.LOW;
+
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
@@ -20,13 +23,25 @@ public class StockBasePointIntegrator {
   private final StockCandleRepository stockCandleRepository;
 
   public void resolve(StockPricePoint confirmedPricePoint, StockBase currentBase, double baseBoundaryThreshold) {
-    if (confirmedPricePoint.isFallingInBase(currentBase, baseBoundaryThreshold)) {
+    if (isLowPointInsideBase(confirmedPricePoint, currentBase, baseBoundaryThreshold)) {
       addUnsingedPointToCurrentBase(confirmedPricePoint, currentBase);
     }
 
-    if (confirmedPricePoint.isRaisedInBase(currentBase, baseBoundaryThreshold)){
+    if (isHighPointInsideBase(confirmedPricePoint, currentBase, baseBoundaryThreshold)) {
       addUnsingedPointToCurrentBase(confirmedPricePoint, currentBase);
     }
+  }
+
+  private boolean isLowPointInsideBase(StockPricePoint point, StockBase base, double threshold) {
+    return point.isSameType(LOW)
+        && point.getPrice() < base.getResistanceLowerBound(threshold)
+        && point.getPrice() >= base.getSupportUpperBound(threshold);
+  }
+
+  private boolean isHighPointInsideBase(StockPricePoint point, StockBase base, double threshold) {
+    return point.isSameType(HIGH)
+        && point.getPrice() > base.getSupportUpperBound(threshold)
+        && point.getPrice() < base.getResistanceUpperBound(threshold);
   }
 
   private void addUnsingedPointToCurrentBase(StockPricePoint confirmedPricePoint, StockBase currentBase) {

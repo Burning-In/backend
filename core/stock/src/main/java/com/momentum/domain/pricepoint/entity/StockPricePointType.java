@@ -1,42 +1,61 @@
 package com.momentum.domain.pricepoint.entity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public enum StockPricePointType {
-  PIVOT_HIGH,
-  PIVOT_LOW,
+  HIGH,
+  LOW,
   ASCENDING,
   DESCENDING,
   FLAT,
-  INIT;
+  UNKNOWN;
 
-  public static StockPricePointType resolve(StockPricePoint first, StockPricePoint middle, StockPricePoint last) {
-    if (first == null) {
-      if (middle.compareTo(last) > 0) {
-        return PIVOT_HIGH;
+  public static StockPricePointType classify(StockPricePoint previous, StockPricePoint target, StockPricePoint next) {
+    if (target == null || next == null) {
+      return UNKNOWN;
+    }
+    if (previous == null) {
+      if (target.compareTo(next) > 0) {
+        return HIGH;
       }
-      if (middle.compareTo(last) < 0) {
-        return PIVOT_LOW;
+      if (target.compareTo(next) < 0) {
+        return LOW;
       }
       return FLAT;
     }
-    if (middle.compareTo(first) > 0 && middle.compareTo(last) > 0) {
-      return PIVOT_HIGH;
+    if (target.compareTo(previous) > 0 && target.compareTo(next) > 0) {
+      return HIGH;
     }
-    if (middle.compareTo(first) < 0 && middle.compareTo(last) < 0) {
-      return PIVOT_LOW;
+    if (target.compareTo(previous) < 0 && target.compareTo(next) < 0) {
+      return LOW;
     }
-    if (first.compareTo(middle) < 0 && middle.compareTo(last) < 0) {
+    if (target.compareTo(previous) > 0 && target.compareTo(next) < 0) {
       return ASCENDING;
     }
-    if (first.compareTo(middle) > 0 && middle.compareTo(last) > 0) {
+    if (target.compareTo(previous) < 0 && target.compareTo(next) > 0) {
       return DESCENDING;
     }
     return FLAT;
   }
 
   public static boolean isNonPivot(StockPricePoint point) {
-    return point.getStockPricePointType() == FLAT
-        || point.getStockPricePointType() == INIT
-        || point.getStockPricePointType() == ASCENDING
-        || point.getStockPricePointType() == DESCENDING;
+    return point.getType() == FLAT
+        || point.getType() == UNKNOWN
+        || point.getType() == ASCENDING
+        || point.getType() == DESCENDING;
+  }
+
+  public static boolean isFlat(StockPricePoint first, StockPricePoint second, double flatThreshold) {
+    if (first == null || second == null) {
+      return false;
+    }
+    BigDecimal p1 = BigDecimal.valueOf(first.getPrice());
+    BigDecimal p2 = BigDecimal.valueOf(second.getPrice());
+    return p1.subtract(p2)
+        .abs()
+        .divide(p2, 10, RoundingMode.HALF_UP)
+        .multiply(BigDecimal.valueOf(100))
+        .compareTo(BigDecimal.valueOf(flatThreshold)) <= 0;
   }
 }

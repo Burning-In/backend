@@ -1,7 +1,7 @@
 package com.momentum.domain.base.service;
 
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_LOW;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.HIGH;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.LOW;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
@@ -21,12 +21,12 @@ public class StockBaseInitializer {
   private final StockCandleRepository stockCandleRepository;
 
   public void resolve(StockPricePoint confirmedPricePoint) {
-    if (confirmedPricePoint.isSameType(PIVOT_LOW)) {
-      initializeBaseWithPairPoint(PIVOT_HIGH, confirmedPricePoint);
+    if (confirmedPricePoint.isSameType(LOW)) {
+      initializeBaseWithPairPoint(HIGH, confirmedPricePoint);
     }
 
-    if (confirmedPricePoint.isSameType(PIVOT_HIGH)) {
-      initializeBaseWithPairPoint(PIVOT_LOW, confirmedPricePoint);
+    if (confirmedPricePoint.isSameType(HIGH)) {
+      initializeBaseWithPairPoint(LOW, confirmedPricePoint);
     }
   }
 
@@ -36,7 +36,7 @@ public class StockBaseInitializer {
     long baseAverageVolume = stockCandleRepository.averageVolume(confirmedPricePoint.getStock(),
         pairedPoint.getTradeDate(),
         confirmedPricePoint.getTradeDate());
-    StockBase newBase = StockBase.initOrLower(pairedPoint, confirmedPricePoint, baseAverageVolume);
+    StockBase newBase = StockBase.init(pairedPoint, confirmedPricePoint, baseAverageVolume);
     stockBaseRepository.save(newBase);
   }
 }

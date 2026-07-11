@@ -1,6 +1,6 @@
 package com.momentum.domain.base.entity;
 
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.HIGH;
 
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
@@ -39,7 +39,7 @@ public class StockBaseLine extends BaseEntity {
   }
 
   public static StockBaseLine create(StockPricePoint point, long baseAverageVolume, StockBase stockBase) {
-    if (point.isSameType(PIVOT_HIGH)) {
+    if (point.isSameType(HIGH)) {
       return StockBaseLine.resistance(point.getPrice(), point.getVolume(), baseAverageVolume, stockBase);
     }
     return StockBaseLine.support(point.getPrice(), point.getVolume(), baseAverageVolume, stockBase);
@@ -77,7 +77,7 @@ public class StockBaseLine extends BaseEntity {
 
   public boolean matches(StockPricePoint point, double threshold) {
     StockBaseLineType expectedType = StockBaseLineType.SUPPORT;
-    if (point.isSameType(PIVOT_HIGH)) {
+    if (point.isSameType(HIGH)) {
       expectedType = StockBaseLineType.RESISTANCE;
     }
     return this.type == expectedType

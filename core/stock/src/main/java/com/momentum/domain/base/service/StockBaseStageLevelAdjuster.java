@@ -1,5 +1,8 @@
 package com.momentum.domain.base.service;
 
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.HIGH;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.LOW;
+
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
@@ -20,13 +23,27 @@ public class StockBaseStageLevelAdjuster {
       return;
     }
     StockBase previousBase = previousBaseOpt.get();
-    if (confirmedPricePoint.isDroppedToPreviousBase(currentBase, previousBase, baseBoundaryThreshold)) {
+    if (isLowPointDroppedToPreviousBase(confirmedPricePoint, currentBase, previousBase, baseBoundaryThreshold)) {
       currentBase.update(previousBase.getStageLevel(), null);
       stockBaseRepository.save(currentBase);
     }
-    if (confirmedPricePoint.isRaisedToPreviousBase(currentBase, previousBase, baseBoundaryThreshold)) {
+    if (isHighPointRaisedToPreviousBase(confirmedPricePoint, currentBase, previousBase, baseBoundaryThreshold)) {
       currentBase.update(previousBase.getStageLevel(), null);
       stockBaseRepository.save(currentBase);
     }
+  }
+
+  private boolean isLowPointDroppedToPreviousBase(StockPricePoint point, StockBase currentBase,
+      StockBase previousBase, double threshold) {
+    return point.isSameType(LOW)
+        && point.getPrice() < currentBase.getSupportLowerBound(threshold)
+        && point.getPrice() < previousBase.getResistanceLowerBound(threshold);
+  }
+
+  private boolean isHighPointRaisedToPreviousBase(StockPricePoint point, StockBase currentBase,
+      StockBase previousBase, double threshold) {
+    return point.isSameType(HIGH)
+        && point.getPrice() >= currentBase.getResistanceUpperBound(threshold)
+        && point.getPrice() > previousBase.getSupportUpperBound(threshold);
   }
 }

@@ -15,7 +15,7 @@ public class StockPricePointTypeNormalResolver {
   private final StockPricePointRepository stockPricePointRepository;
 
   public List<StockPricePoint> resolve(RecentPricePoints points) {
-    StockPricePointType newType = StockPricePointType.resolve(
+    StockPricePointType newType = StockPricePointType.classify(
         points.point1(),
         points.point2(),
         points.point3()

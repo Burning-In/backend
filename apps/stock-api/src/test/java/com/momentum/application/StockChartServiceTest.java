@@ -1,8 +1,8 @@
 package com.momentum.application;
 
-import static com.momentum.domain.ma.StockMovingAveragePeriod.MA_50;
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_LOW;
+import static com.momentum.domain.movingaverage.StockMovingAveragePeriod.MA_50;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.HIGH;
+import static com.momentum.domain.pricepoint.entity.StockPricePointType.LOW;
 import static com.momentum.domain.stock.StockRegime.BREAKOUT_READY;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -120,9 +120,9 @@ class StockChartServiceTest {
 
   private void saveBase(Stock stock, long resistancePrice, long supportPrice) {
     StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
-        PIVOT_HIGH, null, stock);
+        HIGH, null, stock);
     StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
-        PIVOT_LOW, null, stock);
-    stockBaseRepository.save(StockBase.initOrLower(high, low, 100_000L));
+        LOW, null, stock);
+    stockBaseRepository.save(StockBase.init(high, low, 100_000L));
   }
 }

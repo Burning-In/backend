@@ -35,7 +35,8 @@ public class StockPricePointService {
   }
 
   private StockPricePoint initializePricePoint(StockDailyCandle dailyCandle) {
-    StockPricePoint pricePoint = StockPricePoint.initialize(dailyCandle);
+    StockPricePoint pricePoint = StockPricePoint.init(dailyCandle.getClosePrice(), dailyCandle.getVolume(),
+        dailyCandle.getTradeDate(), dailyCandle.getStock());
     return stockPricePointRepository.save(pricePoint);
   }
 

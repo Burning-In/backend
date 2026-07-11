@@ -44,7 +44,8 @@ public class SwingDoorCalculator {
             dailyCandle.getTradeDate())
         .orElseThrow(() -> new IllegalStateException("어제 캔들 없음, 추가바람"));
     return stockPricePointRepository.save(
-        StockPricePoint.initialize(lastCandle)
+        StockPricePoint.init(lastCandle.getClosePrice(), lastCandle.getVolume(),
+            lastCandle.getTradeDate(), lastCandle.getStock())
     );
   }
 

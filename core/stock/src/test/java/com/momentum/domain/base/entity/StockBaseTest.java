@@ -193,10 +193,10 @@ class StockBaseTest {
   }
 
   private StockPricePoint highPricePoint(long price) {
-    return new StockPricePoint(price, 100_000L, LocalDate.now(), StockPricePointType.PIVOT_HIGH, null, stock);
+    return new StockPricePoint(price, 100_000L, LocalDate.now(), StockPricePointType.HIGH, null, stock);
   }
 
   private StockPricePoint lowPricePoint(long price) {
-    return new StockPricePoint(price, 100_000L, LocalDate.now(), StockPricePointType.PIVOT_LOW, null, stock);
+    return new StockPricePoint(price, 100_000L, LocalDate.now(), StockPricePointType.LOW, null, stock);
   }
 }

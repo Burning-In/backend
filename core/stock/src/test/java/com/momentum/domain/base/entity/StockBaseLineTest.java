@@ -21,7 +21,7 @@ class StockBaseLineTest {
   void createResistanceFromPivotHigh() {
     long resistancePrice = 10_000L;
     long baseAverageVolume = 100_000L;
-    StockPricePoint point = point(resistancePrice, StockPricePointType.PIVOT_HIGH);
+    StockPricePoint point = point(resistancePrice, StockPricePointType.HIGH);
 
     StockBaseLine line = StockBaseLine.create(point, baseAverageVolume, null);
 
@@ -36,7 +36,7 @@ class StockBaseLineTest {
   void createSupportFromPivotLow() {
     long supportPrice = 8_000L;
     long baseAverageVolume = 100_000L;
-    StockPricePoint point = point(supportPrice, StockPricePointType.PIVOT_LOW);
+    StockPricePoint point = point(supportPrice, StockPricePointType.LOW);
 
     StockBaseLine line = StockBaseLine.create(point, baseAverageVolume, null);
 
@@ -51,7 +51,7 @@ class StockBaseLineTest {
   void convertLineType() {
     long resistancePrice = 10_000L;
     long averageVolume = 100L;
-    StockBaseLine line = StockBaseLine.create(point(resistancePrice, StockPricePointType.PIVOT_HIGH), averageVolume, null);
+    StockBaseLine line = StockBaseLine.create(point(resistancePrice, StockPricePointType.HIGH), averageVolume, null);
 
     line.convertLineType();
     assertThat(line.getType()).isEqualTo(StockBaseLineType.SUPPORT);
@@ -67,8 +67,8 @@ class StockBaseLineTest {
     long averageVolume = 100L;
     long nearPrice = 10_200L;
     double matchThreshold = 0.05;
-    StockBaseLine line = StockBaseLine.create(point(resistancePrice, StockPricePointType.PIVOT_HIGH), averageVolume, null);
-    StockPricePoint point = point(nearPrice, StockPricePointType.PIVOT_HIGH);
+    StockBaseLine line = StockBaseLine.create(point(resistancePrice, StockPricePointType.HIGH), averageVolume, null);
+    StockPricePoint point = point(nearPrice, StockPricePointType.HIGH);
 
     assertThat(line.matches(point, matchThreshold)).isTrue();
   }
@@ -80,8 +80,8 @@ class StockBaseLineTest {
     long averageVolume = 100L;
     long nearPrice = 10_200L;
     double matchThreshold = 0.05;
-    StockBaseLine line = StockBaseLine.create(point(supportPrice, StockPricePointType.PIVOT_LOW), averageVolume, null);
-    StockPricePoint point = point(nearPrice, StockPricePointType.PIVOT_HIGH);
+    StockBaseLine line = StockBaseLine.create(point(supportPrice, StockPricePointType.LOW), averageVolume, null);
+    StockPricePoint point = point(nearPrice, StockPricePointType.HIGH);
 
     assertThat(line.matches(point, matchThreshold)).isFalse();
   }
@@ -93,8 +93,8 @@ class StockBaseLineTest {
     long averageVolume = 100L;
     long farPrice = 12_000L;
     double matchThreshold = 0.05;
-    StockBaseLine line = StockBaseLine.create(point(resistancePrice, StockPricePointType.PIVOT_HIGH), averageVolume, null);
-    StockPricePoint point = point(farPrice, StockPricePointType.PIVOT_HIGH);
+    StockBaseLine line = StockBaseLine.create(point(resistancePrice, StockPricePointType.HIGH), averageVolume, null);
+    StockPricePoint point = point(farPrice, StockPricePointType.HIGH);
 
     assertThat(line.matches(point, matchThreshold)).isFalse();
   }
@@ -105,8 +105,8 @@ class StockBaseLineTest {
     long resistancePrice = 10_000L;
     long averageVolume = 100L;
     long additionalVolume = 100L;
-    StockBaseLine touched = StockBaseLine.create(point(resistancePrice, StockPricePointType.PIVOT_HIGH), averageVolume, null);
-    StockBaseLine untouched = StockBaseLine.create(point(resistancePrice, StockPricePointType.PIVOT_HIGH), averageVolume, null);
+    StockBaseLine touched = StockBaseLine.create(point(resistancePrice, StockPricePointType.HIGH), averageVolume, null);
+    StockBaseLine untouched = StockBaseLine.create(point(resistancePrice, StockPricePointType.HIGH), averageVolume, null);
 
     touched.updateStrength(additionalVolume, averageVolume);
 

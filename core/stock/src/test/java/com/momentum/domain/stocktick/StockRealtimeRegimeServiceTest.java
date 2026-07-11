@@ -83,10 +83,10 @@ class StockRealtimeRegimeServiceTest {
 
   private void saveBase(Stock stock, long resistancePrice, long supportPrice, boolean vcp) {
     StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
-        StockPricePointType.PIVOT_HIGH, null, stock);
+        StockPricePointType.HIGH, null, stock);
     StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
-        StockPricePointType.PIVOT_LOW, null, stock);
-    StockBase base = StockBase.initOrLower(high, low, 100_000L);
+        StockPricePointType.LOW, null, stock);
+    StockBase base = StockBase.init(high, low, 100_000L);
     if (vcp) {
       // 변동성이 줄어드는(직전 > 직후) 이력 → isVcp = true
       base.update(null, List.of(100L, 50L));
@@ -97,10 +97,10 @@ class StockRealtimeRegimeServiceTest {
   // resolveType()이 최근 가격포인트 3개 이상을 요구하므로 충분한 포인트를 적재한다.
   private void saveExtraPoints(Stock stock) {
     stockPricePointRepository.save(new StockPricePoint(9_500L, 100_000L, LocalDate.now().minusDays(3),
-        StockPricePointType.PIVOT_HIGH, null, stock));
+        StockPricePointType.HIGH, null, stock));
     stockPricePointRepository.save(new StockPricePoint(9_000L, 100_000L, LocalDate.now().minusDays(2),
-        StockPricePointType.PIVOT_LOW, null, stock));
+        StockPricePointType.LOW, null, stock));
     stockPricePointRepository.save(new StockPricePoint(9_300L, 100_000L, LocalDate.now().minusDays(1),
-        StockPricePointType.PIVOT_HIGH, null, stock));
+        StockPricePointType.HIGH, null, stock));
   }
 }
