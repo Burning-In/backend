@@ -34,20 +34,6 @@ class StockRealtimeRegimeServiceTest {
   private StockPricePointRepository stockPricePointRepository;
 
   @Test
-  @DisplayName("VCP이고 현재가가 저항선 상단을 돌파하면 BREAKOUT_SUCCESS로 갱신된다")
-  void updatesToBreakoutSuccess() {
-    Stock stock = saveStock("000040", StockRegime.BREAKOUT_READY);
-    saveBase(stock, 10_000L, 8_000L);
-    saveExtraPoints(stock);
-
-    // 저항선 상단 = 10_000 * 1.05 = 10_500, 현재가 11_000 > 10_500
-    stockRealtimeRegimeService.resolveRealtimeRegime("000040", 11_000L);
-
-    StockRegime saved = stockRepository.findByStockCode("000040").orElseThrow().getStockRegime();
-    assertThat(saved).isEqualTo(StockRegime.BREAKOUT_SUCCESS);
-  }
-
-  @Test
   @DisplayName("종목을 찾지 못하면 IllegalArgumentException")
   void throwsWhenStockNotFound() {
     assertThatThrownBy(() -> stockRealtimeRegimeService.resolveRealtimeRegime("000270", 10_000L))
@@ -62,6 +48,41 @@ class StockRealtimeRegimeServiceTest {
 
     assertThatThrownBy(() -> stockRealtimeRegimeService.resolveRealtimeRegime("000070", 10_000L))
         .isInstanceOf(IllegalStateException.class);
+  }
+
+  @Test
+  @DisplayName("베이스는 있지만 유효한 가격 특이점이 없으면 IllegalStateException")
+  void throwsWhenLastPricePointNotFound() {
+    Stock stock = saveStock("000090", StockRegime.BREAKOUT_READY);
+    // 베이스에 딸린 고점/저점 특이점을 모두 소프트 삭제해, 조회 가능한 특이점이 하나도 없는 상황을 만든다.
+    StockPricePoint high = new StockPricePoint(10_000L, 100_000L, LocalDate.now().minusDays(10),
+        StockPricePointType.HIGH, null, stock);
+    StockPricePoint low = new StockPricePoint(8_000L, 100_000L, LocalDate.now().minusDays(20),
+        StockPricePointType.LOW, null, stock);
+    StockBase base = StockBase.init(high, low, 100_000L);
+    base.update(null, List.of(100L, 50L));
+    stockBaseRepository.save(base);
+    high.delete();
+    low.delete();
+    stockPricePointRepository.save(high);
+    stockPricePointRepository.save(low);
+
+    assertThatThrownBy(() -> stockRealtimeRegimeService.resolveRealtimeRegime("000090", 10_000L))
+        .isInstanceOf(IllegalStateException.class);
+  }
+
+  @Test
+  @DisplayName("실시간에서 VCP이고 현재가가 저항선 상단을 돌파하면 BREAKOUT_SUCCESS로 갱신된다")
+  void updatesToBreakoutSuccess() {
+    Stock stock = saveStock("000040", StockRegime.BREAKOUT_READY);
+    saveBase(stock, 10_000L, 8_000L);
+    saveExtraPoints(stock);
+
+    // 저항선 상단 = 10_000 * 1.05 = 10_500, 현재가 11_000 > 10_500
+    stockRealtimeRegimeService.resolveRealtimeRegime("000040", 11_000L);
+
+    StockRegime saved = stockRepository.findByStockCode("000040").orElseThrow().getStockRegime();
+    assertThat(saved).isEqualTo(StockRegime.BREAKOUT_SUCCESS);
   }
 
   private Stock saveStock(String code, StockRegime regime) {
@@ -79,7 +100,7 @@ class StockRealtimeRegimeServiceTest {
     stockBaseRepository.save(base);
   }
 
-  // resolveType()이 최근 가격포인트 3개 이상을 요구하므로 충분한 포인트를 적재한다.
+  // resolvePointTypes()이 최근 가격포인트 3개 이상을 요구하므로 충분한 포인트를 적재한다.
   private void saveExtraPoints(Stock stock) {
     stockPricePointRepository.save(new StockPricePoint(9_500L, 100_000L, LocalDate.now().minusDays(3),
         StockPricePointType.HIGH, null, stock));

@@ -1,6 +1,9 @@
 package com.momentum.domain.stocktick;
 
-import com.momentum.domain.pricepoint.service.StockPricePointTypeDecider;
+import com.momentum.domain.base.StockBaseRepository;
+import com.momentum.domain.base.entity.StockBase;
+import com.momentum.domain.pricepoint.StockPricePointRepository;
+import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -12,20 +15,24 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StockRealtimeRegimeService {
 
-  private static final double BREAKOUT_THRESHOLD_PERCENT = 5.0;
+  private static final double THRESHOLD_PERCENT = 5.0;
 
   private final StockRepository stockRepository;
-
-  private final StockPricePointTypeDecider stockPricePointTypeDecider;
   private final StockRealtimeRegimePolicy stockRealtimeRegimePolicy;
+  private final StockBaseRepository stockBaseRepository;
+  private final StockPricePointRepository stockPricePointRepository;
 
   @Transactional
   public void resolveRealtimeRegime(String stockCode, long currentPrice) {
     Stock stock = stockRepository.findByStockCode(stockCode)
         .orElseThrow(IllegalArgumentException::new);
-    stockPricePointTypeDecider.resolvePointTypes(stock);
+    StockBase currentBase = stockBaseRepository.findCurrentBaseWithLines(stock)
+        .orElseThrow(IllegalStateException::new);
+    StockPricePoint lastPricePoint = stockPricePointRepository.findLastStockPricePoint(stock)
+        .orElseThrow(IllegalStateException::new);
 
-    StockRegime newRegime = stockRealtimeRegimePolicy.determine(currentPrice, stock, BREAKOUT_THRESHOLD_PERCENT);
+    StockRegime newRegime = stockRealtimeRegimePolicy.decide(currentPrice, stock, currentBase, lastPricePoint,
+        THRESHOLD_PERCENT);
     stock.update(newRegime);
     stockRepository.save(stock);
   }
