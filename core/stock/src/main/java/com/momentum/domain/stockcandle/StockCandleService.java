@@ -15,7 +15,7 @@ public class StockCandleService {
   private final StockCandleRepository stockCandleRepository;
 
   @Transactional
-  public List<StockDailyCandle> create(String stockCode, List<StockCandleDto> stockCandles) {
+  public List<StockDailyCandle> create(String stockCode, List<StockCandleCommand> stockCandles) {
     Stock stock = stockRepository.findByStockCode(stockCode)
         .orElseThrow(IllegalArgumentException::new);
     List<StockDailyCandle> dailyCandles = stockCandles.stream()
@@ -25,7 +25,7 @@ public class StockCandleService {
     return stockCandleRepository.saveAll(dailyCandles);
   }
 
-  private StockDailyCandle fromCandle(Stock stock, StockCandleDto candle) {
+  private StockDailyCandle fromCandle(Stock stock, StockCandleCommand candle) {
     return StockDailyCandle.create(
         stock,
         candle.date(),

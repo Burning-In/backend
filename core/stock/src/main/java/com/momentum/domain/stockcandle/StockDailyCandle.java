@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,7 +45,7 @@ public class StockDailyCandle extends BaseEntity {
       long closePrice,
       long volume) {
     return new StockDailyCandle(
-        LocalDate.parse(rawDate, DateTimeFormatter.BASIC_ISO_DATE),
+        parseTradeDate(rawDate),
         openPrice,
         highPrice,
         lowPrice,
@@ -52,5 +53,16 @@ public class StockDailyCandle extends BaseEntity {
         volume,
         stock
     );
+  }
+
+  private static LocalDate parseTradeDate(String rawDate) {
+    if (rawDate == null) {
+      throw new IllegalArgumentException("tradeDate must not be null");
+    }
+    try {
+      return LocalDate.parse(rawDate, DateTimeFormatter.BASIC_ISO_DATE);
+    } catch (DateTimeParseException e) {
+      throw new IllegalArgumentException("invalid tradeDate format: " + rawDate, e);
+    }
   }
 }
