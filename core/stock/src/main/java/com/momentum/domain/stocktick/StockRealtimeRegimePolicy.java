@@ -16,40 +16,40 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class StockRealtimeRegimePolicy {
 
-  private final StockPricePointRepository stockPricePointRepository;
-  private final StockBaseRepository stockBaseRepository;
+  public StockRegime determine(long currentPrice, Stock stock, StockBase currentBase, StockPricePoint lastPricePoint,
+      double thresholdPercent) {
+    validate(stock, currentBase, lastPricePoint);
 
-  public StockRegime determine(long currentPrice, Stock stock, double breakOutThreshold) {
-    if (stock == null) {
-      return UNKNOWN;
-    }
-    StockBase currentBase = stockBaseRepository.findCurrentBaseWithLines(stock)
-        .orElseThrow(IllegalStateException::new);
-    StockPricePoint lastPricePoint = stockPricePointRepository.findLastStockPricePoint(stock)
-        .orElseThrow(IllegalStateException::new);
-
-    // # 하방이탈 : 현재가 < 지지선 하단(임계 적용)
-    if (currentBase.getLowestSupportLine() != null
-        && currentBase.getLowestSupportLine().getLowerBound(breakOutThreshold) > currentPrice) {
+    if (currentBase.getLowestSupportLine().getLowerBound(thresholdPercent) > currentPrice) {
       return DOWNSIDE_BREAK;
     }
-
-    // # 돌파실패 : 마지막점 타입을 설정해야되는 이유
     if (stock.getStockRegime().equals(BREAKOUT_SUCCESS) && lastPricePoint.getPrice() > currentPrice) {
       return BREAKOUT_FAILED;
     }
-
-    // # 돌파성공 & 돌파준비
-    long resistanceUpperBound = currentBase.getHighestResistanceLine().getUpperBound(breakOutThreshold);
-    if (!currentBase.isVcp()) {
-      return UNKNOWN;
-    }
-    if (currentPrice > resistanceUpperBound) {
+    if (currentBase.isVcp() && currentPrice > currentBase.getHighestResistanceLine().getUpperBound(thresholdPercent)) {
       return BREAKOUT_SUCCESS;
     }
-    return BREAKOUT_READY;
+    if (currentPrice > currentBase.getHighestResistanceLine().getUpperBound(thresholdPercent)) {
+      return BREAKOUT_READY;
+    }
+
+    return UNKNOWN;
+  }
+
+  private void validate(Stock stock, StockBase currentBase, StockPricePoint lastPricePoint) {
+    if (stock == null) {
+      throw new IllegalArgumentException("stock is null");
+    }
+    if (currentBase == null) {
+      throw new IllegalArgumentException("currentBase is null");
+    }
+    if (lastPricePoint == null) {
+      throw new IllegalArgumentException("lastPricePoint is null");
+    }
+    if (currentBase.getHighestResistanceLine() == null || currentBase.getLowestSupportLine() == null) {
+      throw new IllegalArgumentException("currentBase resistance/support line is null");
+    }
   }
 }
