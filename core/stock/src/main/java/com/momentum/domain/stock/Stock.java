@@ -35,7 +35,7 @@ public class Stock extends AggregateRoot {
   }
 
   public void update(StockRegime stockRegime) {
-    if (this.stockRegime.equals(stockRegime) || stockRegime.equals(UNKNOWN)) {
+    if (stockRegime == null || this.stockRegime.equals(stockRegime) || stockRegime.equals(UNKNOWN)) {
       return;
     }
     StockRegime from = this.stockRegime;
