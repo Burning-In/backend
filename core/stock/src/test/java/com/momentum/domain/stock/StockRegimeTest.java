@@ -30,7 +30,7 @@ class StockRegimeTest {
     StockBase base = baseOf(stock, resistancePrice, supportPrice);
 
     StockRegime result = new DailyRegimePolicy()
-        .determine(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
+        .decide(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
             lineApproachThreshold);
 
     assertThat(result).isEqualTo(DOWNSIDE_BREAK);
@@ -49,7 +49,7 @@ class StockRegimeTest {
     StockBase base = baseOf(stock, resistancePrice, supportPrice);
 
     StockRegime result = new DailyRegimePolicy()
-        .determine(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
+        .decide(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
             lineApproachThreshold);
 
     assertThat(result).isEqualTo(BREAKOUT_FAILED);
@@ -69,7 +69,7 @@ class StockRegimeTest {
 
     // gap = (13000-12000)/12000*100 = 8.3% > 5%
     StockRegime result = new DailyRegimePolicy()
-        .determine(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
+        .decide(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
             lineApproachThreshold);
 
     assertThat(result).isEqualTo(BREAKOUT_SUCCESS);
@@ -90,7 +90,7 @@ class StockRegimeTest {
     base.update(null, shrinkingVolatility); // VCP 표시
 
     StockRegime result = new DailyRegimePolicy()
-        .determine(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
+        .decide(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
             lineApproachThreshold);
 
     assertThat(result).isEqualTo(BREAKOUT_READY);
@@ -109,7 +109,7 @@ class StockRegimeTest {
     StockBase base = baseOf(stock, resistancePrice, supportPrice);
 
     StockRegime result = new DailyRegimePolicy()
-        .determine(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
+        .decide(stock, closePrice, recentPoint(stock, recentPrice), base, breakoutThreshold,
             lineApproachThreshold);
 
     assertThat(result).isEqualTo(DIRECTION_UNDETERMINED);

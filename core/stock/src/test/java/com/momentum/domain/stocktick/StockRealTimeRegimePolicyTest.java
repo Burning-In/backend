@@ -32,7 +32,7 @@ class StockRealTimeRegimePolicyTest {
     StockBase base = base(stock, 10_000L, 8_000L, false);
     StockPricePoint lastPoint = point(stock, 9_000L);
 
-    assertThatThrownBy(() -> stockRealtimeRegimePolicy.determine(10_000L, null, base, lastPoint, THRESHOLD_PERCENT))
+    assertThatThrownBy(() -> stockRealtimeRegimePolicy.decide(10_000L, null, base, lastPoint, THRESHOLD_PERCENT))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -42,7 +42,7 @@ class StockRealTimeRegimePolicyTest {
     Stock stock = stock("000120", BREAKOUT_READY);
     StockPricePoint lastPoint = point(stock, 9_000L);
 
-    assertThatThrownBy(() -> stockRealtimeRegimePolicy.determine(10_000L, stock, null, lastPoint, THRESHOLD_PERCENT))
+    assertThatThrownBy(() -> stockRealtimeRegimePolicy.decide(10_000L, stock, null, lastPoint, THRESHOLD_PERCENT))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -52,7 +52,7 @@ class StockRealTimeRegimePolicyTest {
     Stock stock = stock("000130", BREAKOUT_READY);
     StockBase base = base(stock, 10_000L, 8_000L, false);
 
-    assertThatThrownBy(() -> stockRealtimeRegimePolicy.determine(10_000L, stock, base, null, THRESHOLD_PERCENT))
+    assertThatThrownBy(() -> stockRealtimeRegimePolicy.decide(10_000L, stock, base, null, THRESHOLD_PERCENT))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -64,7 +64,7 @@ class StockRealTimeRegimePolicyTest {
     StockPricePoint lastPoint = point(stock, 9_500L);
 
     // 지지선 하단 = 10_000 * 0.95 = 9_500, 현재가 9_000 < 9_500
-    StockRegime result = stockRealtimeRegimePolicy.determine(9_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
+    StockRegime result = stockRealtimeRegimePolicy.decide(9_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
 
     assertThat(result).isEqualTo(DOWNSIDE_BREAK);
   }
@@ -77,7 +77,7 @@ class StockRealTimeRegimePolicyTest {
     StockPricePoint lastPoint = point(stock, 9_500L);
 
     // 지지선 하단 = 7_600, 현재가 9_000 > 7_600 (이탈 아님) & 직전 9_500 > 9_000
-    StockRegime result = stockRealtimeRegimePolicy.determine(9_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
+    StockRegime result = stockRealtimeRegimePolicy.decide(9_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
 
     assertThat(result).isEqualTo(BREAKOUT_FAILED);
   }
@@ -90,7 +90,7 @@ class StockRealTimeRegimePolicyTest {
     StockPricePoint lastPoint = point(stock, 9_000L);
 
     // 저항선 상단 = 10_000 * 1.05 = 10_500, 현재가 11_000 > 10_500 & VCP
-    StockRegime result = stockRealtimeRegimePolicy.determine(11_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
+    StockRegime result = stockRealtimeRegimePolicy.decide(11_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
 
     assertThat(result).isEqualTo(BREAKOUT_SUCCESS);
   }
@@ -103,7 +103,7 @@ class StockRealTimeRegimePolicyTest {
     StockPricePoint lastPoint = point(stock, 9_000L);
 
     // 저항선 상단 = 10_500, 현재가 11_000 > 10_500 이지만 VCP 아님
-    StockRegime result = stockRealtimeRegimePolicy.determine(11_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
+    StockRegime result = stockRealtimeRegimePolicy.decide(11_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
 
     assertThat(result).isEqualTo(BREAKOUT_READY);
   }
@@ -116,7 +116,7 @@ class StockRealTimeRegimePolicyTest {
     StockPricePoint lastPoint = point(stock, 9_000L);
 
     // 저항선 상단 = 10_500, 지지선 하단 = 7_600, 현재가 10_000 은 밴드 안
-    StockRegime result = stockRealtimeRegimePolicy.determine(10_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
+    StockRegime result = stockRealtimeRegimePolicy.decide(10_000L, stock, base, lastPoint, THRESHOLD_PERCENT);
 
     assertThat(result).isEqualTo(UNKNOWN);
   }

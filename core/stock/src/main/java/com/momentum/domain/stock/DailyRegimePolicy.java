@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DailyRegimePolicy {
 
-  public StockRegime determine(Stock stock, long closePrice, StockPricePoint recentPricePoint,
+  public StockRegime decide(Stock stock, long closePrice, StockPricePoint recentPricePoint,
       StockBase currentBase, double breakoutThreshold, double lineApproachThreshold) {
     long resistancePrice = currentBase.getHighestResistanceLine().getPrice();
     long supportPrice = currentBase.getLowestSupportLine().getPrice();

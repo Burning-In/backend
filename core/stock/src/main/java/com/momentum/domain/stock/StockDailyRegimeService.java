@@ -32,7 +32,7 @@ public class StockDailyRegimeService {
       return;
     }
 
-    StockRegime newRegime = dailyRegimePolicy.determine(stock,
+    StockRegime newRegime = dailyRegimePolicy.decide(stock,
         stockDailyCandle.getClosePrice(),
         recentPricePointOpt.get(), currentBaseOpt.get(), BREAKOUT_THRESHOLD, LINE_APPROACH_THRESHOLD);
     stock.update(newRegime);
