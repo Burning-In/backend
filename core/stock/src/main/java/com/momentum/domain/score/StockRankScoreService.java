@@ -17,17 +17,17 @@ public class StockRankScoreService {
   private final StockCandleRepository stockCandleRepository;
   private final StockRankScoreRepository stockRankScoreRepository;
 
-  public void calculateDailyRankScores(Stock stock, LocalDate baseDate) {
+  public void calculateDailyRankScores(Stock stock, LocalDate scoringDate) {
     List<StockDailyCandle> candles = stockCandleRepository
-        .findRecentCandles(stock.getId(), baseDate, TRADING_DAYS_PER_YEAR);
+        .findRecentCandles(stock.getId(), scoringDate, TRADING_DAYS_PER_YEAR);
     if (candles.size() < TRADING_DAYS_PER_YEAR) {
-      return;
+      throw new IllegalArgumentException("Too small stock candles for stock " + stock.getId());
     }
 
     List<Long> closePrices = candles.stream()
         .map(StockDailyCandle::getClosePrice)
         .toList();
-    StockRankScore rankScore = StockRankScore.create(closePrices, baseDate, stock);
+    StockRankScore rankScore = StockRankScore.create(closePrices, scoringDate, stock);
     stockRankScoreRepository.save(rankScore);
   }
 }

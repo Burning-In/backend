@@ -1,6 +1,7 @@
 package com.momentum.domain.score;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
@@ -57,13 +58,12 @@ class StockRankScoreServiceTest {
   }
 
   @Test
-  @DisplayName("종가가 252개 미만이면 저장하지 않는다")
-  void doesNotSaveWhenNotEnoughCandles() {
+  @DisplayName("종가가 252개 미만이면 IllegalArgumentException")
+  void throwsWhenNotEnoughCandles() {
     saveCandles(251, 12_000L, 10_000L);
 
-    stockRankScoreService.calculateDailyRankScores(stock, BASE_DATE);
-
-    assertThat(stockRankScoreRepository.findAllByBaseDate(BASE_DATE)).isEmpty();
+    assertThatThrownBy(() -> stockRankScoreService.calculateDailyRankScores(stock, BASE_DATE))
+        .isInstanceOf(IllegalArgumentException.class);
   }
 
   // BASE_DATE(최신)부터 과거로 count개. 최신 종가 = newestClose, 가장 오래된 종가 = oldestClose
