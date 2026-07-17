@@ -39,7 +39,7 @@ class StockPricePointServiceTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.OTHER));
+    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.UNKNOWN, StockTrend.OTHER));
   }
 
   @Test
