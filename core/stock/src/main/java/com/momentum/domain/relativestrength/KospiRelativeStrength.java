@@ -1,4 +1,4 @@
-package com.momentum.domain.rs;
+package com.momentum.domain.relativestrength;
 
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.stock.Stock;

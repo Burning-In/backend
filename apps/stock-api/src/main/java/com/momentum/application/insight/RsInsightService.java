@@ -1,7 +1,7 @@
 package com.momentum.application.insight;
 
-import com.momentum.domain.rs.KospiRelativeStrength;
-import com.momentum.domain.rs.KospiRelativeStrengthRepository;
+import com.momentum.domain.relativestrength.KospiRelativeStrength;
+import com.momentum.domain.relativestrength.KospiRelativeStrengthRepository;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.RsResponse;

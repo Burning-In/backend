@@ -1,10 +1,10 @@
-package com.momentum.domain.rs;
+package com.momentum.domain.relativestrength;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
-import com.momentum.domain.rs.KospiRawScoreCalculator.RSRawScore;
+import com.momentum.domain.relativestrength.KospiRawScoreCalculator.RSRawScore;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;

@@ -1,9 +1,9 @@
 package com.momentum.infrastructure.rs;
 
-import static com.momentum.domain.rs.QKospi.kospi;
+import static com.momentum.domain.relativestrength.QKospi.kospi;
 
-import com.momentum.domain.rs.Kospi;
-import com.momentum.domain.rs.KospiRepository;
+import com.momentum.domain.relativestrength.Kospi;
+import com.momentum.domain.relativestrength.KospiRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.util.List;

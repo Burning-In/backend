@@ -1,6 +1,6 @@
-package com.momentum.domain.rs;
+package com.momentum.domain.relativestrength;
 
-import com.momentum.domain.rs.KospiRawScoreCalculator.RSRawScore;
+import com.momentum.domain.relativestrength.KospiRawScoreCalculator.RSRawScore;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import java.time.LocalDate;

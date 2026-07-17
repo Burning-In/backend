@@ -1,4 +1,4 @@
-package com.momentum.domain.rs;
+package com.momentum.domain.relativestrength;
 
 import java.time.LocalDate;
 import java.util.List;

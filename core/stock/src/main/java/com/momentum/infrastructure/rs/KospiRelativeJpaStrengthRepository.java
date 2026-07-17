@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.rs;
 
-import com.momentum.domain.rs.KospiRelativeStrength;
+import com.momentum.domain.relativestrength.KospiRelativeStrength;
 import com.momentum.domain.stock.Stock;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

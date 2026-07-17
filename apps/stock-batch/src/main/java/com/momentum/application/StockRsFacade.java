@@ -1,8 +1,8 @@
 package com.momentum.application;
 
-import com.momentum.domain.rs.Kospi;
-import com.momentum.domain.rs.KospiRelativeStrengthService;
-import com.momentum.domain.rs.KospiRepository;
+import com.momentum.domain.relativestrength.Kospi;
+import com.momentum.domain.relativestrength.KospiRelativeStrengthService;
+import com.momentum.domain.relativestrength.KospiRepository;
 import com.momentum.infrastructure.LsKospiProvider;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.momentum.domain.rs;
+package com.momentum.domain.relativestrength;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

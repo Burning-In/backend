@@ -1,7 +1,7 @@
 package com.momentum.infrastructure.rs;
 
-import com.momentum.domain.rs.KospiRelativeStrength;
-import com.momentum.domain.rs.KospiRelativeStrengthRepository;
+import com.momentum.domain.relativestrength.KospiRelativeStrength;
+import com.momentum.domain.relativestrength.KospiRelativeStrengthRepository;
 import com.momentum.domain.stock.Stock;
 import java.util.List;
 import java.util.Optional;

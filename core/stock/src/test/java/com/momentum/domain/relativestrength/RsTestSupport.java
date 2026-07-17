@@ -1,11 +1,10 @@
-package com.momentum.domain.rs;
+package com.momentum.domain.relativestrength;
 
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
