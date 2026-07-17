@@ -10,6 +10,7 @@ import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
+import com.momentum.domain.stock.StockTrend;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,10 +26,11 @@ public class StockRealtimeRegimePolicy {
     if (stock.getStockRegime().equals(BREAKOUT_SUCCESS) && lastPricePoint.getPrice() > currentPrice) {
       return BREAKOUT_FAILED;
     }
-    if (currentBase.isVcp() && currentPrice > currentBase.getHighestResistanceLine().getUpperBound(thresholdPercent)) {
+    if (stock.getStockTrend().equals(StockTrend.UPTREND) && currentBase.isVcp()
+        && currentPrice > currentBase.getHighestResistanceLine().getUpperBound(thresholdPercent)) {
       return BREAKOUT_SUCCESS;
     }
-    if (currentPrice > currentBase.getHighestResistanceLine().getUpperBound(thresholdPercent)) {
+    if (stock.getStockTrend().equals(StockTrend.UPTREND) && currentPrice > currentBase.getHighestResistanceLine().getUpperBound(thresholdPercent)) {
       return BREAKOUT_READY;
     }
 
