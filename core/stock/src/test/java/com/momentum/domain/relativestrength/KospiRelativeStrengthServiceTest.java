@@ -100,12 +100,19 @@ class KospiRelativeStrengthServiceTest {
     List<KospiRelativeStrength> result = service.create(today);
 
     // then
-    // 정렬 후 i=0 → rsRating=1, i=1 → rsRating=round(1/2 * 98)+1=50
+    // 원점수 오름차순 정렬 후 i=0(약한주식) → rsRating=1, i=1(강한주식) → rsRating=round(1/2 * 98)+1=50
     assertThat(result).hasSize(2);
-    List<Integer> ratings = result.stream()
-        .map(KospiRelativeStrength::getRsScore)
-        .sorted()
-        .toList();
-    assertThat(ratings).containsExactly(1, 50);
+    int weakRating = ratingOf(result, weakStock);
+    int strongRating = ratingOf(result, strongStock);
+    assertThat(weakRating).isEqualTo(1);
+    assertThat(strongRating).isEqualTo(50);
+  }
+
+  private int ratingOf(List<KospiRelativeStrength> result, Stock stock) {
+    return result.stream()
+        .filter(rs -> rs.getStock().getId().equals(stock.getId()))
+        .findFirst()
+        .orElseThrow()
+        .getRsScore();
   }
 }

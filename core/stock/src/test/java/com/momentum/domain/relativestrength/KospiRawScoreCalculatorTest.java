@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 
-import com.momentum.domain.relativestrength.KospiRawScoreCalculator.RSRawScore;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -20,6 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Transactional
 class KospiRawScoreCalculatorTest {
+
+  private static final double RECENT_QUARTER_WEIGHT = 0.4;
+  private static final double HALF_YEAR_WEIGHT = 0.2;
+  private static final double THREE_QUARTERS_WEIGHT = 0.2;
+  private static final double FULL_YEAR_WEIGHT = 0.2;
 
   @Autowired
   private KospiRawScoreCalculator calculator;
@@ -44,7 +48,8 @@ class KospiRawScoreCalculatorTest {
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when
-    List<RSRawScore> scores = calculator.calculateScores(List.of(stock), today);
+    List<RSRawScore> scores = calculator.calculateScores(List.of(stock), today,
+        RECENT_QUARTER_WEIGHT, HALF_YEAR_WEIGHT, THREE_QUARTERS_WEIGHT, FULL_YEAR_WEIGHT);
 
     // then
     assertThat(scores).hasSize(1);
@@ -62,7 +67,8 @@ class KospiRawScoreCalculatorTest {
     rsTestSupport.setupCandles(stock, today, 12_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when
-    List<RSRawScore> scores = calculator.calculateScores(List.of(stock), today);
+    List<RSRawScore> scores = calculator.calculateScores(List.of(stock), today,
+        RECENT_QUARTER_WEIGHT, HALF_YEAR_WEIGHT, THREE_QUARTERS_WEIGHT, FULL_YEAR_WEIGHT);
 
     // then
     assertThat(scores).hasSize(1);
@@ -82,7 +88,8 @@ class KospiRawScoreCalculatorTest {
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when
-    List<RSRawScore> scores = calculator.calculateScores(List.of(stock), today);
+    List<RSRawScore> scores = calculator.calculateScores(List.of(stock), today,
+        RECENT_QUARTER_WEIGHT, HALF_YEAR_WEIGHT, THREE_QUARTERS_WEIGHT, FULL_YEAR_WEIGHT);
 
     // then
     assertThat(scores).hasSize(1);
@@ -102,7 +109,8 @@ class KospiRawScoreCalculatorTest {
     rsTestSupport.setupCandles(stockB, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when
-    List<RSRawScore> scores = calculator.calculateScores(List.of(stockA, stockB), today);
+    List<RSRawScore> scores = calculator.calculateScores(List.of(stockA, stockB), today,
+        RECENT_QUARTER_WEIGHT, HALF_YEAR_WEIGHT, THREE_QUARTERS_WEIGHT, FULL_YEAR_WEIGHT);
 
     // then
     assertThat(scores).hasSize(2);
@@ -121,7 +129,8 @@ class KospiRawScoreCalculatorTest {
     rsTestSupport.setupKospi(today, 2500L);
 
     // when & then
-    assertThatThrownBy(() -> calculator.calculateScores(List.of(stock), today))
+    assertThatThrownBy(() -> calculator.calculateScores(List.of(stock), today,
+        RECENT_QUARTER_WEIGHT, HALF_YEAR_WEIGHT, THREE_QUARTERS_WEIGHT, FULL_YEAR_WEIGHT))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
@@ -135,7 +144,8 @@ class KospiRawScoreCalculatorTest {
     rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
 
     // when & then
-    assertThatThrownBy(() -> calculator.calculateScores(List.of(stock), today))
+    assertThatThrownBy(() -> calculator.calculateScores(List.of(stock), today,
+        RECENT_QUARTER_WEIGHT, HALF_YEAR_WEIGHT, THREE_QUARTERS_WEIGHT, FULL_YEAR_WEIGHT))
         .isInstanceOf(IllegalArgumentException.class);
   }
 }

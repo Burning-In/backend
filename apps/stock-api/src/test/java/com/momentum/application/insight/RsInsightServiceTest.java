@@ -43,7 +43,7 @@ class RsInsightServiceTest {
   @DisplayName("RS 점수 반환")
   void returnsRsScore() {
     Kospi kospi = kospiRepository.save(new Kospi(2500L, LocalDate.now()));
-    kospiRelativeStrengthRepository.saveAll(List.of(new KospiRelativeStrength(85, stock, kospi)));
+    kospiRelativeStrengthRepository.saveAll(List.of(KospiRelativeStrength.of(85, stock, kospi)));
 
     RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());
 
@@ -64,8 +64,8 @@ class RsInsightServiceTest {
     Kospi oldKospi = kospiRepository.save(new Kospi(2400L, LocalDate.now().minusDays(30)));
     Kospi newKospi = kospiRepository.save(new Kospi(2500L, LocalDate.now()));
     kospiRelativeStrengthRepository.saveAll(List.of(
-        new KospiRelativeStrength(50, stock, oldKospi),
-        new KospiRelativeStrength(75, stock, newKospi)
+        KospiRelativeStrength.of(50, stock, oldKospi),
+        KospiRelativeStrength.of(75, stock, newKospi)
     ));
 
     RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());

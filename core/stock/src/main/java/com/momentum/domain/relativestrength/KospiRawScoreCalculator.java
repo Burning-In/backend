@@ -2,7 +2,6 @@ package com.momentum.domain.relativestrength;
 
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockCandleRepository;
-import com.momentum.domain.stockcandle.StockDailyCandle;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,65 +12,77 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KospiRawScoreCalculator {
 
+  private static final int CURRENT_MONTH = 0;
+  private static final int THREE_MONTHS_AGO = 3;
+  private static final int SIX_MONTHS_AGO = 6;
+  private static final int NINE_MONTHS_AGO = 9;
+  private static final int TWELVE_MONTHS_AGO = 12;
+
+  private static final double PERCENT_SCALE = 100;
+
   private final StockCandleRepository stockCandleRepository;
   private final KospiRepository kospiRepository;
 
-  public List<RSRawScore> calculateScores(List<Stock> stocks, LocalDate today) {
+  public List<RSRawScore> calculateScores(List<Stock> stocks, LocalDate today, double recentQuarterWeight,
+      double halfYearWeight, double threeQuartersWeight, double fullYearWeight) {
+    if (stocks.isEmpty()) {
+      return List.of();
+    }
     List<RSRawScore> rawScores = new ArrayList<>();
     for (Stock stock : stocks) {
-      double rsRawScore = (calculateStockScore(stock, today) / calculateIndexScore(stock, today)) * 100;
+      double stockScore = calculateStockScore(stock, today, recentQuarterWeight, halfYearWeight, threeQuartersWeight,
+          fullYearWeight);
+      double indexScore = calculateIndexScore(today, recentQuarterWeight, halfYearWeight, threeQuartersWeight,
+          fullYearWeight);
+      double rsRawScore = (stockScore / indexScore) * PERCENT_SCALE;
       rawScores.add(new RSRawScore(stock, rsRawScore));
     }
 
     return rawScores;
   }
 
-  private double calculateStockScore(Stock stock, LocalDate today) {
-    double todayPrice = getCandleFrom(0, stock, today).getClosePrice();
-    double threeMonthPrice = getCandleFrom(3, stock, today).getClosePrice();
-    double sixMonthPrice = getCandleFrom(6, stock, today).getClosePrice();
-    double nineMonthPrice = getCandleFrom(9, stock, today).getClosePrice();
-    double twelveMonthPrice = getCandleFrom(12, stock, today).getClosePrice();
+  private double calculateStockScore(Stock stock, LocalDate today, double recentQuarterWeight, double halfYearWeight,
+      double threeQuartersWeight, double fullYearWeight) {
+    double todayPrice = getCandleFrom(CURRENT_MONTH, stock, today);
+    double threeMonthPrice = getCandleFrom(THREE_MONTHS_AGO, stock, today);
+    double sixMonthPrice = getCandleFrom(SIX_MONTHS_AGO, stock, today);
+    double nineMonthPrice = getCandleFrom(NINE_MONTHS_AGO, stock, today);
+    double twelveMonthPrice = getCandleFrom(TWELVE_MONTHS_AGO, stock, today);
 
-    return calculateWeightedScore(todayPrice, threeMonthPrice, sixMonthPrice, nineMonthPrice, twelveMonthPrice);
+    return calculateWeightedScore(todayPrice, threeMonthPrice, sixMonthPrice, nineMonthPrice, twelveMonthPrice,
+        recentQuarterWeight, halfYearWeight, threeQuartersWeight, fullYearWeight);
   }
 
-  private double calculateIndexScore(Stock stock, LocalDate today) {
-    double todayPrice = getIndexFrom(0, stock, today).getValue();
-    double threeMonthPrice = getIndexFrom(3, stock, today).getValue();
-    double sixMonthPrice = getIndexFrom(6, stock, today).getValue();
-    double nineMonthPrice = getIndexFrom(9, stock, today).getValue();
-    double twelveMonthPrice = getIndexFrom(12, stock, today).getValue();
+  private double calculateIndexScore(LocalDate today, double recentQuarterWeight, double halfYearWeight,
+      double threeQuartersWeight, double fullYearWeight) {
+    double todayPrice = getIndexFrom(CURRENT_MONTH, today);
+    double threeMonthPrice = getIndexFrom(THREE_MONTHS_AGO, today);
+    double sixMonthPrice = getIndexFrom(SIX_MONTHS_AGO, today);
+    double nineMonthPrice = getIndexFrom(NINE_MONTHS_AGO, today);
+    double twelveMonthPrice = getIndexFrom(TWELVE_MONTHS_AGO, today);
 
-    return calculateWeightedScore(todayPrice, threeMonthPrice, sixMonthPrice, nineMonthPrice, twelveMonthPrice);
+    return calculateWeightedScore(todayPrice, threeMonthPrice, sixMonthPrice, nineMonthPrice, twelveMonthPrice,
+        recentQuarterWeight, halfYearWeight, threeQuartersWeight, fullYearWeight);
   }
 
-  private double calculateWeightedScore(double todayPrice, double threeMonthPrice, double sixMonthPrice, double nineMonthPrice,
-      double twelveMonthPrice) {
-    double q1 = todayPrice / threeMonthPrice;
-    double q2 = todayPrice / sixMonthPrice;
-    double q3 = todayPrice / nineMonthPrice;
-    double q4 = todayPrice / twelveMonthPrice;
-
-    return (0.4 * q1) + (0.2 * q2) + (0.2 * q3) + (0.2 * q4);
+  private double calculateWeightedScore(double todayPrice, double threeMonthPrice, double sixMonthPrice,
+      double nineMonthPrice, double twelveMonthPrice, double recentQuarterWeight, double halfYearWeight,
+      double threeQuartersWeight, double fullYearWeight) {
+    return (recentQuarterWeight * todayPrice / threeMonthPrice) + (halfYearWeight * todayPrice / sixMonthPrice)
+        + (threeQuartersWeight * todayPrice / nineMonthPrice) + (fullYearWeight * todayPrice / twelveMonthPrice);
   }
 
-
-  private Kospi getIndexFrom(int month, Stock stock, LocalDate today) {
+  private double getIndexFrom(int month, LocalDate today) {
     LocalDate monthAgo = today.minusMonths(month);
     return kospiRepository.findRecentKospi(monthAgo)
-        .orElseThrow(IllegalArgumentException::new);
+        .orElseThrow(IllegalArgumentException::new)
+        .getValue();
   }
 
-  private StockDailyCandle getCandleFrom(int month, Stock stock, LocalDate today) {
+  private double getCandleFrom(int month, Stock stock, LocalDate today) {
     LocalDate monthAgo = today.minusMonths(month);
     return stockCandleRepository.findRecentCandle(stock, monthAgo)
-        .orElseThrow(IllegalArgumentException::new);
-  }
-
-  public record RSRawScore(Stock stockCode, Double rsRawScore) {
-
+        .orElseThrow(IllegalArgumentException::new)
+        .getClosePrice();
   }
 }
-
-
