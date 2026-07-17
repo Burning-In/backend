@@ -31,7 +31,7 @@ class StockCandleServiceTest {
   void create_shouldSaveCandles() {
     // given
     String stockCode = "005930";
-    stockRepository.save(Stock.of("삼성전자", stockCode, StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    stockRepository.save(Stock.of("삼성전자", stockCode, StockRegime.UNKNOWN, StockTrend.UPTREND));
     List<StockCandleCommand> commands = List.of(
         StockCandleCommand.of("20240101", 100L, 110L, 90L, 105L, 100L),
         StockCandleCommand.of("20240102", 105L, 115L, 95L, 110L, 100L)

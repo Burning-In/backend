@@ -36,14 +36,14 @@ class RegimeInsightServiceTest {
   private static final LocalDate TODAY = LocalDate.now();
 
   @Test
-  @DisplayName("베이스 없으면 DIRECTION_UNDETERMINED 반환")
+  @DisplayName("베이스 없으면 UNKNOWN 반환")
   void returnsUndeterminedWhenNoBase() {
-    Stock stock = saveStock("005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND);
+    Stock stock = saveStock("005930", StockRegime.UNKNOWN, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 10000L);
 
     StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
 
-    assertThat(result.regime()).isEqualTo(StockRegime.DIRECTION_UNDETERMINED);
+    assertThat(result.regime()).isEqualTo(StockRegime.UNKNOWN);
     assertThat(result.currentPrice()).isEqualTo(10000L);
     assertThat(result.supportLine()).isNull();
     assertThat(result.resistanceLine()).isNull();

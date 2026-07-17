@@ -36,7 +36,7 @@ class MovingAverageInsightServiceTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.UNKNOWN, StockTrend.UPTREND));
     saveCandle(10000L);
   }
 

@@ -38,7 +38,7 @@ class MomentumScoreInsightServiceTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.UNKNOWN, StockTrend.UPTREND));
   }
 
   @Test
@@ -100,7 +100,7 @@ class MomentumScoreInsightServiceTest {
   }
 
   private Stock newStock(String code) {
-    return stockRepository.save(Stock.of("테스트종목", code, StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    return stockRepository.save(Stock.of("테스트종목", code, StockRegime.UNKNOWN, StockTrend.UPTREND));
   }
 
   private void saveRankScore(Stock s, BigDecimal momentum, LocalDate baseDate) {
