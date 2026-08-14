@@ -3,7 +3,7 @@ package com.momentum.batch.job.pricepoint;
 import com.momentum.domain.base.service.StockBaseService;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
 import com.momentum.domain.pricepoint.service.StockPricePointService;
-import com.momentum.domain.pricepoint.service.StockPricePointTypeDecider;
+import com.momentum.domain.pricepoint.service.typedecider.StockPricePointTypeDecider;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
@@ -32,7 +32,7 @@ public class StockPricePointItemProcessor implements ItemProcessor<Stock, Stock>
   public Stock process(Stock stock) throws Exception {
     LocalDate baseDate = LocalDate.parse(baseDateStr);
     StockDailyCandle candle = stockCandleRepository
-        .findLastCandleAfterDate(stock, baseDate)
+        .findLastCandleBeforeDate(stock, baseDate)
         .orElseThrow(() -> new IllegalStateException("캔들 데이터 없음: " + stock.getId()));
     /// 도메인서비스나 어플리케이션 서비스로 묶을 필요가 있지않나
     StockPricePoint stockPricePoint = stockPricePointService.resolvePricePoint(candle);

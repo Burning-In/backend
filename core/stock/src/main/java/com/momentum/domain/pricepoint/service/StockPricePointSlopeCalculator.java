@@ -9,24 +9,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class StockPricePointSlopeCalculator {
 
-  public SlopeResult calculateSlope(long pivotPrice, LocalDate pivotDate, long todayPrice, LocalDate todayDate,
-      BigDecimal pivotErrorPercent) {
-    if (pivotDate == null || todayDate == null) {
-      throw new IllegalArgumentException("Pivot date and time cannot be null");
+  private static final int SLOPE_SCALE = 10;
+  private static final BigDecimal PERCENT_DIVISOR = BigDecimal.valueOf(100);
+
+  public SlopeResult calculateSlope(long anchorPrice, LocalDate anchorDate, long todayPrice, LocalDate todayDate,
+      BigDecimal anchorErrorPercent) {
+    if (anchorDate == null || todayDate == null) {
+      throw new IllegalArgumentException("anchorDate와 todayDate는 null일 수 없다");
     }
-    long daysBetween = ChronoUnit.DAYS.between(pivotDate, todayDate);
-    BigDecimal priceDiff = BigDecimal.valueOf(todayPrice - pivotPrice);
-    BigDecimal days = BigDecimal.valueOf(daysBetween);
+    BigDecimal priceDiff = BigDecimal.valueOf(todayPrice - anchorPrice);
+    BigDecimal errorPrice = calculateErrorPrice(anchorPrice, anchorErrorPercent);
+    BigDecimal days = BigDecimal.valueOf(ChronoUnit.DAYS.between(anchorDate, todayDate));
 
-    BigDecimal slopeUpper = priceDiff.subtract(pivotErrorPercent)
-        .divide(days, 10, RoundingMode.HALF_UP);
-    BigDecimal slopeLower = priceDiff.add(pivotErrorPercent)
-        .divide(days, 10, RoundingMode.HALF_UP);
-
-    return new SlopeResult(slopeUpper, slopeLower);
+    return new SlopeResult(
+        priceDiff.subtract(errorPrice).divide(days, SLOPE_SCALE, RoundingMode.HALF_UP),
+        priceDiff.add(errorPrice).divide(days, SLOPE_SCALE, RoundingMode.HALF_UP)
+    );
   }
 
-  public record SlopeResult(BigDecimal upper, BigDecimal lower) {
-
+  private BigDecimal calculateErrorPrice(long anchorPrice, BigDecimal anchorErrorPercent) {
+    return BigDecimal.valueOf(anchorPrice)
+        .multiply(anchorErrorPercent)
+        .divide(PERCENT_DIVISOR, SLOPE_SCALE, RoundingMode.HALF_UP);
   }
 }

@@ -1,18 +1,19 @@
 package com.momentum.domain.pricepoint.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.momentum.domain.pricepoint.entity.StockPricePointCalculation;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
-import com.momentum.domain.stock.StockTrend;
-import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.pricepoint.StockPricePointCalculationRepository;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
+import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.pricepoint.entity.StockPricePointCalculation;
+import com.momentum.domain.stock.Stock;
+import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
+import com.momentum.domain.stock.StockTrend;
+import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
-import java.util.Optional;
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,154 +44,130 @@ class StockPricePointServiceTest {
   }
 
   @Test
-  @DisplayName("히스토리 없음 + 피벗 없음 → 첫 포인트, 피벗만 저장")
-  void resolvePivot_firstPoint_noPivotNoHistory() {
+  @DisplayName("기준점이 하나도 없으면 오늘 캔들이 첫 기준점으로 확정된다")
+  void resolvePricePoint_withoutAnyAnchor_confirmsTodayAsFirstAnchor() {
+    // when
+    StockPricePoint confirmed = resolve("20240101", 10_500L, 1_000L);
+
+    // then
+    assertThat(confirmed).isNotNull();
+    assertSoftly(softly -> {
+      softly.assertThat(confirmed.getPrice()).isEqualTo(10_500L);
+      softly.assertThat(confirmed.getVolume()).isEqualTo(1_000L);
+      softly.assertThat(confirmed.getTradeDate()).isEqualTo(LocalDate.of(2024, 1, 1));
+    });
+  }
+
+  @Test
+  @DisplayName("첫 기준점이 확정된 날에는 기울기를 잴 다음 캔들이 없으므로 채널이 열리지 않는다")
+  void resolvePricePoint_withoutAnyAnchor_doesNotOpenChannel() {
+    // when
+    resolve("20240101", 10_500L, 1_000L);
+
+    // then
+    assertThat(stockPricePointCalculationRepository.findLastCalculationHistory(stock)).isEmpty();
+  }
+
+  @Test
+  @DisplayName("기준점만 있고 채널이 없으면 채널만 열고 기준점은 그대로 둔다")
+  void resolvePricePoint_withAnchorButNoChannel_opensChannelKeepingAnchor() {
     // given
+    StockPricePoint anchor = resolve("20240101", 10_000L, 1_000L);
+
+    // when
+    StockPricePoint confirmed = resolve("20240102", 10_500L, 1_200L);
+
+    // then
+    StockPricePointCalculation opened = lastCalculation();
+    assertSoftly(softly -> {
+      softly.assertThat(confirmed).isNull();
+      softly.assertThat(lastAnchor().getId()).isEqualTo(anchor.getId());
+      softly.assertThat(opened.getStockPricePoint().getId()).isEqualTo(anchor.getId());
+      softly.assertThat(opened.getCurrentPrice()).isEqualTo(10_500L);
+      softly.assertThat(channelOf(opened).isOutOfChannel()).isFalse();
+    });
+  }
+
+  @Test
+  @DisplayName("채널 안에 들어오는 캔들은 채널을 좁히기만 하고 기준점은 그대로 둔다")
+  void resolvePricePoint_withinChannel_narrowsChannelKeepingAnchor() {
+    // given
+    StockPricePoint anchor = resolve("20240101", 10_000L, 1_000L);
+    resolve("20240102", 10_500L, 1_200L);
+    TrendChannel opened = channelOf(lastCalculation());
+
+    // when
+    StockPricePoint confirmed = resolve("20240103", 10_600L, 1_100L);
+
+    // then
+    TrendChannel narrowed = channelOf(lastCalculation());
+    assertSoftly(softly -> {
+      softly.assertThat(confirmed).isNull();
+      softly.assertThat(lastAnchor().getId()).isEqualTo(anchor.getId());
+      softly.assertThat(narrowed.slopeUpperMax()).isGreaterThanOrEqualTo(opened.slopeUpperMax());
+      softly.assertThat(narrowed.slopeLowerMin()).isLessThanOrEqualTo(opened.slopeLowerMin());
+      softly.assertThat(narrowed.isOutOfChannel()).isFalse();
+    });
+  }
+
+  @Test
+  @DisplayName("채널을 이탈하면 오늘이 아니라 채널 안에 있던 마지막 캔들이 새 기준점이 된다")
+  void resolvePricePoint_outOfChannel_confirmsLastCandleInsideChannelAsAnchor() {
+    // given
+    resolve("20240101", 10_000L, 1_000L);
+    resolve("20240102", 10_300L, 1_200L);
+    resolve("20240103", 10_500L, 1_300L);
+
+    // when
+    StockPricePoint confirmed = resolve("20240104", 14_000L, 5_000L);
+
+    // then
+    assertThat(confirmed).isNotNull();
+    assertSoftly(softly -> {
+      softly.assertThat(confirmed.getPrice()).isEqualTo(10_500L);
+      softly.assertThat(confirmed.getVolume()).isEqualTo(1_300L);
+      softly.assertThat(confirmed.getTradeDate()).isEqualTo(LocalDate.of(2024, 1, 3));
+      softly.assertThat(lastAnchor().getId()).isEqualTo(confirmed.getId());
+    });
+  }
+
+  @Test
+  @DisplayName("채널을 이탈하면 새 기준점에서 오늘 캔들로 채널이 다시 열린다")
+  void resolvePricePoint_outOfChannel_reopensChannelFromNewAnchor() {
+    // given
+    resolve("20240101", 10_000L, 1_000L);
+    resolve("20240102", 10_300L, 1_200L);
+    resolve("20240103", 10_500L, 1_300L);
+
+    // when
+    StockPricePoint confirmed = resolve("20240104", 14_000L, 5_000L);
+
+    // then
+    assertThat(confirmed).isNotNull();
+    StockPricePointCalculation reopened = lastCalculation();
+    assertSoftly(softly -> {
+      softly.assertThat(reopened.getStockPricePoint().getId()).isEqualTo(confirmed.getId());
+      softly.assertThat(reopened.getCurrentPrice()).isEqualTo(14_000L);
+      softly.assertThat(reopened.getTradeDate()).isEqualTo(LocalDate.of(2024, 1, 4));
+      softly.assertThat(channelOf(reopened).isOutOfChannel()).isFalse();
+    });
+  }
+
+  private StockPricePoint resolve(String tradeDate, long closePrice, long volume) {
     StockDailyCandle candle = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10500L, 1000L)
-    );
-
-    // when
-    stockPricePointService.resolvePricePoint(candle);
-
-    // then
-    Optional<StockPricePoint> savedPivot = stockPricePointRepository.findLastStockPricePoint(stock);
-    assertThat(savedPivot).isPresent();
-    assertThat(savedPivot.get().getPrice()).isEqualTo(10500L);
-
-    Optional<StockPricePointCalculation> topCalculationHistory = stockPricePointCalculationRepository.findLastCalculationHistory(stock);
-    assertThat(topCalculationHistory).isEmpty();
+        StockDailyCandle.create(stock, tradeDate, closePrice, closePrice, closePrice, closePrice, volume));
+    return stockPricePointService.resolvePricePoint(candle);
   }
 
-  @Test
-  @DisplayName("히스토리 없음 + 피벗 있음 → SU, SL 계산 후 히스토리 저장")
-  void resolvePivot_noPivotHistory_withPivot() {
-    // given
-    // 피벗 먼저 저장 (A 포인트 역할)
-    StockDailyCandle pivotCandle = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L)
-    );
-    stockPricePointService.resolvePricePoint(pivotCandle); // 피벗만 저장됨
-
-    // 다음 포인트 (B 포인트 역할)
-    StockDailyCandle nextCandle = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10500L, 1200L)
-    );
-
-    // when
-    stockPricePointService.resolvePricePoint(nextCandle);
-
-    // then
-    Optional<StockPricePointCalculation> history = stockPricePointCalculationRepository.findLastCalculationHistory(stock);
-    assertThat(history).isPresent();
-    assertThat(history.get().getSlopeUpperMax()).isNotNull();
-    assertThat(history.get().getSlopeLowerMin()).isNotNull();
-    assertThat(history.get().getSlopeUpperMax().compareTo(history.get().getSlopeLowerMin())).isLessThan(0);
+  private StockPricePoint lastAnchor() {
+    return stockPricePointRepository.findLastStockPricePoint(stock).orElseThrow();
   }
 
-  @Test
-  @DisplayName("히스토리 있음 + 정상 갱신 → suMax > slMin, 히스토리 업데이트")
-  void resolvePivot_withHistory_Update_SU_BIGGER_SL() {
-    // given
-    // A 포인트
-    StockDailyCandle candleA = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L)
-    );
-    stockPricePointService.resolvePricePoint(candleA);
-
-    // B 포인트
-    StockDailyCandle candleB = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10500L, 1200L)
-    );
-    stockPricePointService.resolvePricePoint(candleB);
-
-    // C 포인트 (도어 안에 들어오는 포인트)
-    StockDailyCandle candleC = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240103", 10300L, 10900L, 9900L, 10600L, 1100L)
-    );
-
-    // when
-    stockPricePointService.resolvePricePoint(candleC);
-
-    // then
-    Optional<StockPricePointCalculation> history = stockPricePointCalculationRepository.findLastCalculationHistory(stock);
-    assertThat(history).isPresent();
-    assertThat(history.get().getCurrentPrice()).isEqualTo(10600L);
-    assertThat(history.get().getSlopeUpperMax().compareTo(history.get().getSlopeLowerMin())).isLessThan(0);
+  private StockPricePointCalculation lastCalculation() {
+    return stockPricePointCalculationRepository.findLastCalculationHistory(stock).orElseThrow();
   }
 
-  @Test
-  @DisplayName("히스토리 있음 + 정상 갱신 → suMax <= slMin, 히스토리 업데이트")
-  void resolvePivot_withHistory_normalUpdate() {
-    // given
-    // A 포인트
-    StockDailyCandle candleA = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L)
-    );
-    stockPricePointService.resolvePricePoint(candleA);
-
-    // B 포인트
-    StockDailyCandle candleB = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10200L, 1200L)
-    );
-    stockPricePointService.resolvePricePoint(candleB);
-
-    // C 포인트 (도어 안에 들어오는 포인트)
-    StockDailyCandle candleC = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240103", 10300L, 10900L, 9900L, 10500L, 1100L)
-    );
-
-    // when
-    stockPricePointService.resolvePricePoint(candleC);
-
-    // then
-    Optional<StockPricePointCalculation> history = stockPricePointCalculationRepository.findLastCalculationHistory(stock);
-    assertThat(history).isPresent();
-    assertThat(history.get().getCurrentPrice()).isEqualTo(10500L);
-    // 정상 갱신이므로 SU_MAX < SL_MIN 유지
-    assertThat(history.get().getSlopeUpperMax().compareTo(history.get().getSlopeLowerMin())).isLessThan(0);
-  }
-
-  @Test
-  @DisplayName("히스토리 있음 + 역전 → 새 피벗 생성, 히스토리 재초기화")
-  void resolvePivot_withHistory_pivotReset() {
-    // given
-    // A 포인트 (피벗, 가격 10000)
-    StockDailyCandle candleA = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240101", 10000L, 11000L, 9500L, 10000L, 1000L)
-    );
-    stockPricePointService.resolvePricePoint(candleA);
-
-    // B 포인트
-    StockDailyCandle candleB = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240102", 10200L, 10800L, 9800L, 10300L, 1200L)
-    );
-    stockPricePointService.resolvePricePoint(candleB);
-
-    // G 포인트 (마지막 범위내 포인트 역할, 내일이 H가 됨)
-    StockDailyCandle candleG = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240103", 10400L, 11000L, 10000L, 10500L, 1300L)
-    );
-    stockPricePointService.resolvePricePoint(candleG);
-
-    // H 포인트 (역전 유발, 급등)
-    StockDailyCandle candleH = stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20240104", 13000L, 15000L, 12000L, 14000L, 5000L)
-    );
-
-    // when
-    stockPricePointService.resolvePricePoint(candleH);
-
-    // then
-    // 새 피벗이 생성됨 (G = 어제 = 20240103)
-    Optional<StockPricePoint> newPivot = stockPricePointRepository.findLastStockPricePoint(stock);
-    assertThat(newPivot).isPresent();
-    assertThat(newPivot.get().getPrice()).isEqualTo(10500L); // G의 closePrice
-
-    // 히스토리가 새 피벗 기준으로 재초기화됨
-    Optional<StockPricePointCalculation> history = stockPricePointCalculationRepository.findLastCalculationHistory(stock);
-    assertThat(history).isPresent();
-    assertThat(history.get().getStockPricePoint().getPrice()).isEqualTo(10500L);
-    assertThat(history.get().getSlopeUpperMax().compareTo(history.get().getSlopeLowerMin())).isLessThan(0);
+  private TrendChannel channelOf(StockPricePointCalculation calculation) {
+    return new TrendChannel(calculation.getSlopeUpperMax(), calculation.getSlopeLowerMin());
   }
 }

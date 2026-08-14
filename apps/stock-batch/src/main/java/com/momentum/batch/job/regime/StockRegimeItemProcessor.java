@@ -26,7 +26,7 @@ public class StockRegimeItemProcessor implements ItemProcessor<Stock, Stock> {
   public Stock process(Stock stock) throws Exception {
     LocalDate baseDate = LocalDate.parse(baseDateStr);
     StockDailyCandle candle = stockCandleRepository
-        .findLastCandleAfterDate(stock, baseDate)
+        .findLastCandleBeforeDate(stock, baseDate)
         .orElseThrow(() -> new IllegalStateException("캔들 데이터 없음: " + stock.getId()));
     stockDailyRegimeService.resolveDailyRegime(stock, candle);
     return stock;

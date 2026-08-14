@@ -43,7 +43,7 @@ public class StockPricePoint extends BaseEntity implements Comparable<StockPrice
     this.stock = Objects.requireNonNull(stock);
   }
 
-  public static StockPricePoint init(long closePrice, long volume, LocalDate tradeDate, Stock stock) {
+  public static StockPricePoint create(long closePrice, long volume, LocalDate tradeDate, Stock stock) {
     return new StockPricePoint(closePrice, volume, tradeDate, StockPricePointType.UNKNOWN, null, stock);
   }
 

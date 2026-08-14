@@ -2,12 +2,13 @@ package com.momentum.domain.pricepoint.service;
 
 import com.momentum.domain.pricepoint.StockPricePointCalculationRepository;
 import com.momentum.domain.pricepoint.StockPricePointRepository;
-import com.momentum.domain.pricepoint.entity.StockPricePointCalculation;
 import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.pricepoint.entity.StockPricePointCalculation;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,35 +16,51 @@ public class StockPricePointService {
 
   private final StockPricePointCalculationRepository pricePointCalculationRepository;
   private final StockPricePointRepository stockPricePointRepository;
-  private final SwingDoorCalculator swingDoorCalculator;
+  private final SwingDoorChannelCalculator swingDoorChannelCalculator;
 
+  @Transactional
   public StockPricePoint resolvePricePoint(StockDailyCandle dailyCandle) {
-    Optional<StockPricePoint> lastPricePoint = stockPricePointRepository
-        .findLastStockPricePoint(dailyCandle.getStock());
+    Optional<StockPricePoint> lastPricePoint = stockPricePointRepository.findLastStockPricePoint(dailyCandle.getStock());
     if (lastPricePoint.isEmpty()) {
-      return initializePricePoint(dailyCandle);
+      return createPricePoint(dailyCandle);
     }
 
-    Optional<StockPricePointCalculation> lastCalculation = pricePointCalculationRepository
-        .findLastCalculationHistory(dailyCandle.getStock());
+    Optional<StockPricePointCalculation> lastCalculation = pricePointCalculationRepository.findLastCalculationHistory(
+        dailyCandle.getStock());
     if (lastCalculation.isEmpty()) {
-      swingDoorCalculator.initializeCalculation(lastPricePoint.get(), dailyCandle);
+      saveCalculation(swingDoorChannelCalculator.openChannel(lastPricePoint.get(), dailyCandle), lastPricePoint.get(), dailyCandle);
       return null;
     }
 
-    return processSwingDoor(lastCalculation.get(), dailyCandle);
+    StockPricePointCalculation calculation = lastCalculation.get();
+    TrendChannel channel = swingDoorChannelCalculator.narrowChannel(calculation, dailyCandle);
+    if (!channel.isOutOfChannel()) {
+      saveCalculation(channel, calculation.getStockPricePoint(), dailyCandle);
+      return null;
+    }
+
+    StockPricePoint newAnchorPoint = confirmAnchorOf(calculation);
+    saveCalculation(swingDoorChannelCalculator.openChannel(newAnchorPoint, dailyCandle), newAnchorPoint, dailyCandle);
+    return newAnchorPoint;
   }
 
-  private StockPricePoint initializePricePoint(StockDailyCandle dailyCandle) {
-    StockPricePoint pricePoint = StockPricePoint.init(dailyCandle.getClosePrice(), dailyCandle.getVolume(),
+  private StockPricePoint confirmAnchorOf(StockPricePointCalculation lastCalculation) {
+    StockPricePoint anchorPoint = StockPricePoint.create(lastCalculation.getCurrentPrice(),
+        lastCalculation.getVolume(), lastCalculation.getTradeDate(),
+        lastCalculation.getStockPricePoint().getStock());
+    return stockPricePointRepository.save(anchorPoint);
+  }
+
+  private void saveCalculation(TrendChannel channel, StockPricePoint anchorPoint, StockDailyCandle dailyCandle) {
+    StockPricePointCalculation pointCalculation = StockPricePointCalculation.create(dailyCandle.getClosePrice(),
+        dailyCandle.getVolume(), dailyCandle.getTradeDate(), channel.slopeUpperMax(), channel.slopeLowerMin(),
+        anchorPoint);
+    pricePointCalculationRepository.save(pointCalculation);
+  }
+
+  private StockPricePoint createPricePoint(StockDailyCandle dailyCandle) {
+    StockPricePoint pricePoint = StockPricePoint.create(dailyCandle.getClosePrice(), dailyCandle.getVolume(),
         dailyCandle.getTradeDate(), dailyCandle.getStock());
     return stockPricePointRepository.save(pricePoint);
-  }
-
-  private StockPricePoint processSwingDoor(StockPricePointCalculation lastCalculation,
-      StockDailyCandle dailyCandle) {
-    StockPricePoint newPricePoint = swingDoorCalculator.resolve(lastCalculation, dailyCandle);
-    swingDoorCalculator.initializeCalculation(newPricePoint, dailyCandle);
-    return newPricePoint;
   }
 }

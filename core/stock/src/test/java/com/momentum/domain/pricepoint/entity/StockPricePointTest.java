@@ -18,7 +18,7 @@ class StockPricePointTest {
 
   @Test
   @DisplayName("일봉으로 초기 특이점을 생성하면 종가/거래량/거래일을 그대로 가지고 타입은 INIT이다")
-  void initFromCandle() {
+  void createFromCandle() {
     String tradeDateRaw = "20240115";
     LocalDate tradeDate = LocalDate.of(2024, 1, 15);
     long openPrice = 100L;
@@ -30,7 +30,7 @@ class StockPricePointTest {
     StockDailyCandle candle = StockDailyCandle.create(
         stock, tradeDateRaw, openPrice, highPrice, lowPrice, closePrice, candleVolume);
 
-    StockPricePoint point = StockPricePoint.init(
+    StockPricePoint point = StockPricePoint.create(
         candle.getClosePrice(), candle.getVolume(), candle.getTradeDate(), candle.getStock());
 
     assertSoftly(softly -> {

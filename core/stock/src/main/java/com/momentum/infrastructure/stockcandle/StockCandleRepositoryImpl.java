@@ -30,7 +30,7 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
   }
 
   @Override
-  public Optional<StockDailyCandle> findLastCandleAfterDate(Stock stock, LocalDate tradeDate) {
+  public Optional<StockDailyCandle> findLastCandleBeforeDate(Stock stock, LocalDate tradeDate) {
     StockDailyCandle result = jpaQueryFactory
         .selectFrom(stockDailyCandle)
         .where(
