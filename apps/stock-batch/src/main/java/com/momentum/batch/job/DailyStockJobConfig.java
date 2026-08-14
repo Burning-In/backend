@@ -85,10 +85,11 @@ public class DailyStockJobConfig {
         .start(stockCandleStep())
         .next(stockPricePointStep())
         .next(stockVcpStep())
+        // RS 등급이 상승추세 판정의 입력이므로, 레짐 판정보다 먼저 계산해야 당일 RS가 당일 레짐에 반영된다.
+        .next(stockRsStep())
         .next(stockRegimeStep())
         .next(stockRankScoreStep())
         .next(stockEpsStep())
-        .next(stockRsStep())
         .next(stockMaStep())
         .build();
   }

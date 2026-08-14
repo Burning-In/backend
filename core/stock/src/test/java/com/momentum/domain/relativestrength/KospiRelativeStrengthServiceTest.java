@@ -32,24 +32,7 @@ class KospiRelativeStrengthServiceTest {
   private RsTestSupport rsTestSupport;
 
   @Test
-  @DisplayName("주식이 1개일 때 RS 등급은 1이다")
-  void create_withSingleStock_returnsRatingOne() {
-    // given
-    LocalDate today = LocalDate.now();
-    Stock stock = stockRepository.save(Stock.of("단일주식", "000120", StockRegime.UNKNOWN, StockTrend.UPTREND));
-
-    rsTestSupport.setupKospi(today, 2500L);
-    rsTestSupport.setupCandles(stock, today, 10_000L, 10_000L, 10_000L, 10_000L, 10_000L);
-
-    // when
-    List<KospiRelativeStrength> result = service.create(today);
-
-    // then
-    assertThat(result).hasSize(1);
-  }
-
-  @Test
-  @DisplayName("여러 주식의 RS 등급은 1~99 사이에서 배분된다")
+  @DisplayName("여러 주식의 RS 등급은 원점수 순위대로 배분된다")
   void create_withMultipleStocks_assignsRatingsBetweenOneAndNinetyNine() {
     // given
     LocalDate today = LocalDate.now();
@@ -66,7 +49,12 @@ class KospiRelativeStrengthServiceTest {
     List<KospiRelativeStrength> result = service.create(today);
 
     // then
+    // 등급 = round(rank/3 * 98) + 1 → 0, 1, 2위가 각각 1, 34, 66등급이 된다.
     assertThat(result).hasSize(3);
+    assertThat(result).extracting(KospiRelativeStrength::getRsScore)
+        .containsExactlyInAnyOrder(1, 34, 66);
+    assertThat(ratingOf(result, stockA)).isEqualTo(1);
+    assertThat(ratingOf(result, stockC)).isEqualTo(66);
   }
 
   @Test
@@ -85,27 +73,76 @@ class KospiRelativeStrengthServiceTest {
   }
 
   @Test
-  @DisplayName("2개 주식일 때 가장 약한 주식은 1등급, 가장 강한 주식은 50등급이다")
-  void create_withTwoStocks_assignsCorrectRatings() {
+  @DisplayName("RS 등급이 80 이상이면 UPTREND로, 미만이면 OTHER로 갱신된다")
+  void create_updatesStockTrendByRsRating() {
     // given
     LocalDate today = LocalDate.now();
-    Stock weakStock = stockRepository.save(Stock.of("약한주식", "000220", StockRegime.UNKNOWN, StockTrend.UPTREND));
-    Stock strongStock = stockRepository.save(Stock.of("강한주식", "000230", StockRegime.UNKNOWN, StockTrend.UPTREND));
-
     rsTestSupport.setupKospi(today, 2500L);
-    rsTestSupport.setupCandles(weakStock, today, 8_000L, 10_000L, 10_000L, 10_000L, 10_000L);
-    rsTestSupport.setupCandles(strongStock, today, 13_000L, 10_000L, 10_000L, 10_000L, 10_000L);
+
+    // 6개 종목 → 등급 = round(rank/6 * 98) + 1 이므로 최강(rank 5)만 83점으로 80을 넘는다.
+    // 최약 종목은 UPTREND로 시작시켜, 강세가 아니면 OTHER로 내려가는지도 함께 검증한다.
+    Stock weakest = saveStock("000300", StockTrend.UPTREND);
+    Stock second = saveStock("000310", StockTrend.OTHER);
+    Stock third = saveStock("000320", StockTrend.OTHER);
+    Stock fourth = saveStock("000330", StockTrend.OTHER);
+    Stock fifth = saveStock("000340", StockTrend.OTHER);
+    Stock strongest = saveStock("000350", StockTrend.OTHER);
+
+    setupFlatBaseCandles(weakest, today, 8_000L);
+    setupFlatBaseCandles(second, today, 9_000L);
+    setupFlatBaseCandles(third, today, 10_000L);
+    setupFlatBaseCandles(fourth, today, 11_000L);
+    setupFlatBaseCandles(fifth, today, 12_000L);
+    setupFlatBaseCandles(strongest, today, 13_000L);
 
     // when
     List<KospiRelativeStrength> result = service.create(today);
 
     // then
-    // 원점수 오름차순 정렬 후 i=0(약한주식) → rsRating=1, i=1(강한주식) → rsRating=round(1/2 * 98)+1=50
-    assertThat(result).hasSize(2);
-    int weakRating = ratingOf(result, weakStock);
-    int strongRating = ratingOf(result, strongStock);
-    assertThat(weakRating).isEqualTo(1);
-    assertThat(strongRating).isEqualTo(50);
+    assertThat(ratingOf(result, strongest)).isEqualTo(83);
+    assertThat(ratingOf(result, fifth)).isEqualTo(66);
+    assertThat(strongest.getStockTrend()).isEqualTo(StockTrend.UPTREND);
+    assertThat(fifth.getStockTrend()).isEqualTo(StockTrend.OTHER);
+    assertThat(weakest.getStockTrend()).isEqualTo(StockTrend.OTHER);
+  }
+
+  @Test
+  @DisplayName("이미 UPTREND인 종목이 계속 강세면 UPTREND를 유지한다")
+  void create_whenAlreadyUptrendAndStillStrong_keepsUptrend() {
+    // given
+    LocalDate today = LocalDate.now();
+    rsTestSupport.setupKospi(today, 2500L);
+
+    // 6개 종목 중 최강(rank 5)만 83점으로 80을 넘는다. 이 종목을 UPTREND로 시작시킨다.
+    Stock weakest = saveStock("000400", StockTrend.OTHER);
+    Stock second = saveStock("000410", StockTrend.OTHER);
+    Stock third = saveStock("000420", StockTrend.OTHER);
+    Stock fourth = saveStock("000430", StockTrend.OTHER);
+    Stock fifth = saveStock("000440", StockTrend.OTHER);
+    Stock strongest = saveStock("000450", StockTrend.UPTREND);
+
+    setupFlatBaseCandles(weakest, today, 8_000L);
+    setupFlatBaseCandles(second, today, 9_000L);
+    setupFlatBaseCandles(third, today, 10_000L);
+    setupFlatBaseCandles(fourth, today, 11_000L);
+    setupFlatBaseCandles(fifth, today, 12_000L);
+    setupFlatBaseCandles(strongest, today, 13_000L);
+
+    // when
+    List<KospiRelativeStrength> result = service.create(today);
+
+    // then
+    assertThat(ratingOf(result, strongest)).isEqualTo(83);
+    assertThat(strongest.getStockTrend()).isEqualTo(StockTrend.UPTREND);
+  }
+
+  private Stock saveStock(String code, StockTrend trend) {
+    return stockRepository.save(Stock.of("종목" + code, code, StockRegime.UNKNOWN, trend));
+  }
+
+  // 과거 4개 시점을 10_000으로 고정해, 당일 종가만으로 RS 원점수 순위가 갈리게 한다.
+  private void setupFlatBaseCandles(Stock stock, LocalDate today, long todayPrice) {
+    rsTestSupport.setupCandles(stock, today, todayPrice, 10_000L, 10_000L, 10_000L, 10_000L);
   }
 
   private int ratingOf(List<KospiRelativeStrength> result, Stock stock) {

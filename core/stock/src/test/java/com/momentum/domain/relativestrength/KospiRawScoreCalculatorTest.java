@@ -114,8 +114,8 @@ class KospiRawScoreCalculatorTest {
 
     // then
     assertThat(scores).hasSize(2);
-    RSRawScore scoreA = scores.stream().filter(s -> s.stockCode().equals(stockA)).findFirst().orElseThrow();
-    RSRawScore scoreB = scores.stream().filter(s -> s.stockCode().equals(stockB)).findFirst().orElseThrow();
+    RSRawScore scoreA = scores.stream().filter(s -> s.stock().equals(stockA)).findFirst().orElseThrow();
+    RSRawScore scoreB = scores.stream().filter(s -> s.stock().equals(stockB)).findFirst().orElseThrow();
     assertThat(scoreA.rsRawScore()).isGreaterThan(scoreB.rsRawScore());
   }
 

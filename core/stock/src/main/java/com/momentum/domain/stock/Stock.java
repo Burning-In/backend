@@ -42,4 +42,15 @@ public class Stock extends AggregateRoot {
     this.stockRegime = stockRegime;
     registerEvent(new StockStateChangedEvent(code, from, stockRegime));
   }
+
+  public void updateTrend(int rsScore, int upTrendThreshold) {
+    StockTrend newStockTrend = StockTrend.OTHER;
+    if (rsScore >= upTrendThreshold) {
+      newStockTrend = StockTrend.UPTREND;
+    }
+    if (this.stockTrend.equals(newStockTrend)) {
+      return;
+    }
+    this.stockTrend = newStockTrend;
+  }
 }
