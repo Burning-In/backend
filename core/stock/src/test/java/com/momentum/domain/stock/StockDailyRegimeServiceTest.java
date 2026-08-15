@@ -7,9 +7,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.StockPricePointRepository;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
+import com.momentum.domain.anchorpoint.StockAnchorPointRepository;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import java.time.LocalDate;
@@ -32,7 +32,7 @@ class StockDailyRegimeServiceTest {
   @Autowired
   private StockBaseRepository stockBaseRepository;
   @Autowired
-  private StockPricePointRepository stockPricePointRepository;
+  private StockAnchorPointRepository stockAnchorPointRepository;
   @Autowired
   private StockCandleRepository stockCandleRepository;
 
@@ -62,10 +62,10 @@ class StockDailyRegimeServiceTest {
   }
 
   private void saveBase(Stock stock, long resistancePrice, long supportPrice) {
-    StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
-        StockPricePointType.HIGH, null, stock);
-    StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
-        StockPricePointType.LOW, null, stock);
+    StockAnchorPoint high = new StockAnchorPoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
+        StockAnchorPointType.HIGH, null, stock);
+    StockAnchorPoint low = new StockAnchorPoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
+        StockAnchorPointType.LOW, null, stock);
     StockBase base = StockBase.init(high, low, 100_000L);
     base.update(null, List.of(100L, 50L));
     stockBaseRepository.save(base);
@@ -73,8 +73,8 @@ class StockDailyRegimeServiceTest {
 
   // findLatestByStock가 tradeDate 최신 1개를 반환하므로, 오늘 날짜로 저장해 직전 특이점으로 삼는다.
   private void saveRecentPoint(Stock stock, long price) {
-    stockPricePointRepository.save(new StockPricePoint(price, 100L, LocalDate.now(),
-        StockPricePointType.HIGH, null, stock));
+    stockAnchorPointRepository.save(new StockAnchorPoint(price, 100L, LocalDate.now(),
+        StockAnchorPointType.HIGH, null, stock));
   }
 
   // averageVolume은 [베이스 생성일(오늘), 당일] 범위의 캔들에서 계산되므로 오늘 날짜 캔들을 적재한다.

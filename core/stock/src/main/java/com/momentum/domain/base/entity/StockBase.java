@@ -3,7 +3,7 @@ package com.momentum.domain.base.entity;
 import static java.util.Objects.requireNonNull;
 
 import com.momentum.domain.BaseEntity;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import com.momentum.domain.stock.Stock;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
@@ -53,15 +53,15 @@ public class StockBase extends BaseEntity {
   private List<StockBaseLine> stockBaseLines;
 
   @OneToMany(mappedBy = "stockBase", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-  private List<StockPricePoint> stockPricePoints;
+  private List<StockAnchorPoint> stockAnchorPoints;
 
-  private StockBase(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long stageLevel, long baseAverageVolume) {
-    StockBaseLine resistance = StockBaseLine.create(highPricePoint, baseAverageVolume, this);
-    StockBaseLine support = StockBaseLine.create(lowPricePoint, baseAverageVolume, this);
-    this.stockBaseKind = requireNonNull(resolveBaseKind(highPricePoint.getPrice(), lowPricePoint.getPrice()));
+  private StockBase(StockAnchorPoint highAnchorPoint, StockAnchorPoint lowAnchorPoint, long stageLevel, long baseAverageVolume) {
+    StockBaseLine resistance = StockBaseLine.create(highAnchorPoint, baseAverageVolume, this);
+    StockBaseLine support = StockBaseLine.create(lowAnchorPoint, baseAverageVolume, this);
+    this.stockBaseKind = requireNonNull(resolveBaseKind(highAnchorPoint.getPrice(), lowAnchorPoint.getPrice()));
     this.stageLevel = stageLevel;
-    this.stock = requireNonNull(highPricePoint.getStock());
-    this.stockPricePoints = new ArrayList<>(List.of(highPricePoint, lowPricePoint));
+    this.stock = requireNonNull(highAnchorPoint.getStock());
+    this.stockAnchorPoints = new ArrayList<>(List.of(highAnchorPoint, lowAnchorPoint));
     this.vcp = new StockBaseVcp();
     this.highestResistanceLine = resistance;
     this.lowestSupportLine = support;
@@ -70,20 +70,20 @@ public class StockBase extends BaseEntity {
     this.stockBaseLines = new ArrayList<>(List.of(resistance, support));
   }
 
-  public static StockBase init(StockPricePoint highPricePoint, StockPricePoint lowPricePoint, long averageVolume) {
-    return StockBase.create(highPricePoint, lowPricePoint, 1, averageVolume);
+  public static StockBase init(StockAnchorPoint highAnchorPoint, StockAnchorPoint lowAnchorPoint, long averageVolume) {
+    return StockBase.create(highAnchorPoint, lowAnchorPoint, 1, averageVolume);
   }
 
-  public static StockBase upper(StockPricePoint highPricePoint, StockPricePoint lowPricePoint,
+  public static StockBase upper(StockAnchorPoint highAnchorPoint, StockAnchorPoint lowAnchorPoint,
       long currentStageLevel, long averageVolume) {
-    return StockBase.create(highPricePoint, lowPricePoint, currentStageLevel + 1, averageVolume);
+    return StockBase.create(highAnchorPoint, lowAnchorPoint, currentStageLevel + 1, averageVolume);
   }
 
-  private static StockBase create(StockPricePoint highPricePoint, StockPricePoint lowPricePoint,
+  private static StockBase create(StockAnchorPoint highAnchorPoint, StockAnchorPoint lowAnchorPoint,
       long currentStageLevel, long baseAverageVolume) {
-    StockBase stockBase = new StockBase(highPricePoint, lowPricePoint, currentStageLevel, baseAverageVolume);
-    highPricePoint.assignBase(stockBase);
-    lowPricePoint.assignBase(stockBase);
+    StockBase stockBase = new StockBase(highAnchorPoint, lowAnchorPoint, currentStageLevel, baseAverageVolume);
+    highAnchorPoint.assignBase(stockBase);
+    lowAnchorPoint.assignBase(stockBase);
     return stockBase;
   }
 
@@ -96,17 +96,17 @@ public class StockBase extends BaseEntity {
     }
   }
 
-  public void integratePoints(List<StockPricePoint> points, long averageVolume, double priceThreshold) {
+  public void integratePoints(List<StockAnchorPoint> points, long averageVolume, double priceThreshold) {
     if (points == null || points.isEmpty()) {
       return;
     }
-    Set<StockPricePoint> previousPoints = new HashSet<>(this.stockPricePoints);
-    for (StockPricePoint point : points) {
+    Set<StockAnchorPoint> previousPoints = new HashSet<>(this.stockAnchorPoints);
+    for (StockAnchorPoint point : points) {
       if (previousPoints.contains(point)) {
         continue;
       }
       point.assignBase(this);
-      this.stockPricePoints.add(point);
+      this.stockAnchorPoints.add(point);
       StockBaseLine line = updateLineStrengthOrCreate(averageVolume, priceThreshold, point);
       updateHighestLine(line);
       updateLowestLine(line);
@@ -115,7 +115,7 @@ public class StockBase extends BaseEntity {
     this.stockBaseKind = resolveBaseKind(this.highestResistanceLine.getPrice(), this.lowestSupportLine.getPrice());
   }
 
-  private StockBaseLine updateLineStrengthOrCreate(long averageVolume, double priceThreshold, StockPricePoint point) {
+  private StockBaseLine updateLineStrengthOrCreate(long averageVolume, double priceThreshold, StockAnchorPoint point) {
     Optional<StockBaseLine> matchedLineOpt = this.stockBaseLines.stream()
         .filter(line -> line.matches(point, priceThreshold))
         .findFirst();

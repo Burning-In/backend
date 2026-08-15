@@ -7,7 +7,7 @@ import static com.momentum.domain.stock.StockRegime.DOWNSIDE_BREAK;
 import static com.momentum.domain.stock.StockRegime.UNKNOWN;
 
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockTrend;
@@ -16,14 +16,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class StockRealtimeRegimePolicy {
 
-  public StockRegime decide(long currentPrice, Stock stock, StockBase currentBase, StockPricePoint lastPricePoint,
+  public StockRegime decide(long currentPrice, Stock stock, StockBase currentBase, StockAnchorPoint lastAnchorPoint,
       double thresholdPercent) {
-    validate(stock, currentBase, lastPricePoint);
+    validate(stock, currentBase, lastAnchorPoint);
 
     if (currentBase.getLowestSupportLine().getLowerBound(thresholdPercent) > currentPrice) {
       return DOWNSIDE_BREAK;
     }
-    if (stock.getStockRegime().equals(BREAKOUT_SUCCESS) && lastPricePoint.getPrice() > currentPrice) {
+    if (stock.getStockRegime().equals(BREAKOUT_SUCCESS) && lastAnchorPoint.getPrice() > currentPrice) {
       return BREAKOUT_FAILED;
     }
     if (stock.getStockTrend().equals(StockTrend.UPTREND) && currentBase.isVcp()
@@ -37,15 +37,15 @@ public class StockRealtimeRegimePolicy {
     return UNKNOWN;
   }
 
-  private void validate(Stock stock, StockBase currentBase, StockPricePoint lastPricePoint) {
+  private void validate(Stock stock, StockBase currentBase, StockAnchorPoint lastAnchorPoint) {
     if (stock == null) {
       throw new IllegalArgumentException("stock is null");
     }
     if (currentBase == null) {
       throw new IllegalArgumentException("currentBase is null");
     }
-    if (lastPricePoint == null) {
-      throw new IllegalArgumentException("lastPricePoint is null");
+    if (lastAnchorPoint == null) {
+      throw new IllegalArgumentException("lastAnchorPoint is null");
     }
     if (currentBase.getHighestResistanceLine() == null || currentBase.getLowestSupportLine() == null) {
       throw new IllegalArgumentException("currentBase resistance/support line is null");

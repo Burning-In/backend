@@ -9,8 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -153,7 +153,7 @@ class StockDailyRegimePolicyTest {
 
   @Test
   @DisplayName("직전 특이점이 없으면 IllegalArgumentException")
-  void throwsWhenRecentPricePointNull() {
+  void throwsWhenRecentAnchorPointNull() {
     Stock stock = uptrend(BREAKOUT_READY);
     StockBase base = baseOf(stock, 12_000L, 10_000L);
 
@@ -166,15 +166,15 @@ class StockDailyRegimePolicyTest {
     return Stock.of("종목", "000020", regime, StockTrend.UPTREND);
   }
 
-  private StockPricePoint recentPoint(Stock stock, long price) {
-    return new StockPricePoint(price, 100L, LocalDate.now(), StockPricePointType.HIGH, null, stock);
+  private StockAnchorPoint recentPoint(Stock stock, long price) {
+    return new StockAnchorPoint(price, 100L, LocalDate.now(), StockAnchorPointType.HIGH, null, stock);
   }
 
   private StockBase baseOf(Stock stock, long resistancePrice, long supportPrice) {
-    StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now(),
-        StockPricePointType.HIGH, null, stock);
-    StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now(),
-        StockPricePointType.LOW, null, stock);
+    StockAnchorPoint high = new StockAnchorPoint(resistancePrice, 100_000L, LocalDate.now(),
+        StockAnchorPointType.HIGH, null, stock);
+    StockAnchorPoint low = new StockAnchorPoint(supportPrice, 100_000L, LocalDate.now(),
+        StockAnchorPointType.LOW, null, stock);
     return StockBase.init(high, low, 100_000L);
   }
 }

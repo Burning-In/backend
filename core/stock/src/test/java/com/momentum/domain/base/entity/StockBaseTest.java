@@ -3,8 +3,8 @@ package com.momentum.domain.base.entity;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockTrend;
@@ -24,7 +24,7 @@ class StockBaseTest {
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
 
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
 
     assertThat(base.getStageLevel()).isEqualTo(1L);
   }
@@ -37,7 +37,7 @@ class StockBaseTest {
     long averageVolume = 100_000L;
     long currentStageLevel = 2L;
 
-    StockBase base = StockBase.upper(highPricePoint(highPrice), lowPricePoint(lowPrice),
+    StockBase base = StockBase.upper(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice),
         currentStageLevel, averageVolume);
 
     assertThat(base.getStageLevel()).isEqualTo(3L);
@@ -50,7 +50,7 @@ class StockBaseTest {
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
 
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
 
     assertThat(base.getStockBaseKind()).isEqualTo(StockBaseKind.BASE);
   }
@@ -62,19 +62,19 @@ class StockBaseTest {
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
 
-    StockBase base = StockBase.init(highPricePoint(pullbackHighPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(pullbackHighPrice), lowAnchorPoint(lowPrice), averageVolume);
 
     assertThat(base.getStockBaseKind()).isEqualTo(StockBaseKind.PULLBACK);
   }
 
   @Test
   @DisplayName("고점/저점 한 쌍으로 생성 직후 base가 생성된다")
-  void assignsBaseToPricePoints() {
+  void assignsBaseToAnchorPoints() {
     long highPrice = 12_000L;
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
-    StockPricePoint high = highPricePoint(highPrice);
-    StockPricePoint low = lowPricePoint(lowPrice);
+    StockAnchorPoint high = highAnchorPoint(highPrice);
+    StockAnchorPoint low = lowAnchorPoint(lowPrice);
 
     StockBase base = StockBase.init(high, low, averageVolume);
 
@@ -91,7 +91,7 @@ class StockBaseTest {
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
     List<Long> shrinkingVolatility = List.of(100L, 50L);
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
     assertThat(base.isVcp()).isFalse();
 
     base.update(null, shrinkingVolatility);
@@ -105,7 +105,7 @@ class StockBaseTest {
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
     long updatedStageLevel = 5L;
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
 
     base.update(updatedStageLevel, null);
 
@@ -119,7 +119,7 @@ class StockBaseTest {
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
     double boundThreshold = 5.0;
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
 
     assertSoftly(softly -> {
       softly.assertThat(base.getResistanceUpperBound(boundThreshold)).isEqualTo(12_600L);
@@ -134,7 +134,7 @@ class StockBaseTest {
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
     double boundThreshold = 5.0;
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
 
     assertSoftly(softly -> {
       softly.assertThat(base.getSupportUpperBound(boundThreshold)).isEqualTo(10_500L);
@@ -150,9 +150,9 @@ class StockBaseTest {
     long averageVolume = 100_000L;
     long higherResistancePrice = 13_000L;
     double priceThreshold = 0.01;
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
 
-    base.integratePoints(List.of(highPricePoint(higherResistancePrice)), averageVolume, priceThreshold);
+    base.integratePoints(List.of(highAnchorPoint(higherResistancePrice)), averageVolume, priceThreshold);
 
     assertThat(base.getHighestResistanceLine().getPrice()).isEqualTo(higherResistancePrice);
   }
@@ -165,9 +165,9 @@ class StockBaseTest {
     long averageVolume = 100_000L;
     long lowerSupportPrice = 9_000L;
     double priceThreshold = 0.01;
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
 
-    base.integratePoints(List.of(lowPricePoint(lowerSupportPrice)), averageVolume, priceThreshold);
+    base.integratePoints(List.of(lowAnchorPoint(lowerSupportPrice)), averageVolume, priceThreshold);
 
     assertThat(base.getLowestSupportLine().getPrice()).isEqualTo(lowerSupportPrice);
   }
@@ -180,23 +180,23 @@ class StockBaseTest {
     long averageVolume = 100_000L;
     long strongerResistancePrice = 13_000L;
     double priceThreshold = 0.01;
-    StockBase base = StockBase.init(highPricePoint(highPrice), lowPricePoint(lowPrice), averageVolume);
+    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
     // 생성 직후 최강 저항선은 초기 고점(12_000), 아직 터치가 없어 강도는 0이다
     assertThat(base.getStrongestResistanceLine().getPrice()).isEqualTo(highPrice);
 
     // 같은 가격(13_000) 고점 2개 통합 → 두 번째에서 같은 라인에 터치가 쌓여 강도가 초기 라인(0)을 넘어선다
     base.integratePoints(
-        List.of(highPricePoint(strongerResistancePrice), highPricePoint(strongerResistancePrice)),
+        List.of(highAnchorPoint(strongerResistancePrice), highAnchorPoint(strongerResistancePrice)),
         averageVolume, priceThreshold);
 
     assertThat(base.getStrongestResistanceLine().getPrice()).isEqualTo(strongerResistancePrice);
   }
 
-  private StockPricePoint highPricePoint(long price) {
-    return new StockPricePoint(price, 100_000L, LocalDate.now(), StockPricePointType.HIGH, null, stock);
+  private StockAnchorPoint highAnchorPoint(long price) {
+    return new StockAnchorPoint(price, 100_000L, LocalDate.now(), StockAnchorPointType.HIGH, null, stock);
   }
 
-  private StockPricePoint lowPricePoint(long price) {
-    return new StockPricePoint(price, 100_000L, LocalDate.now(), StockPricePointType.LOW, null, stock);
+  private StockAnchorPoint lowAnchorPoint(long price) {
+    return new StockAnchorPoint(price, 100_000L, LocalDate.now(), StockAnchorPointType.LOW, null, stock);
   }
 }

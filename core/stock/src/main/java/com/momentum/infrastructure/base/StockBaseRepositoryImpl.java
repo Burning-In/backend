@@ -72,7 +72,7 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
   }
 
   @Override
-  public Optional<StockBase> findWithPricePointsById(Long baseId) {
+  public Optional<StockBase> findWithAnchorPointsById(Long baseId) {
     StockBase result = queryFactory
         .selectFrom(stockBase)
         .leftJoin(stockBase.stockBaseLines).fetchJoin()

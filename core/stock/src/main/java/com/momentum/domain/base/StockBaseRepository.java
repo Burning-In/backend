@@ -17,5 +17,5 @@ public interface StockBaseRepository {
 
   Optional<StockBase> findPreviousBase(Stock stock, Instant currentBaseCreatedAt);
 
-  Optional<StockBase> findWithPricePointsById(Long baseId);
+  Optional<StockBase> findWithAnchorPointsById(Long baseId);
 }

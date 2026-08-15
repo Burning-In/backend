@@ -1,9 +1,9 @@
 package com.momentum.domain.base.entity;
 
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.HIGH;
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.HIGH;
 
 import com.momentum.domain.BaseEntity;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,7 +38,7 @@ public class StockBaseLine extends BaseEntity {
     this.stockBase = stockBase;
   }
 
-  public static StockBaseLine create(StockPricePoint point, long baseAverageVolume, StockBase stockBase) {
+  public static StockBaseLine create(StockAnchorPoint point, long baseAverageVolume, StockBase stockBase) {
     if (point.isSameType(HIGH)) {
       return StockBaseLine.resistance(point.getPrice(), point.getVolume(), baseAverageVolume, stockBase);
     }
@@ -75,7 +75,7 @@ public class StockBaseLine extends BaseEntity {
     }
   }
 
-  public boolean matches(StockPricePoint point, double threshold) {
+  public boolean matches(StockAnchorPoint point, double threshold) {
     StockBaseLineType expectedType = StockBaseLineType.SUPPORT;
     if (point.isSameType(HIGH)) {
       expectedType = StockBaseLineType.RESISTANCE;

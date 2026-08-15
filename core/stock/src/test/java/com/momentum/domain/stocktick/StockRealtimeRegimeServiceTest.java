@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.StockPricePointRepository;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
+import com.momentum.domain.anchorpoint.StockAnchorPointRepository;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -31,7 +31,7 @@ class StockRealtimeRegimeServiceTest {
   @Autowired
   private StockBaseRepository stockBaseRepository;
   @Autowired
-  private StockPricePointRepository stockPricePointRepository;
+  private StockAnchorPointRepository stockAnchorPointRepository;
 
   @Test
   @DisplayName("종목을 찾지 못하면 IllegalArgumentException")
@@ -52,20 +52,20 @@ class StockRealtimeRegimeServiceTest {
 
   @Test
   @DisplayName("베이스는 있지만 유효한 가격 특이점이 없으면 IllegalStateException")
-  void throwsWhenLastPricePointNotFound() {
+  void throwsWhenLastAnchorPointNotFound() {
     Stock stock = saveStock("000090", StockRegime.BREAKOUT_READY);
     // 베이스에 딸린 고점/저점 특이점을 모두 소프트 삭제해, 조회 가능한 특이점이 하나도 없는 상황을 만든다.
-    StockPricePoint high = new StockPricePoint(10_000L, 100_000L, LocalDate.now().minusDays(10),
-        StockPricePointType.HIGH, null, stock);
-    StockPricePoint low = new StockPricePoint(8_000L, 100_000L, LocalDate.now().minusDays(20),
-        StockPricePointType.LOW, null, stock);
+    StockAnchorPoint high = new StockAnchorPoint(10_000L, 100_000L, LocalDate.now().minusDays(10),
+        StockAnchorPointType.HIGH, null, stock);
+    StockAnchorPoint low = new StockAnchorPoint(8_000L, 100_000L, LocalDate.now().minusDays(20),
+        StockAnchorPointType.LOW, null, stock);
     StockBase base = StockBase.init(high, low, 100_000L);
     base.update(null, List.of(100L, 50L));
     stockBaseRepository.save(base);
     high.delete();
     low.delete();
-    stockPricePointRepository.save(high);
-    stockPricePointRepository.save(low);
+    stockAnchorPointRepository.save(high);
+    stockAnchorPointRepository.save(low);
 
     assertThatThrownBy(() -> stockRealtimeRegimeService.resolveRealtimeRegime("000090", 10_000L))
         .isInstanceOf(IllegalStateException.class);
@@ -90,10 +90,10 @@ class StockRealtimeRegimeServiceTest {
   }
 
   private void saveBase(Stock stock, long resistancePrice, long supportPrice) {
-    StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
-        StockPricePointType.HIGH, null, stock);
-    StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
-        StockPricePointType.LOW, null, stock);
+    StockAnchorPoint high = new StockAnchorPoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
+        StockAnchorPointType.HIGH, null, stock);
+    StockAnchorPoint low = new StockAnchorPoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
+        StockAnchorPointType.LOW, null, stock);
     StockBase base = StockBase.init(high, low, 100_000L);
     // 변동성이 줄어드는(직전 > 직후) 이력 → isVcp = true
     base.update(null, List.of(100L, 50L));
@@ -102,11 +102,11 @@ class StockRealtimeRegimeServiceTest {
 
   // resolvePointTypes()이 최근 가격포인트 3개 이상을 요구하므로 충분한 포인트를 적재한다.
   private void saveExtraPoints(Stock stock) {
-    stockPricePointRepository.save(new StockPricePoint(9_500L, 100_000L, LocalDate.now().minusDays(3),
-        StockPricePointType.HIGH, null, stock));
-    stockPricePointRepository.save(new StockPricePoint(9_000L, 100_000L, LocalDate.now().minusDays(2),
-        StockPricePointType.LOW, null, stock));
-    stockPricePointRepository.save(new StockPricePoint(9_300L, 100_000L, LocalDate.now().minusDays(1),
-        StockPricePointType.HIGH, null, stock));
+    stockAnchorPointRepository.save(new StockAnchorPoint(9_500L, 100_000L, LocalDate.now().minusDays(3),
+        StockAnchorPointType.HIGH, null, stock));
+    stockAnchorPointRepository.save(new StockAnchorPoint(9_000L, 100_000L, LocalDate.now().minusDays(2),
+        StockAnchorPointType.LOW, null, stock));
+    stockAnchorPointRepository.save(new StockAnchorPoint(9_300L, 100_000L, LocalDate.now().minusDays(1),
+        StockAnchorPointType.HIGH, null, stock));
   }
 }

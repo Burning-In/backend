@@ -8,44 +8,44 @@ import static com.momentum.domain.stock.StockRegime.UNKNOWN;
 
 import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.base.entity.StockBaseLine;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import org.springframework.stereotype.Component;
 
 @Component
 public class StockDailyRegimePolicy {
 
   public StockRegime decide(long closePrice, long volume, long baseAverageVolume, Stock stock, StockBase currentBase,
-      StockPricePoint lastPricePoint, double thresholdPercent) {
-    validate(stock, currentBase, lastPricePoint);
+      StockAnchorPoint lastAnchorPoint, double thresholdPercent) {
+    validate(stock, currentBase, lastAnchorPoint);
     StockBaseLine highestResistanceLine = currentBase.getHighestResistanceLine();
     StockBaseLine lowestSupportLine = currentBase.getLowestSupportLine();
 
     if (closePrice < lowestSupportLine.getLowerBound(thresholdPercent)) {
       return DOWNSIDE_BREAK;
     }
-    if (stock.getStockRegime().equals(BREAKOUT_SUCCESS) && closePrice < lastPricePoint.getPrice()) {
+    if (stock.getStockRegime().equals(BREAKOUT_SUCCESS) && closePrice < lastAnchorPoint.getPrice()) {
       return BREAKOUT_FAILED;
     }
-    if (isBreakoutSuccess(stock, closePrice, volume, baseAverageVolume, highestResistanceLine, lastPricePoint,
+    if (isBreakoutSuccess(stock, closePrice, volume, baseAverageVolume, highestResistanceLine, lastAnchorPoint,
         thresholdPercent)) {
       return BREAKOUT_SUCCESS;
     }
-    if (isBreakoutReady(stock, closePrice, highestResistanceLine, lowestSupportLine, lastPricePoint, currentBase,
+    if (isBreakoutReady(stock, closePrice, highestResistanceLine, lowestSupportLine, lastAnchorPoint, currentBase,
         thresholdPercent)) {
       return BREAKOUT_READY;
     }
     return UNKNOWN;
   }
 
-  private void validate(Stock stock, StockBase currentBase, StockPricePoint recentPricePoint) {
+  private void validate(Stock stock, StockBase currentBase, StockAnchorPoint recentAnchorPoint) {
     if (stock == null) {
       throw new IllegalArgumentException("stock is null");
     }
     if (currentBase == null) {
       throw new IllegalArgumentException("currentBase is null");
     }
-    if (recentPricePoint == null) {
-      throw new IllegalArgumentException("lastPricePoint is null");
+    if (recentAnchorPoint == null) {
+      throw new IllegalArgumentException("lastAnchorPoint is null");
     }
     if (currentBase.getHighestResistanceLine() == null || currentBase.getLowestSupportLine() == null) {
       throw new IllegalArgumentException("currentBase resistance/support line is null");
@@ -53,17 +53,17 @@ public class StockDailyRegimePolicy {
   }
 
   private boolean isBreakoutSuccess(Stock stock, long closePrice, long volume, long baseAverageVolume,
-      StockBaseLine highestResistanceLine, StockPricePoint lastPricePoint, double thresholdPercent) {
+      StockBaseLine highestResistanceLine, StockAnchorPoint lastAnchorPoint, double thresholdPercent) {
     return stock.getStockTrend().equals(StockTrend.UPTREND)
         && closePrice > highestResistanceLine.getUpperBound(thresholdPercent)
-        && closePrice > lastPricePoint.getPrice()
+        && closePrice > lastAnchorPoint.getPrice()
         && volume > baseAverageVolume;
   }
 
   private boolean isBreakoutReady(Stock stock, long closePrice, StockBaseLine highestResistanceLine,
-      StockBaseLine lowestSupportLine, StockPricePoint lastPricePoint, StockBase currentBase, double thresholdPercent) {
+      StockBaseLine lowestSupportLine, StockAnchorPoint lastAnchorPoint, StockBase currentBase, double thresholdPercent) {
     return stock.getStockTrend().equals(StockTrend.UPTREND) && (currentBase.getVcp().isVcp()
         || (closePrice > highestResistanceLine.getLowerBound(thresholdPercent) && closePrice > lowestSupportLine.getPrice()
-        && closePrice > lastPricePoint.getPrice()));
+        && closePrice > lastAnchorPoint.getPrice()));
   }
 }

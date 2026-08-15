@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.StockPricePointRepository;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
+import com.momentum.domain.anchorpoint.StockAnchorPointRepository;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -31,7 +31,7 @@ class RegimeInsightServiceTest {
   @Autowired StockRepository stockRepository;
   @Autowired StockCandleRepository stockCandleRepository;
   @Autowired StockBaseRepository stockBaseRepository;
-  @Autowired StockPricePointRepository stockPricePointRepository;
+  @Autowired StockAnchorPointRepository stockAnchorPointRepository;
 
   private static final LocalDate TODAY = LocalDate.now();
 
@@ -106,11 +106,11 @@ class RegimeInsightServiceTest {
   }
 
   private void saveBase(Stock stock, long highPrice, long lowPrice) {
-    StockPricePoint high = stockPricePointRepository.save(
-        new StockPricePoint(highPrice, 100000L, TODAY.minusDays(10), StockPricePointType.HIGH, null, stock)
+    StockAnchorPoint high = stockAnchorPointRepository.save(
+        new StockAnchorPoint(highPrice, 100000L, TODAY.minusDays(10), StockAnchorPointType.HIGH, null, stock)
     );
-    StockPricePoint low = stockPricePointRepository.save(
-        new StockPricePoint(lowPrice, 100000L, TODAY.minusDays(20), StockPricePointType.LOW, null, stock)
+    StockAnchorPoint low = stockAnchorPointRepository.save(
+        new StockAnchorPoint(lowPrice, 100000L, TODAY.minusDays(20), StockAnchorPointType.LOW, null, stock)
     );
     StockBase base = StockBase.init(high, low, 100000L);
     stockBaseRepository.save(base);

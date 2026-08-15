@@ -1,13 +1,13 @@
 package com.momentum.interfaces.api.stock;
 
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.HIGH;
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.LOW;
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.HIGH;
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.LOW;
 import static com.momentum.domain.stock.StockRegime.BREAKOUT_READY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stock.StockTrend;
@@ -100,9 +100,9 @@ class StockChartV1ControllerTest {
   }
 
   private void saveBase(Stock stock, long resistancePrice, long supportPrice) {
-    StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
+    StockAnchorPoint high = new StockAnchorPoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
         HIGH, null, stock);
-    StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
+    StockAnchorPoint low = new StockAnchorPoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
         LOW, null, stock);
     stockBaseRepository.save(StockBase.init(high, low, 100_000L));
   }
