@@ -108,9 +108,9 @@ class MovingAverageInsightServiceTest {
 
   private void saveMas(long ma50, long ma150, long ma200) {
     stockMovingAverageRepository.saveAll(List.of(
-        new StockMovingAverage(ma50, StockMovingAveragePeriod.MA_50, stock),
-        new StockMovingAverage(ma150, StockMovingAveragePeriod.MA_150, stock),
-        new StockMovingAverage(ma200, StockMovingAveragePeriod.MA_200, stock)
+        new StockMovingAverage(ma50, TODAY, StockMovingAveragePeriod.MA_50, stock),
+        new StockMovingAverage(ma150, TODAY, StockMovingAveragePeriod.MA_150, stock),
+        new StockMovingAverage(ma200, TODAY, StockMovingAveragePeriod.MA_200, stock)
     ));
   }
 }

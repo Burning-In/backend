@@ -30,7 +30,7 @@ public class MovingAverageInsightService {
         .orElseThrow();
     long currentPrice = candle.getClosePrice();
 
-    List<StockMovingAverage> maList = stockMovingAverageRepository.findLatestByStock(stock);
+    List<StockMovingAverage> maList = stockMovingAverageRepository.findLatestByStock(stock, at);
     Map<StockMovingAveragePeriod, Long> maMap = new EnumMap<>(StockMovingAveragePeriod.class);
     maList.forEach(ma -> maMap.put(ma.getStockMovingAveragePeriod(), ma.getMa()));
 
