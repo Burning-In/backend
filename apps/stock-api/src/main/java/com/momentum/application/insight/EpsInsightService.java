@@ -29,7 +29,7 @@ public class EpsInsightService {
 
     List<QuarterlyEpsItem> items = epsList.stream()
         .map(e -> new QuarterlyEpsItem(
-            e.getQuarterlyDate().toString(),
+            e.getQuarter().toString(),
             BigDecimal.valueOf(e.getEps()).setScale(2, RoundingMode.HALF_UP)
         ))
         .toList();
@@ -37,8 +37,8 @@ public class EpsInsightService {
     BigDecimal changeRateYoY = null;
     if (!epsList.isEmpty()) {
       StockEps latest = epsList.get(0);
-      if (latest.getYearOverYear() != null) {
-        changeRateYoY = BigDecimal.valueOf(latest.getYearOverYear()).setScale(4, RoundingMode.HALF_UP);
+      if (latest.getYearOverYearChangeRate() != null) {
+        changeRateYoY = BigDecimal.valueOf(latest.getYearOverYearChangeRate()).setScale(4, RoundingMode.HALF_UP);
       }
     }
 

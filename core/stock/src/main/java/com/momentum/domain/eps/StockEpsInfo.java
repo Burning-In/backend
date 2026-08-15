@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 public record StockEpsInfo(
     Stock stock,
-    YearMonth quarterlyDate,
+    YearMonth quarter,
     double eps
 ) {
 
