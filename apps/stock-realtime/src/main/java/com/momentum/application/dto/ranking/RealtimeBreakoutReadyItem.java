@@ -15,11 +15,11 @@ public record RealtimeBreakoutReadyItem(
   public static List<RealtimeBreakoutReadyItem> from(List<StockRankScore> ranked) {
     return ranked.stream()
         .map(score -> new RealtimeBreakoutReadyItem(
-            score.getStock().getName(),
             score.getStock().getCode(),
+            score.getStock().getName(),
             null,
-            score.getMomentum().getValue(),
-            score.getFipScore().getFip()))
+            score.getMomentumScore().getValue(),
+            score.getFrogInPanScore().getValue()))
         .toList();
   }
 }

@@ -48,7 +48,7 @@ class SnapshotServiceTest {
   @Test
   @DisplayName("생성 시 종목의 현재 레짐과 최신 종가를 박제해 저장한다")
   void createCapturesRegimeAndPrice() {
-    Stock stock = saveStock("000001", BREAKOUT_READY);
+    Stock stock = saveStock("000040", BREAKOUT_READY);
     saveCandle(stock, 10_000L);
     SnapshotCreateRequest request = new SnapshotCreateRequest(stock.getCode(), BUY, List.of(), "회고");
 
@@ -63,7 +63,7 @@ class SnapshotServiceTest {
   @Test
   @DisplayName("존재하지 않는 종목으로 생성하면 예외")
   void createThrowsWhenStockNotFound() {
-    SnapshotCreateRequest request = new SnapshotCreateRequest("999999", BUY, List.of(), "회고");
+    SnapshotCreateRequest request = new SnapshotCreateRequest("000270", BUY, List.of(), "회고");
 
     assertThatThrownBy(() -> snapshotService.create(request))
         .isInstanceOf(CoreException.class);
@@ -72,7 +72,7 @@ class SnapshotServiceTest {
   @Test
   @DisplayName("상세 조회는 참고 스냅샷 id·회고를 반환한다")
   void getDetailReturnsReferencesAndRetrospective() {
-    Stock stock = saveStock("000002", BREAKOUT_READY);
+    Stock stock = saveStock("000050", BREAKOUT_READY);
     StockSnapShot ref = saveSnapshot(stock, 9_000L, BUY);
     StockSnapShot snapshot = snapshotRepository.save(
         StockSnapShot.create(stock, 10_000L, BUY, List.of(ref), RECORDED_AT, "회고내용"));
@@ -83,6 +83,7 @@ class SnapshotServiceTest {
     assertThat(detail.retrospective()).isEqualTo("회고내용");
     assertThat(detail.judgment()).isEqualTo(BUY);
     assertThat(detail.stockName()).isEqualTo(stock.getName());
+    assertThat(detail.stockCode()).isEqualTo(stock.getCode());
   }
 
   @Test
@@ -95,8 +96,8 @@ class SnapshotServiceTest {
   @Test
   @DisplayName("목록은 레짐 필터로 추리고 판단별 카운트를 집계한다")
   void getSnapShotsFiltersByRegimeAndCounts() {
-    Stock ready = saveStock("000003", BREAKOUT_READY);
-    Stock success = saveStock("000004", BREAKOUT_SUCCESS);
+    Stock ready = saveStock("000070", BREAKOUT_READY);
+    Stock success = saveStock("000227", BREAKOUT_SUCCESS);
     saveSnapshot(ready, 100L, BUY);
     saveSnapshot(ready, 200L, SELL);
     saveSnapshot(success, 300L, BUY);
@@ -113,7 +114,7 @@ class SnapshotServiceTest {
   @Test
   @DisplayName("수정은 판단·회고만 바꾸고 박제값은 유지한다")
   void updateKeepsCapturedValues() {
-    Stock stock = saveStock("000005", BREAKOUT_READY);
+    Stock stock = saveStock("000540", BREAKOUT_READY);
     StockSnapShot snapshot = saveSnapshot(stock, 10_000L, BUY);
     SnapshotUpdateRequest request =
         new SnapshotUpdateRequest(snapshot.getId(), SELL, List.of(), "수정된 회고");
@@ -128,12 +129,12 @@ class SnapshotServiceTest {
   }
 
   private Stock saveStock(String code, StockRegime regime) {
-    return stockRepository.save(new Stock("종목" + code, code, regime, StockTrend.UPTREND));
+    return stockRepository.save(Stock.of("종목" + code, code, regime, StockTrend.UPTREND));
   }
 
   private void saveCandle(Stock stock, long closePrice) {
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, "20260510", closePrice, closePrice, closePrice, closePrice, 1_000L, "2"));
+        StockDailyCandle.create(stock, "20260510", closePrice, closePrice, closePrice, closePrice, 1_000L));
   }
 
   private StockSnapShot saveSnapshot(Stock stock, long price, SnapshotJudgment judgment) {

@@ -1,14 +1,14 @@
 package com.momentum.application;
 
-import static com.momentum.domain.ma.StockMovingAveragePeriod.MA_50;
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_LOW;
+import static com.momentum.domain.movingaverage.StockMovingAveragePeriod.MA_50;
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.HIGH;
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.LOW;
 import static com.momentum.domain.stock.StockRegime.BREAKOUT_READY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stock.StockTrend;
@@ -43,7 +43,7 @@ class StockChartServiceTest {
   @Test
   @DisplayName("일봉은 요청 날짜 범위만 오름차순으로 반환한다")
   void getDailyCandlesReturnsRange() {
-    Stock stock = saveStock("000012");
+    Stock stock = saveStock("000520");
     saveCandle(stock, LocalDate.of(2026, 5, 1), 100L);
     saveCandle(stock, LocalDate.of(2026, 5, 2), 200L);
     saveCandle(stock, LocalDate.of(2026, 5, 3), 300L);
@@ -59,7 +59,7 @@ class StockChartServiceTest {
   @Test
   @DisplayName("이평선은 최근 N거래일 종가 평균을 롤링으로 계산한다")
   void getMovingAveragesComputesRollingSma() {
-    Stock stock = saveStock("000010");
+    Stock stock = saveStock("000080");
     LocalDate start = LocalDate.of(2026, 1, 1);
     saveCandles(stock, start, 50, i -> 1_000L);          // index 0~49 종가 1000
     saveCandle(stock, start.plusDays(50), 2_000L);        // index 50 종가 2000
@@ -76,7 +76,7 @@ class StockChartServiceTest {
   @Test
   @DisplayName("N거래일치 데이터가 모이지 않으면 이평선 값이 없다")
   void getMovingAveragesSkipsDaysWithoutFullWindow() {
-    Stock stock = saveStock("000011");
+    Stock stock = saveStock("000100");
     LocalDate start = LocalDate.of(2026, 1, 1);
     saveCandles(stock, start, 30, i -> 1_000L);          // 30개(<50)
 
@@ -89,7 +89,7 @@ class StockChartServiceTest {
   @Test
   @DisplayName("베이스는 지지/저항 가격을 반환하고 최신 베이스의 endDate는 null이다")
   void getBasesMapsCurrentBaseWithNullEndDate() {
-    Stock stock = saveStock("000013");
+    Stock stock = saveStock("000540");
     saveBase(stock, 10_000L, 8_000L);
 
     BaseListResponse response = stockChartService.getBases(
@@ -104,12 +104,12 @@ class StockChartServiceTest {
   }
 
   private Stock saveStock(String code) {
-    return stockRepository.save(new Stock("종목" + code, code, BREAKOUT_READY, StockTrend.UPTREND));
+    return stockRepository.save(Stock.of("종목" + code, code, BREAKOUT_READY, StockTrend.UPTREND));
   }
 
   private StockDailyCandle saveCandle(Stock stock, LocalDate date, long close) {
     return stockCandleRepository.save(StockDailyCandle.create(
-        stock, date.format(DateTimeFormatter.BASIC_ISO_DATE), close, close, close, close, 1_000L, "2"));
+        stock, date.format(DateTimeFormatter.BASIC_ISO_DATE), close, close, close, close, 1_000L));
   }
 
   private void saveCandles(Stock stock, LocalDate start, int count, IntToLongFunction closeFn) {
@@ -119,10 +119,10 @@ class StockChartServiceTest {
   }
 
   private void saveBase(Stock stock, long resistancePrice, long supportPrice) {
-    StockPricePoint high = new StockPricePoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
-        PIVOT_HIGH, null, stock);
-    StockPricePoint low = new StockPricePoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
-        PIVOT_LOW, null, stock);
-    stockBaseRepository.save(StockBase.initOrLower(high, low, 100_000L));
+    StockAnchorPoint high = new StockAnchorPoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
+        HIGH, null, stock);
+    StockAnchorPoint low = new StockAnchorPoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
+        LOW, null, stock);
+    stockBaseRepository.save(StockBase.init(high, low, 100_000L));
   }
 }

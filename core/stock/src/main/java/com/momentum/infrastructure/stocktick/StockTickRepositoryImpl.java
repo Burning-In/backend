@@ -1,6 +1,6 @@
 package com.momentum.infrastructure.stocktick;
 
-import com.momentum.domain.stock.StockCode;
+import com.momentum.domain.stock.TrackedStock;
 import com.momentum.domain.stocktick.StockTick;
 import com.momentum.domain.stocktick.StockTickRepository;
 import java.time.Instant;
@@ -33,17 +33,10 @@ public class StockTickRepositoryImpl implements StockTickRepository {
   }
 
   @Override
-  public Optional<StockTick> findLatestTick(StockCode stockCode, LocalDateTime at) {
+  public Optional<StockTick> findLatestTick(TrackedStock stockName, LocalDateTime at) {
     ZonedDateTime atKst = at.atZone(KST);
     return stockTickJpaRepository
-        .findFirstByStockCodeAndCreatedAtLessThanEqualOrderByCreatedAtDescIdDesc(stockCode, atKst);
-  }
-
-  @Override
-  public Double averageDailyOrderFlow(Instant now, long fromPrice, long toPrice) {
-    ZonedDateTime[] range = dailyRange(now);
-    return stockTickJpaRepository
-        .findAverageContractPowerByDateAndPriceRange(range[0], range[1], fromPrice, toPrice);
+        .findFirstByStockNameAndCreatedAtLessThanEqualOrderByCreatedAtDescIdDesc(stockName, atKst);
   }
 
   /**

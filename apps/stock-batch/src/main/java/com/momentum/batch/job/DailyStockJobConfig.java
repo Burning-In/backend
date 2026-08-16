@@ -1,11 +1,12 @@
 package com.momentum.batch.job;
 
+import com.momentum.batch.listener.StepMonitorListener;
 import com.momentum.batch.job.eps.StockEpsItemProcessor;
 import com.momentum.batch.job.eps.StockEpsItemWriter;
 import com.momentum.batch.job.ma.StockMaItemProcessor;
 import com.momentum.batch.job.ma.StockMaItemWriter;
-import com.momentum.batch.job.pricepoint.StockPricePointItemProcessor;
-import com.momentum.batch.job.pricepoint.StockPricePointItemWriter;
+import com.momentum.batch.job.anchorpoint.StockAnchorPointItemProcessor;
+import com.momentum.batch.job.anchorpoint.StockAnchorPointItemWriter;
 import com.momentum.batch.job.regime.StockRegimeItemProcessor;
 import com.momentum.batch.job.regime.StockRegimeItemWriter;
 import com.momentum.batch.job.rs.StockRsTasklet;
@@ -43,8 +44,8 @@ public class DailyStockJobConfig {
   private final StockCandleItemProcessor stockCandleItemProcessor;
   private final StockCandleItemWriter stockCandleItemWriter;
 
-  private final StockPricePointItemProcessor stockPricePointItemProcessor;
-  private final StockPricePointItemWriter stockPricePointItemWriter;
+  private final StockAnchorPointItemProcessor stockAnchorPointItemProcessor;
+  private final StockAnchorPointItemWriter stockAnchorPointItemWriter;
 
   private final StockVcpItemProcessor stockVcpItemProcessor;
   private final StockVcpItemWriter stockVcpItemWriter;
@@ -59,6 +60,8 @@ public class DailyStockJobConfig {
   private final StockEpsItemWriter stockEpsItemWriter;
 
   private final StockRsTasklet stockRsTasklet;
+
+  private final StepMonitorListener stepMonitorListener;
 
   private final StockMaItemProcessor stockMaItemProcessor;
   private final StockMaItemWriter stockMaItemWriter;
@@ -80,12 +83,13 @@ public class DailyStockJobConfig {
   public Job dailyStockJob() {
     return new JobBuilder("dailyStockJob", jobRepository)
         .start(stockCandleStep())
-        .next(stockPricePointStep())
+        .next(stockAnchorPointStep())
         .next(stockVcpStep())
+        // RS 등급이 상승추세 판정의 입력이므로, 레짐 판정보다 먼저 계산해야 당일 RS가 당일 레짐에 반영된다.
+        .next(stockRsStep())
         .next(stockRegimeStep())
         .next(stockRankScoreStep())
         .next(stockEpsStep())
-        .next(stockRsStep())
         .next(stockMaStep())
         .build();
   }
@@ -97,16 +101,18 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockCandleItemProcessor)
         .writer(stockCandleItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
   @Bean
-  public Step stockPricePointStep() {
-    return new StepBuilder("stockPricePointStep", jobRepository)
+  public Step stockAnchorPointStep() {
+    return new StepBuilder("stockAnchorPointStep", jobRepository)
         .<Stock, Stock>chunk(CHUNK_SIZE, transactionManager)
         .reader(stockItemReader())
-        .processor(stockPricePointItemProcessor)
-        .writer(stockPricePointItemWriter)
+        .processor(stockAnchorPointItemProcessor)
+        .writer(stockAnchorPointItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -117,6 +123,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockVcpItemProcessor)
         .writer(stockVcpItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -127,6 +134,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockRegimeItemProcessor)
         .writer(stockRegimeItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -137,6 +145,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockRankScoreProcessor)
         .writer(stockRankScoreWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -147,6 +156,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockEpsItemProcessor)
         .writer(stockEpsItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -154,6 +164,7 @@ public class DailyStockJobConfig {
   public Step stockRsStep() {
     return new StepBuilder("stockRsStep", jobRepository)
         .tasklet(stockRsTasklet, transactionManager)
+        .listener(stepMonitorListener)
         .build();
   }
 
@@ -164,6 +175,7 @@ public class DailyStockJobConfig {
         .reader(stockItemReader())
         .processor(stockMaItemProcessor)
         .writer(stockMaItemWriter)
+        .listener(stepMonitorListener)
         .build();
   }
 }

@@ -14,24 +14,29 @@ public class StockEpsService {
   public List<StockEps> create(List<StockEpsInfo> stockEpsInfos) {
     List<StockEps> result = new ArrayList<>();
     for (StockEpsInfo stockEpsInfo : stockEpsInfos) {
-      StockEps oneYearAgoEps = getOneYearAgo(stockEpsInfo);
-      Double yoy = calculateYoY(oneYearAgoEps, stockEpsInfo.eps());
-      StockEps stockEps = new StockEps(stockEpsInfo.eps(), stockEpsInfo.quarterlyDate(), yoy, stockEpsInfo.stock());
+      Double yearOverYearChangeRate = calculateYearOverYearChangeRate(stockEpsInfo, stockEpsInfo.eps());
+      StockEps stockEps = new StockEps(stockEpsInfo.eps(), stockEpsInfo.quarter(), yearOverYearChangeRate, stockEpsInfo.stock());
       result.add(stockEps);
     }
 
     return stockEpsRepository.saveAll(result);
   }
 
-  private Double calculateYoY(StockEps oneYearAgoEps, double currentEps) {
-    if (oneYearAgoEps == null) {
+  private Double calculateYearOverYearChangeRate(StockEpsInfo stockEpsInfo, double currentEps) {
+    StockEps oneYearAgoEps = getOneYearAgoEps(stockEpsInfo);
+    if (!canCompareWith(oneYearAgoEps)) {
       return null;
     }
-    return (currentEps - oneYearAgoEps.getEps()) / oneYearAgoEps.getEps();
+    double baseEps = oneYearAgoEps.getEps();
+    return (currentEps - baseEps) / Math.abs(baseEps);
   }
 
-  private StockEps getOneYearAgo(StockEpsInfo stockEpsInfo) {
-    return stockEpsRepository.findOneYearAgo(stockEpsInfo.stock(), stockEpsInfo.quarterlyDate())
+  private boolean canCompareWith(StockEps oneYearAgoEps) {
+    return oneYearAgoEps != null && oneYearAgoEps.getEps() != 0;
+  }
+
+  private StockEps getOneYearAgoEps(StockEpsInfo stockEpsInfo) {
+    return stockEpsRepository.findOneYearAgo(stockEpsInfo.stock(), stockEpsInfo.quarter())
         .orElse(null);
   }
 }

@@ -1,8 +1,8 @@
 package com.momentum.application;
 
-import com.momentum.domain.rs.KOSPI;
-import com.momentum.domain.rs.KOSPIRelativeStrengthService;
-import com.momentum.domain.rs.KOSPIRepository;
+import com.momentum.domain.relativestrength.Kospi;
+import com.momentum.domain.relativestrength.KospiRelativeStrengthService;
+import com.momentum.domain.relativestrength.KospiRepository;
 import com.momentum.infrastructure.LsKospiProvider;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 public class StockRsFacade {
 
   private final LsKospiProvider lsKospiProvider;
-  private final KOSPIRepository kOSPIRepository;
-  private final KOSPIRelativeStrengthService kOSPIRelativeStrengthService;
+  private final KospiRepository kospiRepository;
+  private final KospiRelativeStrengthService kospiRelativeStrengthService;
 
   public void calculate(LocalDate today) {
     long afterMarketKospi = lsKospiProvider.getAfterMarketKospi(today);
-    kOSPIRepository.save(new KOSPI(afterMarketKospi, today));
+    kospiRepository.save(new Kospi(afterMarketKospi, today));
 
-    kOSPIRelativeStrengthService.create(today);
+    kospiRelativeStrengthService.create(today);
   }
 }

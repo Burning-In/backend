@@ -3,10 +3,10 @@ package com.momentum.application.insight;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.momentum.domain.rs.KOSPI;
-import com.momentum.domain.rs.KOPSIRelativeStrength;
-import com.momentum.domain.rs.KOSPIRelativeStrengthRepository;
-import com.momentum.domain.rs.KOSPIRepository;
+import com.momentum.domain.relativestrength.Kospi;
+import com.momentum.domain.relativestrength.KospiRelativeStrength;
+import com.momentum.domain.relativestrength.KospiRelativeStrengthRepository;
+import com.momentum.domain.relativestrength.KospiRepository;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -29,21 +29,21 @@ class RsInsightServiceTest {
 
   @Autowired RsInsightService rsInsightService;
   @Autowired StockRepository stockRepository;
-  @Autowired KOSPIRepository kospiRepository;
-  @Autowired KOSPIRelativeStrengthRepository kospiRelativeStrengthRepository;
+  @Autowired KospiRepository kospiRepository;
+  @Autowired KospiRelativeStrengthRepository kospiRelativeStrengthRepository;
 
   private Stock stock;
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.UNKNOWN, StockTrend.UPTREND));
   }
 
   @Test
   @DisplayName("RS 점수 반환")
   void returnsRsScore() {
-    KOSPI kospi = kospiRepository.save(new KOSPI(2500L, LocalDate.now()));
-    kospiRelativeStrengthRepository.saveAll(List.of(new KOPSIRelativeStrength(85, stock, kospi)));
+    Kospi kospi = kospiRepository.save(new Kospi(2500L, LocalDate.now()));
+    kospiRelativeStrengthRepository.saveAll(List.of(KospiRelativeStrength.of(85, stock, kospi)));
 
     RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());
 
@@ -61,11 +61,11 @@ class RsInsightServiceTest {
   @Test
   @DisplayName("여러 RS 기록 중 최신 기록 반환")
   void returnsLatestRsWhenMultipleRecordsExist() {
-    KOSPI oldKospi = kospiRepository.save(new KOSPI(2400L, LocalDate.now().minusDays(30)));
-    KOSPI newKospi = kospiRepository.save(new KOSPI(2500L, LocalDate.now()));
+    Kospi oldKospi = kospiRepository.save(new Kospi(2400L, LocalDate.now().minusDays(30)));
+    Kospi newKospi = kospiRepository.save(new Kospi(2500L, LocalDate.now()));
     kospiRelativeStrengthRepository.saveAll(List.of(
-        new KOPSIRelativeStrength(50, stock, oldKospi),
-        new KOPSIRelativeStrength(75, stock, newKospi)
+        KospiRelativeStrength.of(50, stock, oldKospi),
+        KospiRelativeStrength.of(75, stock, newKospi)
     ));
 
     RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());

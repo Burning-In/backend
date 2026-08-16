@@ -3,7 +3,7 @@ package com.momentum.interfaces.api.stock;
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.stock.StockChartV1Dto.BaseListResponse;
 import com.momentum.interfaces.api.stock.StockChartV1Dto.DailyCandleResponse;
-import com.momentum.domain.ma.StockMovingAveragePeriod;
+import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
 import com.momentum.interfaces.api.stock.StockChartV1Dto.MovingAverageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;

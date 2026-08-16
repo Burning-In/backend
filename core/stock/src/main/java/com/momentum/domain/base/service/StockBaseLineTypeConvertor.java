@@ -13,18 +13,16 @@ public class StockBaseLineTypeConvertor {
 
   private final StockBaseRepository stockBaseRepository;
 
-  public void convertLineType(StockBase newBase) {
-    if (newBase == null) {
+  public void convertLineType(StockBase previousBase, StockBase newBase) {
+    if (previousBase == null || newBase == null) {
       return;
     }
-    StockBase previousBase = stockBaseRepository.findCurrentBaseWithLines(newBase.getStock())
-        .orElseThrow(IllegalArgumentException::new);
     for (StockBaseLine line : previousBase.getStockBaseLines()) {
-      if (line.getLineType() == StockBaseLineType.RESISTANCE
+      if (line.getType() == StockBaseLineType.RESISTANCE
           && line.getPrice() <= newBase.getLowestSupportLine().getPrice()) {
         line.convertLineType();
       }
-      if (line.getLineType() == StockBaseLineType.SUPPORT
+      if (line.getType() == StockBaseLineType.SUPPORT
           && line.getPrice() >= newBase.getHighestResistanceLine().getPrice()) {
         line.convertLineType();
       }

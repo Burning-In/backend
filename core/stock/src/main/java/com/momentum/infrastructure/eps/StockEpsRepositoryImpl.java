@@ -25,7 +25,7 @@ public class StockEpsRepositoryImpl implements StockEpsRepository {
         .where(
             stockEps.deletedAt.isNull(),
             stockEps.stock.eq(stock),
-            stockEps.quarterlyDate.eq(date.minusYears(1))
+            stockEps.quarter.eq(date.minusYears(1))
         )
         .fetchOne();
 
@@ -44,7 +44,7 @@ public class StockEpsRepositoryImpl implements StockEpsRepository {
             stockEps.deletedAt.isNull(),
             stockEps.stock.eq(stock)
         )
-        .orderBy(stockEps.quarterlyDate.desc())
+        .orderBy(stockEps.quarter.desc())
         .limit(limit)
         .fetch();
   }

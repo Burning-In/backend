@@ -1,6 +1,6 @@
 package com.momentum.interfaces.api.stock;
 
-import com.momentum.domain.ma.StockMovingAveragePeriod;
+import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
 import java.time.LocalDate;
 import java.util.List;
 

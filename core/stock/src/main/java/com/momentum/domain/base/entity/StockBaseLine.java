@@ -1,9 +1,9 @@
 package com.momentum.domain.base.entity;
 
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.HIGH;
 
 import com.momentum.domain.BaseEntity;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,30 +22,30 @@ public class StockBaseLine extends BaseEntity {
   private StockBaseLinePrice price;
 
   @Embedded
-  private StockBaseLineStrength stockBaseLineStrength;
+  private StockBaseLineStrength strength;
 
   @Enumerated(EnumType.STRING)
-  private StockBaseLineType lineType;
+  private StockBaseLineType type;
 
   @ManyToOne
   private StockBase stockBase;
 
-  private StockBaseLine(StockBaseLinePrice price, StockBaseLineStrength stockBaseLineStrength,
-      StockBaseLineType lineType, StockBase stockBase) {
+  private StockBaseLine(StockBaseLinePrice price, StockBaseLineStrength strength,
+      StockBaseLineType type, StockBase stockBase) {
     this.price = price;
-    this.stockBaseLineStrength = stockBaseLineStrength;
-    this.lineType = lineType;
+    this.strength = strength;
+    this.type = type;
     this.stockBase = stockBase;
   }
 
-  public static StockBaseLine createLineByPointType(StockPricePoint point, long baseAverageVolume, StockBase stockBase) {
-    if (point.isSameType(PIVOT_HIGH)) {
+  public static StockBaseLine create(StockAnchorPoint point, long baseAverageVolume, StockBase stockBase) {
+    if (point.isSameType(HIGH)) {
       return StockBaseLine.resistance(point.getPrice(), point.getVolume(), baseAverageVolume, stockBase);
     }
     return StockBaseLine.support(point.getPrice(), point.getVolume(), baseAverageVolume, stockBase);
   }
 
-  public static StockBaseLine resistance(long closePrice, Long currentVolume, Long averageDailyVolume, StockBase stockBase) {
+  private static StockBaseLine resistance(long closePrice, Long currentVolume, Long averageDailyVolume, StockBase stockBase) {
     return new StockBaseLine(
         new StockBaseLinePrice(closePrice),
         StockBaseLineStrength.create(currentVolume, averageDailyVolume),
@@ -54,7 +54,7 @@ public class StockBaseLine extends BaseEntity {
     );
   }
 
-  public static StockBaseLine support(long closePrice, Long currentVolume, Long averageDailyVolume, StockBase stockBase) {
+  private static StockBaseLine support(long closePrice, Long currentVolume, Long averageDailyVolume, StockBase stockBase) {
     return new StockBaseLine(
         new StockBaseLinePrice(closePrice),
         StockBaseLineStrength.create(currentVolume, averageDailyVolume),
@@ -64,32 +64,28 @@ public class StockBaseLine extends BaseEntity {
   }
 
   public void updateStrength(Long additionalVolume, Long averageDailyVolume) {
-    this.stockBaseLineStrength.touch(additionalVolume, averageDailyVolume);
+    this.strength.touch(additionalVolume, averageDailyVolume);
   }
 
   public void convertLineType() {
-    if (this.lineType == StockBaseLineType.RESISTANCE) {
-      this.lineType = StockBaseLineType.SUPPORT;
+    if (this.type == StockBaseLineType.RESISTANCE) {
+      this.type = StockBaseLineType.SUPPORT;
     } else {
-      this.lineType = StockBaseLineType.RESISTANCE;
+      this.type = StockBaseLineType.RESISTANCE;
     }
   }
 
-  public boolean isMatched(StockPricePoint point, double threshold) {
-    return this.lineType.equals(toLineType(point))
+  public boolean matches(StockAnchorPoint point, double threshold) {
+    StockBaseLineType expectedType = StockBaseLineType.SUPPORT;
+    if (point.isSameType(HIGH)) {
+      expectedType = StockBaseLineType.RESISTANCE;
+    }
+    return this.type == expectedType
         && this.price.isWithinThreshold(point.getPrice(), threshold);
   }
 
   public boolean isStrongerThan(StockBaseLine other) {
-    return this.stockBaseLineStrength.getStrength()
-        .compareTo(other.getStockBaseLineStrength().getStrength()) > 0;
-  }
-
-  private StockBaseLineType toLineType(StockPricePoint point) {
-    if (point.isSameType(PIVOT_HIGH)) {
-      return StockBaseLineType.RESISTANCE;
-    }
-    return StockBaseLineType.SUPPORT;
+    return this.strength.compareTo(other.getStrength()) > 0;
   }
 
   public long getPrice() {

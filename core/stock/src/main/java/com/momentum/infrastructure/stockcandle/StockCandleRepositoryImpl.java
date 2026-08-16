@@ -30,7 +30,7 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
   }
 
   @Override
-  public Optional<StockDailyCandle> findLastCandleAfterDate(Stock stock, LocalDate tradeDate) {
+  public Optional<StockDailyCandle> findLastCandleBeforeDate(Stock stock, LocalDate tradeDate) {
     StockDailyCandle result = jpaQueryFactory
         .selectFrom(stockDailyCandle)
         .where(
@@ -45,7 +45,7 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
 
   @Override
   public Long averageVolume(Stock stock, LocalDate from, LocalDate to) {
-    return jpaQueryFactory
+    Long averageVolume = jpaQueryFactory
         .select(stockDailyCandle.volume.avg().longValue())
         .from(stockDailyCandle)
         .where(
@@ -55,6 +55,11 @@ public class StockCandleRepositoryImpl implements StockCandleRepository {
             stockDailyCandle.tradeDate.loe(to)
         )
         .fetchOne();
+
+    if (averageVolume == null) {
+      return 0L;
+    }
+    return averageVolume;
   }
 
   @Override

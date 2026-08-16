@@ -2,9 +2,9 @@ package com.momentum.application.insight;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.domain.ma.StockMovingAverage;
-import com.momentum.domain.ma.StockMovingAveragePeriod;
-import com.momentum.domain.ma.StockMovingAverageRepository;
+import com.momentum.domain.movingaverage.StockMovingAverage;
+import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
+import com.momentum.domain.movingaverage.StockMovingAverageRepository;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -36,7 +36,7 @@ class MovingAverageInsightServiceTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.UNKNOWN, StockTrend.UPTREND));
     saveCandle(10000L);
   }
 
@@ -102,15 +102,15 @@ class MovingAverageInsightServiceTest {
   private void saveCandle(long closePrice) {
     String rawDate = TODAY.format(DateTimeFormatter.BASIC_ISO_DATE);
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L, "2")
+        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L)
     );
   }
 
   private void saveMas(long ma50, long ma150, long ma200) {
     stockMovingAverageRepository.saveAll(List.of(
-        new StockMovingAverage(ma50, StockMovingAveragePeriod.MA_50, stock),
-        new StockMovingAverage(ma150, StockMovingAveragePeriod.MA_150, stock),
-        new StockMovingAverage(ma200, StockMovingAveragePeriod.MA_200, stock)
+        new StockMovingAverage(ma50, TODAY, StockMovingAveragePeriod.MA_50, stock),
+        new StockMovingAverage(ma150, TODAY, StockMovingAveragePeriod.MA_150, stock),
+        new StockMovingAverage(ma200, TODAY, StockMovingAveragePeriod.MA_200, stock)
     ));
   }
 }

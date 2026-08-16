@@ -1,14 +1,15 @@
 package com.momentum.domain.base.service;
 
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_HIGH;
-import static com.momentum.domain.pricepoint.entity.StockPricePointType.PIVOT_LOW;
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.HIGH;
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.LOW;
 
+import com.momentum.domain.anchorpoint.StockAnchorPointRepository;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.StockPricePointRepository;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
 import com.momentum.domain.stockcandle.StockCandleRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,27 +17,39 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StockBaseInitializer {
 
-  private final StockPricePointRepository stockPricePointRepository;
+  private final StockAnchorPointRepository stockAnchorPointRepository;
   private final StockBaseRepository stockBaseRepository;
   private final StockCandleRepository stockCandleRepository;
 
-  public void resolve(StockPricePoint confirmedPricePoint) {
-    if (confirmedPricePoint.isSameType(PIVOT_LOW)) {
-      initializeBaseWithPairPoint(PIVOT_HIGH, confirmedPricePoint);
+  public void resolve(StockAnchorPoint confirmedAnchorPoint) {
+    if (confirmedAnchorPoint.isSameType(LOW)) {
+      initializeBaseWithPairPoint(HIGH, confirmedAnchorPoint);
     }
 
-    if (confirmedPricePoint.isSameType(PIVOT_HIGH)) {
-      initializeBaseWithPairPoint(PIVOT_LOW, confirmedPricePoint);
+    if (confirmedAnchorPoint.isSameType(HIGH)) {
+      initializeBaseWithPairPoint(LOW, confirmedAnchorPoint);
     }
   }
 
-  private void initializeBaseWithPairPoint(StockPricePointType pairedType, StockPricePoint confirmedPricePoint) {
-    StockPricePoint pairedPoint = stockPricePointRepository.findLastPricePointWithoutBase(pairedType)
-        .orElseThrow(IllegalArgumentException::new);
-    long baseAverageVolume = stockCandleRepository.averageVolume(confirmedPricePoint.getStock(),
+  private void initializeBaseWithPairPoint(StockAnchorPointType pairedType, StockAnchorPoint confirmedAnchorPoint) {
+    Optional<StockAnchorPoint> pairedPointOpt = stockAnchorPointRepository.findLastAnchorPointWithoutBase(
+        confirmedAnchorPoint.getStock(), pairedType);
+    if (pairedPointOpt.isEmpty()) {
+      return;
+    }
+    StockAnchorPoint pairedPoint = pairedPointOpt.get();
+    long baseAverageVolume = stockCandleRepository.averageVolume(confirmedAnchorPoint.getStock(),
         pairedPoint.getTradeDate(),
-        confirmedPricePoint.getTradeDate());
-    StockBase newBase = StockBase.initOrLower(pairedPoint, confirmedPricePoint, baseAverageVolume);
+        confirmedAnchorPoint.getTradeDate());
+    StockBase newBase = createBase(confirmedAnchorPoint, pairedPoint, baseAverageVolume);
     stockBaseRepository.save(newBase);
+  }
+
+  private StockBase createBase(StockAnchorPoint confirmedAnchorPoint, StockAnchorPoint pairedPoint,
+      long baseAverageVolume) {
+    if (confirmedAnchorPoint.isSameType(HIGH)) {
+      return StockBase.init(confirmedAnchorPoint, pairedPoint, baseAverageVolume);
+    }
+    return StockBase.init(pairedPoint, confirmedAnchorPoint, baseAverageVolume);
   }
 }

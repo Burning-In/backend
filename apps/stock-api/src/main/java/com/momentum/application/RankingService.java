@@ -2,7 +2,7 @@ package com.momentum.application;
 
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
-import com.momentum.domain.stock.StockCode;
+import com.momentum.domain.stock.TrackedStock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stocktick.StockTick;
 import com.momentum.domain.stocktick.StockTickRepository;
@@ -32,9 +32,9 @@ public class RankingService {
         .map(score -> new BreakoutSuccessItem(
             score.getStock().getName(),
             score.getStock().getCode(),
-            currentPrice(score.getStock().getCode(), at),
-            score.getMomentum().getValue(),
-            score.getFipScore().getFip()))
+            getLastPrice(score.getStock().getCode(), at),
+            score.getMomentumScore().getValue(),
+            score.getFrogInPanScore().getValue()))
         .toList();
     return new BreakoutSuccessResponse(stocks);
   }
@@ -45,9 +45,9 @@ public class RankingService {
         .map(score -> new BreakoutReadyItem(
             score.getStock().getName(),
             score.getStock().getCode(),
-            currentPrice(score.getStock().getCode(), at),
-            score.getMomentum().getValue(),
-            score.getFipScore().getFip()))
+            getLastPrice(score.getStock().getCode(), at),
+            score.getMomentumScore().getValue(),
+            score.getFrogInPanScore().getValue()))
         .toList();
     return new BreakoutReadyResponse(stocks);
   }
@@ -56,9 +56,8 @@ public class RankingService {
     return stockRankScoreRepository.findLastStockRankScore(regime, at.toLocalDate(), RANKING_LIMIT);
   }
 
-  /** 조회 시점({@code at}) 기준 해당 종목의 가장 최근 체결가. 틱이 없으면 null. */
-  private BigDecimal currentPrice(String stockCode, LocalDateTime at) {
-    return stockTickRepository.findLatestTick(StockCode.getCode(stockCode), at)
+  private BigDecimal getLastPrice(String code, LocalDateTime at) {
+    return stockTickRepository.findLatestTick(TrackedStock.fromCode(code), at)
         .map(StockTick::getPrice)
         .map(BigDecimal::valueOf)
         .orElse(null);

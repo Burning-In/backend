@@ -2,7 +2,7 @@ package com.momentum.infrastructure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.momentum.application.dto.StockTickInfo;
-import com.momentum.domain.stock.StockCode;
+import com.momentum.domain.stock.TrackedStock;
 import com.momentum.application.StockRealtimeFacade;
 import com.momentum.domain.stocktick.StockRealtimeRegimeService;
 import jakarta.annotation.PreDestroy;
@@ -40,7 +40,7 @@ public class LsWebSocketHandler extends TextWebSocketHandler {
   }
 
   private void subscribeAll() throws Exception {
-    for (StockCode stock : StockCode.values()) {
+    for (TrackedStock stock : TrackedStock.values()) {
 
       LsWsRequest request = LsWsRequest.subscribe(
           authToken,
@@ -112,7 +112,7 @@ public class LsWebSocketHandler extends TextWebSocketHandler {
 
       log.info("구독 해제 시작");
 
-      for (StockCode stock : StockCode.values()) {
+      for (TrackedStock stock : TrackedStock.values()) {
 
         LsWsRequest request =
             LsWsRequest.unsubscribe(

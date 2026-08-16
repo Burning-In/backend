@@ -2,8 +2,8 @@ package com.momentum.domain.base.service;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,35 +16,35 @@ public class StockBaseVolatilityContractionPatternService {
   private final StockBaseRepository stockBaseRepository;
 
   public void calculateVolatilityContractionPattern(Long stockBaseId) {
-    StockBase stockBase = stockBaseRepository.findWithPricePointsById(stockBaseId)
+    StockBase stockBase = stockBaseRepository.findWithAnchorPointsById(stockBaseId)
         .orElseThrow(IllegalArgumentException::new);
-    List<StockPricePoint> points = stockBase.getStockPricePoints();
+    List<StockAnchorPoint> points = stockBase.getStockAnchorPoints();
     if (points == null) {
-      throw new IllegalStateException("StockPricePoints must not be null");
+      throw new IllegalStateException("StockAnchorPoints must not be null");
     }
 
-    List<StockPricePoint> stockPricePoints = points.stream()
-        .filter(point -> !StockPricePointType.isNonPivot(point))
+    List<StockAnchorPoint> stockAnchorPoints = points.stream()
+        .filter(point -> !point.getType().isNonPivot())
         .toList();
 
-    List<Long> volatilityHistories = calculateVolatilityHistories(stockPricePoints);
+    List<Long> volatilityHistories = calculateVolatilityHistories(stockAnchorPoints);
     stockBase.update(null, volatilityHistories);
     stockBaseRepository.save(stockBase);
   }
 
-  private List<Long> calculateVolatilityHistories(List<StockPricePoint> stockPricePoints) {
+  private List<Long> calculateVolatilityHistories(List<StockAnchorPoint> stockAnchorPoints) {
     int left = 0;
     int right = 0;
     List<Long> volatilityHistories = new ArrayList<>();
-    while (left <= right && right < stockPricePoints.size()) {
-      StockPricePoint leftPricePoint = stockPricePoints.get(left);
-      StockPricePoint rightPricePoint = stockPricePoints.get(right);
-      if (rightPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_HIGH)) {
+    while (left <= right && right < stockAnchorPoints.size()) {
+      StockAnchorPoint leftAnchorPoint = stockAnchorPoints.get(left);
+      StockAnchorPoint rightAnchorPoint = stockAnchorPoints.get(right);
+      if (rightAnchorPoint.getType().equals(StockAnchorPointType.HIGH)) {
         left = right;
       }
-      if (leftPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_HIGH) &&
-          rightPricePoint.getStockPricePointType().equals(StockPricePointType.PIVOT_LOW)) {
-        volatilityHistories.add(leftPricePoint.getPrice() - rightPricePoint.getPrice());
+      if (leftAnchorPoint.getType().equals(StockAnchorPointType.HIGH) &&
+          rightAnchorPoint.getType().equals(StockAnchorPointType.LOW)) {
+        volatilityHistories.add(leftAnchorPoint.getPrice() - rightAnchorPoint.getPrice());
       }
       right++;
     }

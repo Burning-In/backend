@@ -34,7 +34,7 @@ class VolumeInsightServiceTest {
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(new Stock("삼성전자", "005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND));
+    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.UNKNOWN, StockTrend.UPTREND));
   }
 
   @Test
@@ -85,6 +85,6 @@ class VolumeInsightServiceTest {
 
   private StockDailyCandle candle(LocalDate date, long volume) {
     String rawDate = date.format(DateTimeFormatter.BASIC_ISO_DATE);
-    return StockDailyCandle.create(stock, rawDate, 10000L, 10000L, 10000L, 10000L, volume, "2");
+    return StockDailyCandle.create(stock, rawDate, 10000L, 10000L, 10000L, 10000L, volume);
   }
 }

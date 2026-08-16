@@ -1,13 +1,9 @@
 package com.momentum.domain.stocktick;
 
-import static com.momentum.domain.stock.StockRegime.UNKNOWN;
-import static com.momentum.domain.stock.StockRegime.decideRealTimeStockRegime;
-
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.StockPricePointRepository;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.service.StockPricePointTypeDecider;
+import com.momentum.domain.anchorpoint.StockAnchorPointRepository;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -19,26 +15,25 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class StockRealtimeRegimeService {
 
-  private static final double BREAKOUT_THRESHOLD_PERCENT = 5.0;
+  private static final double THRESHOLD_PERCENT = 5.0;
 
   private final StockRepository stockRepository;
-  private final StockPricePointRepository stockPricePointRepository;
+  private final StockRealtimeRegimePolicy stockRealtimeRegimePolicy;
   private final StockBaseRepository stockBaseRepository;
-  private final StockPricePointTypeDecider stockPricePointTypeDecider;
+  private final StockAnchorPointRepository stockAnchorPointRepository;
 
   @Transactional
   public void resolveRealtimeRegime(String stockCode, long currentPrice) {
     Stock stock = stockRepository.findByStockCode(stockCode)
         .orElseThrow(IllegalArgumentException::new);
-    stockPricePointTypeDecider.resolveType(stock);
-    StockBase currentStockBase = stockBaseRepository.findCurrentBaseWithLines(stock)
+    StockBase currentBase = stockBaseRepository.findCurrentBaseWithLines(stock)
         .orElseThrow(IllegalStateException::new);
-    StockPricePoint lastPricePoint = stockPricePointRepository.findLastStockPricePoint(stock)
+    StockAnchorPoint lastAnchorPoint = stockAnchorPointRepository.findLastStockAnchorPoint(stock)
         .orElseThrow(IllegalStateException::new);
 
-    StockRegime decided = decideRealTimeStockRegime(currentPrice, currentStockBase, stock,
-        BREAKOUT_THRESHOLD_PERCENT, lastPricePoint.getPrice());
-    stock.update(decided);
+    StockRegime newRegime = stockRealtimeRegimePolicy.decide(currentPrice, stock, currentBase, lastAnchorPoint,
+        THRESHOLD_PERCENT);
+    stock.update(newRegime);
     stockRepository.save(stock);
   }
 }

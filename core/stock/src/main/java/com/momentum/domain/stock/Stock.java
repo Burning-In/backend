@@ -4,6 +4,9 @@ import static com.momentum.domain.stock.StockRegime.UNKNOWN;
 
 import com.momentum.domain.AggregateRoot;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,23 +17,40 @@ import lombok.NoArgsConstructor;
 public class Stock extends AggregateRoot {
 
   private String name;
-  private String code; // 수정필요
+  private String code;
+  @Enumerated(EnumType.STRING)
   private StockRegime stockRegime;
+  @Enumerated(EnumType.STRING)
   private StockTrend stockTrend;
 
-  public Stock(String name, String code, StockRegime stockRegime, StockTrend stockTrend) {
-    this.name = name;
-    this.code = code;
-    this.stockRegime = stockRegime;
-    this.stockTrend = stockTrend;
+  private Stock(String name, String code, StockRegime stockRegime, StockTrend stockTrend) {
+    this.name = Objects.requireNonNull(name);
+    this.code = Objects.requireNonNull(code);
+    this.stockRegime = Objects.requireNonNull(stockRegime);
+    this.stockTrend = Objects.requireNonNull(stockTrend);
+  }
+
+  public static Stock of(String name, String code, StockRegime stockRegime, StockTrend stockTrend) {
+    return new Stock(name, code, stockRegime, stockTrend);
   }
 
   public void update(StockRegime stockRegime) {
-    if (this.stockRegime.equals(stockRegime) || stockRegime.equals(UNKNOWN)) {
+    if (stockRegime == null || this.stockRegime.equals(stockRegime) || stockRegime.equals(UNKNOWN)) {
       return;
     }
     StockRegime from = this.stockRegime;
     this.stockRegime = stockRegime;
     registerEvent(new StockStateChangedEvent(code, from, stockRegime));
+  }
+
+  public void updateTrend(int rsScore, int upTrendThreshold) {
+    StockTrend newStockTrend = StockTrend.OTHER;
+    if (rsScore >= upTrendThreshold) {
+      newStockTrend = StockTrend.UPTREND;
+    }
+    if (this.stockTrend.equals(newStockTrend)) {
+      return;
+    }
+    this.stockTrend = newStockTrend;
   }
 }

@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.StockPricePointRepository;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
+import com.momentum.domain.anchorpoint.StockAnchorPointRepository;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
+import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockRepository;
@@ -31,19 +31,19 @@ class RegimeInsightServiceTest {
   @Autowired StockRepository stockRepository;
   @Autowired StockCandleRepository stockCandleRepository;
   @Autowired StockBaseRepository stockBaseRepository;
-  @Autowired StockPricePointRepository stockPricePointRepository;
+  @Autowired StockAnchorPointRepository stockAnchorPointRepository;
 
   private static final LocalDate TODAY = LocalDate.now();
 
   @Test
-  @DisplayName("베이스 없으면 DIRECTION_UNDETERMINED 반환")
+  @DisplayName("베이스 없으면 UNKNOWN 반환")
   void returnsUndeterminedWhenNoBase() {
-    Stock stock = saveStock("005930", StockRegime.DIRECTION_UNDETERMINED, StockTrend.UPTREND);
+    Stock stock = saveStock("005930", StockRegime.UNKNOWN, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 10000L);
 
     StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
 
-    assertThat(result.regime()).isEqualTo(StockRegime.DIRECTION_UNDETERMINED);
+    assertThat(result.regime()).isEqualTo(StockRegime.UNKNOWN);
     assertThat(result.currentPrice()).isEqualTo(10000L);
     assertThat(result.supportLine()).isNull();
     assertThat(result.resistanceLine()).isNull();
@@ -53,7 +53,7 @@ class RegimeInsightServiceTest {
   @Test
   @DisplayName("BREAKOUT_SUCCESS 레짐이면 저항선 대비 변동률 반환")
   void returnsChangeRateFromResistanceWhenBreakoutSuccess() {
-    Stock stock = saveStock("000001", StockRegime.BREAKOUT_SUCCESS, StockTrend.UPTREND);
+    Stock stock = saveStock("000040", StockRegime.BREAKOUT_SUCCESS, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 11000L);
     saveBase(stock, 10000L, 8000L);
 
@@ -69,7 +69,7 @@ class RegimeInsightServiceTest {
   @Test
   @DisplayName("DOWNSIDE_BREAK 레짐이면 지지선 대비 변동률 반환")
   void returnsChangeRateFromSupportWhenDownsideBreak() {
-    Stock stock = saveStock("000002", StockRegime.DOWNSIDE_BREAK, StockTrend.UPTREND);
+    Stock stock = saveStock("000050", StockRegime.DOWNSIDE_BREAK, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 9000L);
     saveBase(stock, 12000L, 10000L);
 
@@ -83,7 +83,7 @@ class RegimeInsightServiceTest {
   @Test
   @DisplayName("BREAKOUT_FAILED 레짐이면 저항선 대비 음수 변동률 반환")
   void returnsNegativeChangeRateFromResistanceWhenBreakoutFailed() {
-    Stock stock = saveStock("000003", StockRegime.BREAKOUT_FAILED, StockTrend.UPTREND);
+    Stock stock = saveStock("000070", StockRegime.BREAKOUT_FAILED, StockTrend.UPTREND);
     saveCandle(stock, TODAY, 9500L);
     saveBase(stock, 10000L, 8000L);
 
@@ -95,24 +95,24 @@ class RegimeInsightServiceTest {
   }
 
   private Stock saveStock(String code, StockRegime regime, StockTrend trend) {
-    return stockRepository.save(new Stock("테스트종목", code, regime, trend));
+    return stockRepository.save(Stock.of("테스트종목", code, regime, trend));
   }
 
   private void saveCandle(Stock stock, LocalDate date, long closePrice) {
     String rawDate = date.format(DateTimeFormatter.BASIC_ISO_DATE);
     stockCandleRepository.save(
-        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L, "2")
+        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L)
     );
   }
 
   private void saveBase(Stock stock, long highPrice, long lowPrice) {
-    StockPricePoint high = stockPricePointRepository.save(
-        new StockPricePoint(highPrice, 100000L, TODAY.minusDays(10), StockPricePointType.PIVOT_HIGH, null, stock)
+    StockAnchorPoint high = stockAnchorPointRepository.save(
+        new StockAnchorPoint(highPrice, 100000L, TODAY.minusDays(10), StockAnchorPointType.HIGH, null, stock)
     );
-    StockPricePoint low = stockPricePointRepository.save(
-        new StockPricePoint(lowPrice, 100000L, TODAY.minusDays(20), StockPricePointType.PIVOT_LOW, null, stock)
+    StockAnchorPoint low = stockAnchorPointRepository.save(
+        new StockAnchorPoint(lowPrice, 100000L, TODAY.minusDays(20), StockAnchorPointType.LOW, null, stock)
     );
-    StockBase base = StockBase.initOrLower(high, low, 100000L);
+    StockBase base = StockBase.init(high, low, 100000L);
     stockBaseRepository.save(base);
   }
 }

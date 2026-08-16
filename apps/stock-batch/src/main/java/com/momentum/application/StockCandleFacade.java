@@ -1,6 +1,6 @@
 package com.momentum.application;
 
-import com.momentum.domain.stockcandle.StockCandleDto;
+import com.momentum.domain.stockcandle.StockCandleCommand;
 import com.momentum.domain.stockcandle.StockCandleService;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import com.momentum.infrastructure.LsStockChartClient;
@@ -23,17 +23,15 @@ public class StockCandleFacade {
     return stockCandleService.create(stockCandleRequest.stockCode(), fromChartInfo(response.candleResponses()));
   }
 
-  private List<StockCandleDto> fromChartInfo(List<CandleResponse> candleResponse) {
+  private List<StockCandleCommand> fromChartInfo(List<CandleResponse> candleResponse) {
     return candleResponse.stream()
-        .map(candle -> new StockCandleDto(
+        .map(candle -> StockCandleCommand.of(
             candle.date(),
             candle.openPrice(),
             candle.highPrice(),
             candle.lowPrice(),
             candle.closePrice(),
-            candle.volume(),
-            candle.tradingValue(),
-            candle.priceChangeSign()
+            candle.volume()
         ))
         .toList();
   }

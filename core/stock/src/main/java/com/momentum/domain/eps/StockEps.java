@@ -8,6 +8,7 @@ import java.time.YearMonth;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -15,17 +16,17 @@ public class StockEps extends BaseEntity {
 
   private double eps;
 
-  private YearMonth quarterlyDate;
+  private YearMonth quarter;
 
-  private Double yearOverYear;
+  private Double yearOverYearChangeRate;
 
   @ManyToOne
   private Stock stock;
 
-  public StockEps(double eps, YearMonth quarterlyDate, Double yearOverYear, Stock stock) {
+  public StockEps(double eps, YearMonth quarter, Double yearOverYearChangeRate, Stock stock) {
     this.eps = eps;
-    this.quarterlyDate = quarterlyDate;
-    this.yearOverYear = yearOverYear;
+    this.quarter = quarter;
+    this.yearOverYearChangeRate = yearOverYearChangeRate;
     this.stock = stock;
   }
 }

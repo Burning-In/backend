@@ -1,8 +1,8 @@
 package com.momentum.application.insight;
 
-import com.momentum.domain.ma.StockMovingAverage;
-import com.momentum.domain.ma.StockMovingAveragePeriod;
-import com.momentum.domain.ma.StockMovingAverageRepository;
+import com.momentum.domain.movingaverage.StockMovingAverage;
+import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
+import com.momentum.domain.movingaverage.StockMovingAverageRepository;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stockcandle.StockCandleRepository;
@@ -30,7 +30,7 @@ public class MovingAverageInsightService {
         .orElseThrow();
     long currentPrice = candle.getClosePrice();
 
-    List<StockMovingAverage> maList = stockMovingAverageRepository.findLatestByStock(stock);
+    List<StockMovingAverage> maList = stockMovingAverageRepository.findLatestByStock(stock, at);
     Map<StockMovingAveragePeriod, Long> maMap = new EnumMap<>(StockMovingAveragePeriod.class);
     maList.forEach(ma -> maMap.put(ma.getStockMovingAveragePeriod(), ma.getMa()));
 

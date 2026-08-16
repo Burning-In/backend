@@ -11,15 +11,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.momentum.application.dto.ranking.RealtimeBreakoutSuccessItem;
-import com.momentum.domain.score.FipScore;
-import com.momentum.domain.score.Momentum;
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRegime;
 import com.momentum.domain.stock.StockTrend;
 import com.momentum.infrastructure.sse.SseEmitterRegistry;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -72,8 +69,8 @@ class RealtimeRankingFacadeTest {
   @SuppressWarnings("unchecked")
   void updateRankingBroadcastsRegimeRanking() {
     // 정렬/필터/limit은 리포지토리(쿼리)가 담당 → 이미 정렬된 순서로 반환된다고 가정
-    StockRankScore first = score("종목B", "000002", BREAKOUT_SUCCESS, "0.30", "0.50");
-    StockRankScore second = score("종목A", "000001", BREAKOUT_SUCCESS, "0.10", "0.20");
+    StockRankScore first = score("종목B", "000050", BREAKOUT_SUCCESS);
+    StockRankScore second = score("종목A", "000040", BREAKOUT_SUCCESS);
     when(stockRankScoreRepository.findLastStockRankScore(eq(BREAKOUT_SUCCESS), any(), anyLong()))
         .thenReturn(List.of(first, second));
 
@@ -84,7 +81,7 @@ class RealtimeRankingFacadeTest {
 
     List<RealtimeBreakoutSuccessItem> response = (List<RealtimeBreakoutSuccessItem>) payload.getValue();
     assertThat(response).extracting(RealtimeBreakoutSuccessItem::stockCode)
-        .containsExactly("000002", "000001");
+        .containsExactly("000050", "000040");
   }
 
   @Test
@@ -107,12 +104,8 @@ class RealtimeRankingFacadeTest {
     verify(sseEmitterRegistry, never()).broadcast(any(), any(), any());
   }
 
-  private StockRankScore score(String name, String code, StockRegime regime, String momentum, String fip) {
-    Stock stock = new Stock(name, code, regime, StockTrend.UPTREND);
-    return StockRankScore.create(
-        Momentum.of(new BigDecimal(momentum)),
-        FipScore.of(new BigDecimal(fip), 100, 50),
-        LocalDate.now(),
-        stock);
+  private StockRankScore score(String name, String code, StockRegime regime) {
+    Stock stock = Stock.of(name, code, regime, StockTrend.UPTREND);
+    return StockRankScore.create(List.of(12_000L, 10_000L), LocalDate.now(), stock);
   }
 }

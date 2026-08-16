@@ -2,7 +2,7 @@ package com.momentum.application;
 
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.ma.StockMovingAveragePeriod;
+import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
 import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stock.StockRepository;
 import com.momentum.domain.stockcandle.StockCandleRepository;
@@ -72,7 +72,7 @@ public class StockChartService {
 
   public BaseListResponse getBases(String stockCode, LocalDate from, LocalDate to) {
     Stock stock = findStock(stockCode);
-    List<StockBase> bases = stockBaseRepository.findAllByStockOrderByCreatedAt(stock);
+    List<StockBase> bases = stockBaseRepository.findAllByStockOrderByStartedAt(stock);
 
     List<BaseItem> items = new ArrayList<>();
     for (int i = 0; i < bases.size(); i++) {

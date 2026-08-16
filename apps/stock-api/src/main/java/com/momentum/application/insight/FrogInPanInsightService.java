@@ -1,6 +1,6 @@
 package com.momentum.application.insight;
 
-import com.momentum.domain.score.FipScore;
+import com.momentum.domain.score.FrogInPanScore;
 import com.momentum.domain.score.StockRankScore;
 import com.momentum.domain.score.StockRankScoreRepository;
 import com.momentum.domain.stock.Stock;
@@ -25,12 +25,12 @@ public class FrogInPanInsightService {
   public FrogInPanResponse query(String stockCode, LocalDate at) {
     Stock stock = findStock(stockCode);
     StockRankScore rankScore = stockRankScoreRepository.findLatestByStock(stock)
-        .orElseThrow(() -> new NoSuchElementException("FIP 데이터가 없습니다: " + stock.getCode()));
+        .orElseThrow(() -> new NoSuchElementException("FIP 데이터가 없습니다: " + stock.getName()));
 
-    FipScore fipScore = rankScore.getFipScore();
+    FrogInPanScore frogInPanScore = rankScore.getFrogInPanScore();
     BigDecimal percentileRank = computePercentile(rankScore);
 
-    return new FrogInPanResponse(fipScore.getUpDays(), fipScore.getDownDays(), fipScore.getFip(), percentileRank);
+    return new FrogInPanResponse(frogInPanScore.getUpDays(), frogInPanScore.getDownDays(), frogInPanScore.getValue(), percentileRank);
   }
 
   private Stock findStock(String stockCode) {
@@ -41,13 +41,13 @@ public class FrogInPanInsightService {
   private BigDecimal computePercentile(StockRankScore myScore) {
     List<StockRankScore> allScores = stockRankScoreRepository.findAllByBaseDate(myScore.getBaseDate());
     List<BigDecimal> nonNull = allScores.stream()
-        .map(s -> s.getFipScore().getFip())
+        .map(s -> s.getFrogInPanScore().getValue())
         .filter(Objects::nonNull)
         .toList();
     if (nonNull.isEmpty()) {
       return null;
     }
-    BigDecimal myFip = myScore.getFipScore().getFip();
+    BigDecimal myFip = myScore.getFrogInPanScore().getValue();
     long below = nonNull.stream().filter(v -> v.compareTo(myFip) < 0).count();
     return BigDecimal.valueOf((double) below / nonNull.size() * 100).setScale(1, RoundingMode.HALF_UP);
   }

@@ -1,10 +1,9 @@
 package com.momentum.domain.base.service;
 
+import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
 import com.momentum.domain.base.StockBaseRepository;
 import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.pricepoint.entity.StockPricePoint;
-import com.momentum.domain.pricepoint.entity.StockPricePointType;
-import java.util.List;
+import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,8 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class StockBaseService {
-
-  public static final double BASE_BOUNDARY_THRESHOLD = 5.0;
 
   private final StockBaseInitializer stockBaseInitializer;
   private final StockBaseConfirmer stockBaseConfirmer;
@@ -23,26 +20,30 @@ public class StockBaseService {
 
   private final StockBaseRepository stockBaseRepository;
 
-  public void resolve(List<StockPricePoint> typeConfirmedPoints) {
-    if (typeConfirmedPoints == null || typeConfirmedPoints.isEmpty()) {
-      throw new IllegalArgumentException("stockPricePoint cannot be null");
+  @Transactional
+  public void resolve(StockAnchorPoint confirmedAnchorPoint) {
+    if (confirmedAnchorPoint == null) {
+      throw new IllegalArgumentException("confirmedAnchorPoint cannot be null");
     }
-    StockPricePoint confirmedPricePoint = typeConfirmedPoints.getFirst();
-    if (StockPricePointType.isNonPivot(confirmedPricePoint)) {
+
+    if (confirmedAnchorPoint.getType().isNonPivot()) {
       return;
     }
-    Optional<StockBase> currentBaseOpt = stockBaseRepository.findCurrentBaseWithLines(confirmedPricePoint.getStock());
+
+    Optional<StockBase> currentBaseOpt = stockBaseRepository.findCurrentBaseWithLines(confirmedAnchorPoint.getStock());
     if (currentBaseOpt.isEmpty()) {
-      stockBaseInitializer.resolve(confirmedPricePoint);
+      stockBaseInitializer.resolve(confirmedAnchorPoint);
       return;
     }
-    confirmStockBase(confirmedPricePoint, currentBaseOpt.get());
-    stockBasePointIntegrator.resolve(confirmedPricePoint, currentBaseOpt.get(), BASE_BOUNDARY_THRESHOLD);
-    stockBaseStageLevelAdjuster.resolve(confirmedPricePoint, currentBaseOpt.get(), BASE_BOUNDARY_THRESHOLD);
+
+    StockBase currentBase = currentBaseOpt.get();
+    confirmStockBase(confirmedAnchorPoint, currentBase);
+    stockBasePointIntegrator.resolve(confirmedAnchorPoint, currentBase);
+    stockBaseStageLevelAdjuster.resolve(confirmedAnchorPoint, currentBase);
   }
 
-  private void confirmStockBase(StockPricePoint confirmedPricePoint, StockBase currentBase) {
-    StockBase newBase = stockBaseConfirmer.resolve(confirmedPricePoint, currentBase, BASE_BOUNDARY_THRESHOLD);
-    stockBaseLineTypeConvertor.convertLineType(newBase);
+  private void confirmStockBase(StockAnchorPoint confirmedAnchorPoint, StockBase currentBase) {
+    StockBase newBase = stockBaseConfirmer.resolve(confirmedAnchorPoint, currentBase);
+    stockBaseLineTypeConvertor.convertLineType(currentBase, newBase);
   }
 }
