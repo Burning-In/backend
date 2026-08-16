@@ -33,6 +33,9 @@ public class StockBaseLineStrength implements Comparable<StockBaseLineStrength> 
   }
 
   private static BigDecimal calculateStrength(Long currentVolume, Long averageDailyVolume, Long touchCount) {
+    if (currentVolume == null || averageDailyVolume == null || averageDailyVolume == 0L) {
+      return BigDecimal.ZERO.setScale(4, RoundingMode.HALF_UP);
+    }
     BigDecimal normalizedVolume = BigDecimal.valueOf(currentVolume)
         .divide(BigDecimal.valueOf(averageDailyVolume), 10, RoundingMode.HALF_UP);
     double log = Math.log(touchCount + 1);

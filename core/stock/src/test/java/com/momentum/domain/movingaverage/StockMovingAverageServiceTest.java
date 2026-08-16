@@ -112,7 +112,7 @@ class StockMovingAverageServiceTest {
   void create_truncatesFractionalAverage() {
     // given
     saveCandles(1, 49, 1_000L);
-    saveCandles(50, 1, 1_050L);
+    saveCandles(50, 1, 1_075L);
 
     // when
     List<StockMovingAverage> result = stockMovingAverageService.create(stock, TODAY);

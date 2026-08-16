@@ -1,5 +1,6 @@
 package com.momentum.domain.base.entity;
 
+import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.HIGH;
 import static java.util.Objects.requireNonNull;
 
 import com.momentum.domain.BaseEntity;
@@ -14,6 +15,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,9 +30,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockBase extends BaseEntity {
 
-  private static final double BASE_VOLATILITY_THRESHOLD = 10.0;
+  private static final double BASE_MIN_WIDTH_PERCENT = 15.0;
+  private static final double BASE_BOUNDARY_RATIO_OF_WIDTH = 0.1;
 
   private long stageLevel;
+  private LocalDate startedAt;
 
   @Embedded
   private StockBaseVcp vcp;
@@ -60,6 +64,7 @@ public class StockBase extends BaseEntity {
     StockBaseLine support = StockBaseLine.create(lowAnchorPoint, baseAverageVolume, this);
     this.stockBaseKind = requireNonNull(resolveBaseKind(highAnchorPoint.getPrice(), lowAnchorPoint.getPrice()));
     this.stageLevel = stageLevel;
+    this.startedAt = resolveStartedAt(highAnchorPoint, lowAnchorPoint);
     this.stock = requireNonNull(highAnchorPoint.getStock());
     this.stockAnchorPoints = new ArrayList<>(List.of(highAnchorPoint, lowAnchorPoint));
     this.vcp = new StockBaseVcp();
@@ -77,6 +82,11 @@ public class StockBase extends BaseEntity {
   public static StockBase upper(StockAnchorPoint highAnchorPoint, StockAnchorPoint lowAnchorPoint,
       long currentStageLevel, long averageVolume) {
     return StockBase.create(highAnchorPoint, lowAnchorPoint, currentStageLevel + 1, averageVolume);
+  }
+
+  public static StockBase lower(StockAnchorPoint highAnchorPoint, StockAnchorPoint lowAnchorPoint,
+      long currentStageLevel, long averageVolume) {
+    return StockBase.create(highAnchorPoint, lowAnchorPoint, Math.max(0, currentStageLevel - 1), averageVolume);
   }
 
   private static StockBase create(StockAnchorPoint highAnchorPoint, StockAnchorPoint lowAnchorPoint,
@@ -155,9 +165,16 @@ public class StockBase extends BaseEntity {
     }
   }
 
+  private static LocalDate resolveStartedAt(StockAnchorPoint highAnchorPoint, StockAnchorPoint lowAnchorPoint) {
+    if (highAnchorPoint.getTradeDate().isAfter(lowAnchorPoint.getTradeDate())) {
+      return highAnchorPoint.getTradeDate();
+    }
+    return lowAnchorPoint.getTradeDate();
+  }
+
   private StockBaseKind resolveBaseKind(long highPrice, long lowPrice) {
-    double volatility = (double) (highPrice - lowPrice) / lowPrice * 100;
-    if (volatility >= BASE_VOLATILITY_THRESHOLD) {
+    double widthPercent = (double) (highPrice - lowPrice) / lowPrice * 100;
+    if (widthPercent >= BASE_MIN_WIDTH_PERCENT) {
       return StockBaseKind.BASE;
     }
     return StockBaseKind.PULLBACK;
@@ -167,19 +184,42 @@ public class StockBase extends BaseEntity {
     return vcp.isVcp();
   }
 
-  public long getResistanceUpperBound(double threshold) {
-    return highestResistanceLine.getUpperBound(threshold);
+  public boolean isAbove(StockAnchorPoint point) {
+    if (point.isSameType(HIGH)) {
+      return point.getPrice() >= getResistanceUpperBound();
+    }
+    return point.getPrice() >= resistanceLowerBound();
   }
 
-  public long getResistanceLowerBound(double threshold) {
-    return highestResistanceLine.getLowerBound(threshold);
+  public boolean isBelow(StockAnchorPoint point) {
+    if (point.isSameType(HIGH)) {
+      return point.getPrice() < supportUpperBound();
+    }
+    return point.getPrice() < getSupportLowerBound();
   }
 
-  public long getSupportUpperBound(double threshold) {
-    return lowestSupportLine.getUpperBound(threshold);
+  public boolean contains(StockAnchorPoint point) {
+    return !isAbove(point) && !isBelow(point);
   }
 
-  public long getSupportLowerBound(double threshold) {
-    return lowestSupportLine.getLowerBound(threshold);
+  public long getResistanceUpperBound() {
+    return highestResistanceLine.getPrice() + boundaryMargin();
+  }
+
+  public long getSupportLowerBound() {
+    return lowestSupportLine.getPrice() - boundaryMargin();
+  }
+
+  private long resistanceLowerBound() {
+    return highestResistanceLine.getPrice() - boundaryMargin();
+  }
+
+  private long supportUpperBound() {
+    return lowestSupportLine.getPrice() + boundaryMargin();
+  }
+
+  private long boundaryMargin() {
+    long width = highestResistanceLine.getPrice() - lowestSupportLine.getPrice();
+    return (long) (width * BASE_BOUNDARY_RATIO_OF_WIDTH);
   }
 }

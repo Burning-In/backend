@@ -8,7 +8,7 @@ import com.momentum.domain.stock.Stock;
 import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemProcessor;
@@ -39,8 +39,10 @@ public class StockAnchorPointItemProcessor implements ItemProcessor<Stock, Stock
     if (stockAnchorPoint == null) { // null주는지 체크 필요
       return null;
     }
-    List<StockAnchorPoint> typeConfirmedPoints = stockAnchorPointTypeDecider.resolvePointTypes(stock);
-    stockBaseService.resolve(typeConfirmedPoints);
+    stockAnchorPointTypeDecider.resolvePointTypes(stock)
+        .stream()
+        .max(Comparator.comparing(StockAnchorPoint::getTradeDate))
+        .ifPresent(stockBaseService::resolve);
     ///
     return stock;
   }

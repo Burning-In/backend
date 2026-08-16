@@ -16,35 +16,35 @@ public class StockBaseStageLevelAdjuster {
 
   private final StockBaseRepository stockBaseRepository;
 
-  public void resolve(StockAnchorPoint confirmedAnchorPoint, StockBase currentBase, double baseBoundaryThreshold) {
+  public void resolve(StockAnchorPoint confirmedAnchorPoint, StockBase currentBase) {
     Optional<StockBase> previousBaseOpt = stockBaseRepository
-        .findPreviousBase(confirmedAnchorPoint.getStock(), currentBase.getCreatedAt().toInstant());
+        .findPreviousBase(confirmedAnchorPoint.getStock(), currentBase.getStartedAt());
     if (previousBaseOpt.isEmpty()) {
       return;
     }
-    // 애네도.. 그런데? 앞에 조건이 있음.. 근데 ㄷ안에 로직이 같아서 이거 그냥 앞에 가드로 넣으면 될 것 같은데?
     StockBase previousBase = previousBaseOpt.get();
-    if (isLowPointDroppedToPreviousBase(confirmedAnchorPoint, currentBase, previousBase, baseBoundaryThreshold)) {
+    if (isLowPointDroppedToPreviousBase(confirmedAnchorPoint, currentBase, previousBase)) {
       currentBase.update(previousBase.getStageLevel(), null);
       stockBaseRepository.save(currentBase);
     }
-    if (isHighPointRaisedToPreviousBase(confirmedAnchorPoint, currentBase, previousBase, baseBoundaryThreshold)) {
+    if (isHighPointRaisedToPreviousBase(confirmedAnchorPoint, currentBase, previousBase)) {
       currentBase.update(previousBase.getStageLevel(), null);
       stockBaseRepository.save(currentBase);
     }
   }
 
   private boolean isLowPointDroppedToPreviousBase(StockAnchorPoint point, StockBase currentBase,
-      StockBase previousBase, double threshold) {
+      StockBase previousBase) {
     return point.isSameType(LOW)
-        && point.getPrice() < currentBase.getSupportLowerBound(threshold)
-        && point.getPrice() < previousBase.getResistanceLowerBound(threshold);
+        && currentBase.isBelow(point)
+        && !previousBase.isAbove(point);
   }
 
   private boolean isHighPointRaisedToPreviousBase(StockAnchorPoint point, StockBase currentBase,
-      StockBase previousBase, double threshold) {
+      StockBase previousBase) {
     return point.isSameType(HIGH)
-        && point.getPrice() >= currentBase.getResistanceUpperBound(threshold)
-        && point.getPrice() > previousBase.getSupportUpperBound(threshold);
+        && currentBase.isAbove(point)
+        && !previousBase.isBelow(point);
   }
+
 }

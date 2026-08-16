@@ -22,7 +22,7 @@ public interface StockAnchorPointRepository {
 
   Optional<StockAnchorPoint> findLowAnchorPoint(StockBase currentBase, long lowerPrice);
 
-  Optional<StockAnchorPoint> findLastAnchorPointWithoutBase(StockAnchorPointType stockAnchorPointType);
+  Optional<StockAnchorPoint> findLastAnchorPointWithoutBase(Stock stock, StockAnchorPointType stockAnchorPointType);
 
   List<StockAnchorPoint> findUnassignedPointsSinceBase(StockBase currentBase);
 

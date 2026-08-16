@@ -7,8 +7,7 @@ import com.momentum.domain.base.entity.StockBase;
 import com.momentum.domain.base.entity.StockBaseKind;
 import com.momentum.domain.stock.Stock;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,7 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
             stockBase.stockBaseKind.eq(StockBaseKind.BASE),
             stockBase.deletedAt.isNull()
         )
-        .orderBy(stockBase.createdAt.desc())
+        .orderBy(stockBase.startedAt.desc(), stockBase.id.desc())
         .limit(1)
         .fetchOne();
 
@@ -44,27 +43,27 @@ public class StockBaseRepositoryImpl implements StockBaseRepository {
   }
 
   @Override
-  public List<StockBase> findAllByStockOrderByCreatedAt(Stock stock) {
+  public List<StockBase> findAllByStockOrderByStartedAt(Stock stock) {
     return queryFactory
         .selectFrom(stockBase)
         .where(
             stockBase.stock.id.eq(stock.getId()),
             stockBase.deletedAt.isNull()
         )
-        .orderBy(stockBase.createdAt.asc())
+        .orderBy(stockBase.startedAt.asc(), stockBase.id.asc())
         .fetch();
   }
 
   @Override
-  public Optional<StockBase> findPreviousBase(Stock stock, Instant currentBaseCreatedAt) {
+  public Optional<StockBase> findPreviousBase(Stock stock, LocalDate currentBaseStartedAt) {
     StockBase result = queryFactory
         .selectFrom(stockBase)
         .where(
             stockBase.stock.id.eq(stock.getId()),
-            stockBase.createdAt.lt(ZonedDateTime.from(currentBaseCreatedAt)),
+            stockBase.startedAt.lt(currentBaseStartedAt),
             stockBase.deletedAt.isNull()
         )
-        .orderBy(stockBase.createdAt.desc())
+        .orderBy(stockBase.startedAt.desc(), stockBase.id.desc())
         .limit(1)
         .fetchOne();
 

@@ -66,11 +66,11 @@ class StockBaseLineTest {
     long resistancePrice = 10_000L;
     long averageVolume = 100L;
     long nearPrice = 10_200L;
-    double matchThreshold = 0.05;
+    double matchThresholdPercent = 5.0;
     StockBaseLine line = StockBaseLine.create(point(resistancePrice, StockAnchorPointType.HIGH), averageVolume, null);
     StockAnchorPoint point = point(nearPrice, StockAnchorPointType.HIGH);
 
-    assertThat(line.matches(point, matchThreshold)).isTrue();
+    assertThat(line.matches(point, matchThresholdPercent)).isTrue();
   }
 
   @Test
@@ -79,11 +79,11 @@ class StockBaseLineTest {
     long supportPrice = 10_000L;
     long averageVolume = 100L;
     long nearPrice = 10_200L;
-    double matchThreshold = 0.05;
+    double matchThresholdPercent = 5.0;
     StockBaseLine line = StockBaseLine.create(point(supportPrice, StockAnchorPointType.LOW), averageVolume, null);
     StockAnchorPoint point = point(nearPrice, StockAnchorPointType.HIGH);
 
-    assertThat(line.matches(point, matchThreshold)).isFalse();
+    assertThat(line.matches(point, matchThresholdPercent)).isFalse();
   }
 
   @Test
@@ -92,11 +92,11 @@ class StockBaseLineTest {
     long resistancePrice = 10_000L;
     long averageVolume = 100L;
     long farPrice = 12_000L;
-    double matchThreshold = 0.05;
+    double matchThresholdPercent = 5.0;
     StockBaseLine line = StockBaseLine.create(point(resistancePrice, StockAnchorPointType.HIGH), averageVolume, null);
     StockAnchorPoint point = point(farPrice, StockAnchorPointType.HIGH);
 
-    assertThat(line.matches(point, matchThreshold)).isFalse();
+    assertThat(line.matches(point, matchThresholdPercent)).isFalse();
   }
 
   @Test

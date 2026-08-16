@@ -44,8 +44,36 @@ class StockBaseTest {
   }
 
   @Test
-  @DisplayName("고점/저점 변동성이 임계치(10%) 이상이면 BASE로 분류된다")
-  void classifiedAsBaseWhenVolatilityHigh() {
+  @DisplayName("lower로 생성하면 stageLevel이 현재 단계 - 1이다")
+  void lowerDecrementsStageLevel() {
+    long highPrice = 12_000L;
+    long lowPrice = 10_000L;
+    long averageVolume = 100_000L;
+    long currentStageLevel = 2L;
+
+    StockBase base = StockBase.lower(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice),
+        currentStageLevel, averageVolume);
+
+    assertThat(base.getStageLevel()).isEqualTo(1L);
+  }
+
+  @Test
+  @DisplayName("lower로 생성해도 stageLevel은 0 밑으로 내려가지 않는다")
+  void lowerNeverDropsBelowZero() {
+    long highPrice = 12_000L;
+    long lowPrice = 10_000L;
+    long averageVolume = 100_000L;
+    long lowestStageLevel = 0L;
+
+    StockBase base = StockBase.lower(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice),
+        lowestStageLevel, averageVolume);
+
+    assertThat(base.getStageLevel()).isEqualTo(0L);
+  }
+
+  @Test
+  @DisplayName("고점/저점 폭이 임계치(15%) 이상이면 횡보구간(BASE)으로 분류된다")
+  void classifiedAsBaseWhenWidthIsWide() {
     long highPrice = 12_000L;
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
@@ -56,9 +84,9 @@ class StockBaseTest {
   }
 
   @Test
-  @DisplayName("고점/저점 변동성이 임계치(10%) 미만이면 PULLBACK으로 분류된다")
-  void classifiedAsPullbackWhenVolatilityLow() {
-    long pullbackHighPrice = 10_500L;
+  @DisplayName("고점/저점 폭이 임계치(15%) 미만이면 눌림(PULLBACK)으로 분류된다")
+  void classifiedAsPullbackWhenWidthIsNarrow() {
+    long pullbackHighPrice = 11_400L;
     long lowPrice = 10_000L;
     long averageVolume = 100_000L;
 
@@ -113,33 +141,73 @@ class StockBaseTest {
   }
 
   @Test
-  @DisplayName("저항선 상단/하단 경계는 최고 저항선 가격에 임계치를 적용한 값이다")
-  void resistanceBounds() {
-    long highPrice = 12_000L;
-    long lowPrice = 10_000L;
-    long averageVolume = 100_000L;
-    double boundThreshold = 5.0;
-    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
+  @DisplayName("고점은 저항 상단을 넘어야 위로 벗어난 것으로 본다")
+  void isAboveWithHighPoint() {
+    StockBase base = base();
 
     assertSoftly(softly -> {
-      softly.assertThat(base.getResistanceUpperBound(boundThreshold)).isEqualTo(12_600L);
-      softly.assertThat(base.getResistanceLowerBound(boundThreshold)).isEqualTo(11_400L);
+      softly.assertThat(base.isAbove(highAnchorPoint(12_200L))).isTrue();
+      softly.assertThat(base.isAbove(highAnchorPoint(12_100L))).isFalse();
     });
   }
 
   @Test
-  @DisplayName("지지선 상단/하단 경계는 최저 지지선 가격에 임계치를 적용한 값이다")
-  void supportBounds() {
-    long highPrice = 12_000L;
-    long lowPrice = 10_000L;
-    long averageVolume = 100_000L;
-    double boundThreshold = 5.0;
-    StockBase base = StockBase.init(highAnchorPoint(highPrice), lowAnchorPoint(lowPrice), averageVolume);
+  @DisplayName("저점은 저항 하단까지만 올라와도 위로 벗어난 것으로 본다")
+  void isAboveWithLowPoint() {
+    StockBase base = base();
 
     assertSoftly(softly -> {
-      softly.assertThat(base.getSupportUpperBound(boundThreshold)).isEqualTo(10_500L);
-      softly.assertThat(base.getSupportLowerBound(boundThreshold)).isEqualTo(9_500L);
+      softly.assertThat(base.isAbove(lowAnchorPoint(11_800L))).isTrue();
+      softly.assertThat(base.isAbove(lowAnchorPoint(11_700L))).isFalse();
     });
+  }
+
+  @Test
+  @DisplayName("저점은 지지 하단을 뚫어야 아래로 벗어난 것으로 본다")
+  void isBelowWithLowPoint() {
+    StockBase base = base();
+
+    assertSoftly(softly -> {
+      softly.assertThat(base.isBelow(lowAnchorPoint(9_799L))).isTrue();
+      softly.assertThat(base.isBelow(lowAnchorPoint(9_800L))).isFalse();
+    });
+  }
+
+  @Test
+  @DisplayName("고점은 지지 상단까지만 내려와도 아래로 벗어난 것으로 본다")
+  void isBelowWithHighPoint() {
+    StockBase base = base();
+
+    assertSoftly(softly -> {
+      softly.assertThat(base.isBelow(highAnchorPoint(10_199L))).isTrue();
+      softly.assertThat(base.isBelow(highAnchorPoint(10_200L))).isFalse();
+    });
+  }
+
+  @Test
+  @DisplayName("위로도 아래로도 벗어나지 않은 점은 베이스 안에 있다")
+  void containsWhenNeitherAboveNorBelow() {
+    StockBase base = base();
+
+    assertSoftly(softly -> {
+      softly.assertThat(base.contains(lowAnchorPoint(11_000L))).isTrue();
+      softly.assertThat(base.contains(highAnchorPoint(11_000L))).isTrue();
+      softly.assertThat(base.contains(lowAnchorPoint(11_800L))).isFalse();
+      softly.assertThat(base.contains(highAnchorPoint(10_199L))).isFalse();
+    });
+  }
+
+
+  @Test
+  @DisplayName("지지선에 닿은 저점도 베이스 안에 있는 것으로 본다")
+  void containsLowPointTouchingSupport() {
+    StockBase base = base();
+
+    assertThat(base.contains(lowAnchorPoint(10_000L))).isTrue();
+  }
+
+  private StockBase base() {
+    return StockBase.init(highAnchorPoint(12_000L), lowAnchorPoint(10_000L), 100_000L);
   }
 
   @Test

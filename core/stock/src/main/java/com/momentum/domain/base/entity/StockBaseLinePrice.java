@@ -24,8 +24,8 @@ public class StockBaseLinePrice {
     return (long) (price * (-threshold / 100.0 + 1));
   }
 
-  public boolean isWithinThreshold(long pointPrice, double threshold) {
-    double diff = Math.abs(price - pointPrice) / (double) price;
-    return diff <= threshold;
+  public boolean isWithinThreshold(long pointPrice, double thresholdPercent) {
+    double diffPercent = Math.abs(price - pointPrice) / (double) price * 100;
+    return diffPercent <= thresholdPercent;
   }
 }

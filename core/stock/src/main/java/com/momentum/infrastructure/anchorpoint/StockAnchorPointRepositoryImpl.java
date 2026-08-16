@@ -32,7 +32,7 @@ public class StockAnchorPointRepositoryImpl implements StockAnchorPointRepositor
         .where(
             stockAnchorPoint.stock.eq(stock),
             stockAnchorPoint.deletedAt.isNull())
-        .orderBy(stockAnchorPoint.createdAt.desc())
+        .orderBy(stockAnchorPoint.tradeDate.desc(), stockAnchorPoint.id.desc())
         .limit(1)
         .fetchFirst();
 
@@ -82,7 +82,7 @@ public class StockAnchorPointRepositoryImpl implements StockAnchorPointRepositor
         .where(
             stockAnchorPoint.stockBase.isNull(),
             stockAnchorPoint.type.eq(StockAnchorPointType.HIGH),
-            stockAnchorPoint.createdAt.gt(currentBase.getCreatedAt()),
+            stockAnchorPoint.tradeDate.gt(currentBase.getStartedAt()),
             stockAnchorPoint.price.price.gt(overPrice)
         )
         .orderBy(stockAnchorPoint.tradeDate.asc())
@@ -97,7 +97,7 @@ public class StockAnchorPointRepositoryImpl implements StockAnchorPointRepositor
         .where(
             stockAnchorPoint.stockBase.isNull(),
             stockAnchorPoint.type.eq(StockAnchorPointType.LOW),
-            stockAnchorPoint.createdAt.gt(currentBase.getCreatedAt()),
+            stockAnchorPoint.tradeDate.gt(currentBase.getStartedAt()),
             stockAnchorPoint.price.price.lt(lowerPrice)
         )
         .orderBy(stockAnchorPoint.tradeDate.asc())
@@ -107,10 +107,11 @@ public class StockAnchorPointRepositoryImpl implements StockAnchorPointRepositor
   }
 
   @Override
-  public Optional<StockAnchorPoint> findLastAnchorPointWithoutBase(StockAnchorPointType stockAnchorPointType) {
+  public Optional<StockAnchorPoint> findLastAnchorPointWithoutBase(Stock stock, StockAnchorPointType stockAnchorPointType) {
     StockAnchorPoint result = jpaQueryFactory.selectFrom(stockAnchorPoint)
         .where(
             stockAnchorPoint.stockBase.isNull(),
+            stockAnchorPoint.stock.id.eq(stock.getId()),
             stockAnchorPoint.type.eq(stockAnchorPointType)
         )
         .orderBy(stockAnchorPoint.tradeDate.desc())
@@ -125,7 +126,7 @@ public class StockAnchorPointRepositoryImpl implements StockAnchorPointRepositor
         .where(
             stockAnchorPoint.stockBase.isNull(),
             stockAnchorPoint.stock.id.eq(currentBase.getStock().getId()),
-            stockAnchorPoint.createdAt.goe(currentBase.getCreatedAt()))
+            stockAnchorPoint.tradeDate.goe(currentBase.getStartedAt()))
         .fetch();
   }
 
