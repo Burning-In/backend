@@ -6,6 +6,8 @@ import static com.momentum.domain.stock.StockRegime.BREAKOUT_READY;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.momentum.infrastructure.auth.JwtAuthenticationFilter;
+import com.momentum.infrastructure.auth.JwtProvider;
 import com.momentum.domain.SnapshotJudgment;
 import com.momentum.domain.SnapshotRepository;
 import com.momentum.domain.StockSnapShot;
@@ -17,6 +19,8 @@ import com.momentum.domain.stockcandle.StockCandleRepository;
 import com.momentum.domain.stockcandle.StockDailyCandle;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotUpdateRequest;
+import jakarta.servlet.http.Cookie;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -34,11 +38,14 @@ import org.springframework.transaction.annotation.Transactional;
 class SnapshotV1ControllerTest {
 
   private static final LocalDateTime RECORDED_AT = LocalDateTime.of(2026, 5, 10, 9, 30);
+  private static final long MEMBER_ID = 1L;
 
   @Autowired
   private MockMvcTester mockMvcTester;
   @Autowired
   private ObjectMapper objectMapper;
+  @Autowired
+  private JwtProvider jwtProvider;
   @Autowired
   private SnapshotRepository snapshotRepository;
   @Autowired
@@ -56,6 +63,7 @@ class SnapshotV1ControllerTest {
 
     assertThat(mockMvcTester.post()
         .uri("/api/v1/snapshots")
+        .cookie(accessTokenCookie())
         .contentType(MediaType.APPLICATION_JSON)
         .content(body))
         .hasStatusOk()
@@ -70,7 +78,8 @@ class SnapshotV1ControllerTest {
     StockSnapShot snapshot = snapshotRepository.save(
         StockSnapShot.create(stock, 10_000L, BUY, List.of(), RECORDED_AT, "회고내용"));
 
-    assertThat(mockMvcTester.get().uri("/api/v1/snapshots/{id}", snapshot.getId()))
+    assertThat(mockMvcTester.get().uri("/api/v1/snapshots/{id}", snapshot.getId())
+        .cookie(accessTokenCookie()))
         .hasStatusOk()
         .bodyJson()
         .extractingPath("$.data.retrospective").isEqualTo("회고내용");
@@ -83,7 +92,9 @@ class SnapshotV1ControllerTest {
     saveSnapshot(stock, 100L, BUY);
     saveSnapshot(stock, 200L, SELL);
 
-    assertThat(mockMvcTester.get().uri("/api/v1/snapshots").param("regimes", "BREAKOUT_READY"))
+    assertThat(mockMvcTester.get().uri("/api/v1/snapshots")
+        .cookie(accessTokenCookie())
+        .param("regimes", "BREAKOUT_READY"))
         .hasStatusOk()
         .bodyJson()
         .extractingPath("$.data.buyCount").isEqualTo(1);
@@ -99,11 +110,17 @@ class SnapshotV1ControllerTest {
 
     assertThat(mockMvcTester.patch()
         .uri("/api/v1/snapshots/{id}", snapshot.getId())
+        .cookie(accessTokenCookie())
         .contentType(MediaType.APPLICATION_JSON)
         .content(body))
         .hasStatusOk()
         .bodyJson()
         .extractingPath("$.meta.result").isEqualTo("SUCCESS");
+  }
+
+  private Cookie accessTokenCookie() {
+    return new Cookie(JwtAuthenticationFilter.ACCESS_TOKEN_COOKIE,
+        jwtProvider.createAccessToken(MEMBER_ID, Instant.now()));
   }
 
   private Stock saveStock(String code, StockRegime regime) {
