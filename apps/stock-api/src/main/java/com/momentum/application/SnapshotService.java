@@ -3,10 +3,12 @@ package com.momentum.application;
 import com.momentum.domain.SnapshotJudgment;
 import com.momentum.domain.SnapshotRepository;
 import com.momentum.domain.StockSnapShot;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
-import com.momentum.domain.stock.StockRepository;
-import com.momentum.domain.stockcandle.StockCandleRepository;
+import com.momentum.sharedkernel.StockRegime;
+import com.momentum.infrastructure.query.SnapshotQueryDao;
+import com.momentum.infrastructure.query.SnapshotRows.SnapshotListRow;
+import com.momentum.infrastructure.query.SnapshotRows.SnapshotSourceRow;
+import com.momentum.infrastructure.query.StockIdentityRow;
+import com.momentum.infrastructure.query.StockMetaQueryDao;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateResponse;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotDetailResponse;
@@ -18,6 +20,7 @@ import com.momentum.support.error.ErrorType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,24 +30,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class SnapshotService {
 
   private final SnapshotRepository snapshotRepository;
-  private final StockRepository stockRepository;
-  private final StockCandleRepository stockCandleRepository;
+  private final SnapshotQueryDao snapshotQueryDao;
+  private final StockMetaQueryDao stockMetaQueryDao;
 
   @Transactional
   public SnapshotCreateResponse create(SnapshotCreateRequest request) {
-    Stock stock = stockRepository.findByStockCode(request.stockCode())
-        .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "종목을 찾을 수 없습니다: " + request.stockCode()));
-
-    long capturedPrice = stockCandleRepository.findRecentCandle(stock, LocalDate.now())
-        .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "최신 캔들을 찾을 수 없습니다: " + request.stockCode()))
-        .getClosePrice();
+    SnapshotSourceRow source = snapshotQueryDao.findSnapshotSource(request.stockCode(), LocalDate.now())
+        .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND,
+            "종목 또는 최신 캔들을 찾을 수 없습니다: " + request.stockCode()));
 
     List<StockSnapShot> references = snapshotRepository.findAllByIds(request.referenceSnapshotIds());
     LocalDateTime recordedAt = LocalDateTime.now();
 
     StockSnapShot snapshot = snapshotRepository.save(
-        StockSnapShot.create(stock, capturedPrice, request.judgment(), references, recordedAt,
-            request.retrospective()));
+        StockSnapShot.create(source.stockId(), StockRegime.valueOf(source.stockRegime()),
+            source.closePrice(), request.judgment(), references, recordedAt, request.retrospective()));
 
     return new SnapshotCreateResponse(snapshot.getId(), recordedAt.toLocalDate());
   }
@@ -52,12 +52,15 @@ public class SnapshotService {
   @Transactional(readOnly = true)
   public SnapshotDetailResponse getDetail(Long snapshotId) {
     StockSnapShot snapshot = findSnapshot(snapshotId);
+    StockIdentityRow stock = findStock(snapshot.getStockId());
+
     List<Long> referenceSnapshotIds = snapshot.getReferences().stream()
         .map(reference -> reference.getReferenced().getId())
         .toList();
+
     return new SnapshotDetailResponse(
-        snapshot.getStock().getName(),
-        snapshot.getStock().getCode(),
+        stock.stockName(),
+        stock.stockCode(),
         snapshot.getJudgment(),
         referenceSnapshotIds,
         snapshot.getRecordedAt(),
@@ -68,18 +71,18 @@ public class SnapshotService {
   @Transactional(readOnly = true)
   public SnapshotListResponse getSnapShots(LocalDateTime startDate, LocalDateTime endDate,
       List<SnapshotJudgment> judgments, List<StockRegime> regimes, String stockName) {
-    List<StockSnapShot> snapshots =
-        snapshotRepository.search(startDate, endDate, judgments, regimes, stockName);
+    List<SnapshotListRow> snapshots = snapshotQueryDao.search(
+        startDate, endDate, namesOf(judgments), namesOf(regimes), stockName);
 
     List<SnapshotListItem> items = snapshots.stream()
         .map(snapshot -> new SnapshotListItem(
-            snapshot.getId(),
-            snapshot.getStock().getName(),
-            snapshot.getStock().getCode(),
-            snapshot.getCapturedRegime(),
-            snapshot.getJudgment(),
-            snapshot.getRecordedAt(),
-            snapshot.getCapturedPrice()))
+            snapshot.snapshotId(),
+            snapshot.stockName(),
+            snapshot.stockCode(),
+            StockRegime.valueOf(snapshot.capturedRegime()),
+            SnapshotJudgment.valueOf(snapshot.judgment()),
+            snapshot.recordedAt(),
+            snapshot.capturedPrice()))
         .toList();
 
     return new SnapshotListResponse(
@@ -102,7 +105,25 @@ public class SnapshotService {
         .orElseThrow(() -> new CoreException(ErrorType.NOT_FOUND, "스냅샷을 찾을 수 없습니다: " + snapshotId));
   }
 
-  private int countOf(List<StockSnapShot> snapshots, SnapshotJudgment judgment) {
-    return (int) snapshots.stream().filter(snapshot -> snapshot.getJudgment() == judgment).count();
+  private StockIdentityRow findStock(Long stockId) {
+    Map<Long, StockIdentityRow> stocks = stockMetaQueryDao.findIdentitiesByIds(List.of(stockId));
+    StockIdentityRow stock = stocks.get(stockId);
+    if (stock == null) {
+      throw new CoreException(ErrorType.NOT_FOUND, "종목을 찾을 수 없습니다: " + stockId);
+    }
+    return stock;
+  }
+
+  private List<String> namesOf(List<? extends Enum<?>> values) {
+    if (values == null) {
+      return List.of();
+    }
+    return values.stream().map(Enum::name).toList();
+  }
+
+  private int countOf(List<SnapshotListRow> snapshots, SnapshotJudgment judgment) {
+    return (int) snapshots.stream()
+        .filter(snapshot -> SnapshotJudgment.valueOf(snapshot.judgment()) == judgment)
+        .count();
   }
 }

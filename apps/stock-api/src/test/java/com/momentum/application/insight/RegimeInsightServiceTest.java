@@ -1,22 +1,16 @@
 package com.momentum.application.insight;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.momentum.sharedkernel.StockRegime.BREAKOUT_FAILED;
+import static com.momentum.sharedkernel.StockRegime.BREAKOUT_SUCCESS;
+import static com.momentum.sharedkernel.StockRegime.DOWNSIDE_BREAK;
+import static com.momentum.sharedkernel.StockRegime.UNKNOWN;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.momentum.domain.base.StockBaseRepository;
-import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.anchorpoint.StockAnchorPointRepository;
-import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
-import com.momentum.domain.anchorpoint.entity.StockAnchorPointType;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
-import com.momentum.domain.stock.StockRepository;
-import com.momentum.domain.stock.StockTrend;
-import com.momentum.domain.stockcandle.StockCandleRepository;
-import com.momentum.domain.stockcandle.StockDailyCandle;
+import com.momentum.sharedkernel.StockRegime;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.StockRegimeResponse;
+import com.momentum.support.AnalysisTestData;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,92 +21,92 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 class RegimeInsightServiceTest {
 
-  @Autowired RegimeInsightService regimeInsightService;
-  @Autowired StockRepository stockRepository;
-  @Autowired StockCandleRepository stockCandleRepository;
-  @Autowired StockBaseRepository stockBaseRepository;
-  @Autowired StockAnchorPointRepository stockAnchorPointRepository;
-
   private static final LocalDate TODAY = LocalDate.now();
+
+  @Autowired RegimeInsightService regimeInsightService;
+  @Autowired AnalysisTestData analysisTestData;
 
   @Test
   @DisplayName("베이스 없으면 UNKNOWN 반환")
   void returnsUndeterminedWhenNoBase() {
-    Stock stock = saveStock("005930", StockRegime.UNKNOWN, StockTrend.UPTREND);
-    saveCandle(stock, TODAY, 10000L);
+    long stockId = analysisTestData.saveStock("005930", UNKNOWN);
+    analysisTestData.saveCandle(stockId, TODAY, 10_000L, 100_000L);
 
-    StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
+    StockRegimeResponse result = regimeInsightService.query("005930", TODAY);
 
-    assertThat(result.regime()).isEqualTo(StockRegime.UNKNOWN);
-    assertThat(result.currentPrice()).isEqualTo(10000L);
-    assertThat(result.supportLine()).isNull();
-    assertThat(result.resistanceLine()).isNull();
-    assertThat(result.changeRateFromReferenceLine()).isNull();
+    assertSoftly(softly -> {
+      softly.assertThat(result.regime()).isEqualTo(UNKNOWN);
+      softly.assertThat(result.currentPrice()).isEqualTo(10_000L);
+      softly.assertThat(result.supportLine()).isNull();
+      softly.assertThat(result.resistanceLine()).isNull();
+      softly.assertThat(result.changeRateFromReferenceLine()).isNull();
+    });
+  }
+
+  @Test
+  @DisplayName("레짐이 UNKNOWN이면 베이스가 있어도 UNKNOWN 반환")
+  void returnsUndeterminedWhenRegimeUnknown() {
+    long stockId = saveStockWithBase("000020", UNKNOWN, 10_000L, 8_000L, 9_000L);
+
+    StockRegimeResponse result = regimeInsightService.query("000020", TODAY);
+
+    assertSoftly(softly -> {
+      softly.assertThat(result.regime()).isEqualTo(UNKNOWN);
+      softly.assertThat(result.supportLine()).isNull();
+      softly.assertThat(result.resistanceLine()).isNull();
+    });
+    assertSoftly(softly -> softly.assertThat(stockId).isPositive());
   }
 
   @Test
   @DisplayName("BREAKOUT_SUCCESS 레짐이면 저항선 대비 변동률 반환")
   void returnsChangeRateFromResistanceWhenBreakoutSuccess() {
-    Stock stock = saveStock("000040", StockRegime.BREAKOUT_SUCCESS, StockTrend.UPTREND);
-    saveCandle(stock, TODAY, 11000L);
-    saveBase(stock, 10000L, 8000L);
+    saveStockWithBase("000040", BREAKOUT_SUCCESS, 10_000L, 8_000L, 11_000L);
 
-    StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
+    StockRegimeResponse result = regimeInsightService.query("000040", TODAY);
 
-    assertThat(result.regime()).isEqualTo(StockRegime.BREAKOUT_SUCCESS);
-    assertThat(result.resistanceLine()).isEqualTo(10000L);
-    assertThat(result.supportLine()).isEqualTo(8000L);
-    // (11000 - 10000) / 10000 * 100 = 10.0
-    assertThat(result.changeRateFromReferenceLine()).isEqualByComparingTo(new BigDecimal("10.0000"));
+    assertSoftly(softly -> {
+      softly.assertThat(result.regime()).isEqualTo(BREAKOUT_SUCCESS);
+      softly.assertThat(result.resistanceLine()).isEqualTo(10_000L);
+      softly.assertThat(result.supportLine()).isEqualTo(8_000L);
+      // (11000 - 10000) / 10000 * 100 = 10.0
+      softly.assertThat(result.changeRateFromReferenceLine()).isEqualByComparingTo(new BigDecimal("10.0000"));
+    });
   }
 
   @Test
   @DisplayName("DOWNSIDE_BREAK 레짐이면 지지선 대비 변동률 반환")
   void returnsChangeRateFromSupportWhenDownsideBreak() {
-    Stock stock = saveStock("000050", StockRegime.DOWNSIDE_BREAK, StockTrend.UPTREND);
-    saveCandle(stock, TODAY, 9000L);
-    saveBase(stock, 12000L, 10000L);
+    saveStockWithBase("000050", DOWNSIDE_BREAK, 12_000L, 10_000L, 9_000L);
 
-    StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
+    StockRegimeResponse result = regimeInsightService.query("000050", TODAY);
 
-    assertThat(result.regime()).isEqualTo(StockRegime.DOWNSIDE_BREAK);
     // (9000 - 10000) / 10000 * 100 = -10.0
-    assertThat(result.changeRateFromReferenceLine()).isEqualByComparingTo(new BigDecimal("-10.0000"));
+    assertSoftly(softly -> {
+      softly.assertThat(result.regime()).isEqualTo(DOWNSIDE_BREAK);
+      softly.assertThat(result.changeRateFromReferenceLine()).isEqualByComparingTo(new BigDecimal("-10.0000"));
+    });
   }
 
   @Test
   @DisplayName("BREAKOUT_FAILED 레짐이면 저항선 대비 음수 변동률 반환")
   void returnsNegativeChangeRateFromResistanceWhenBreakoutFailed() {
-    Stock stock = saveStock("000070", StockRegime.BREAKOUT_FAILED, StockTrend.UPTREND);
-    saveCandle(stock, TODAY, 9500L);
-    saveBase(stock, 10000L, 8000L);
+    saveStockWithBase("000070", BREAKOUT_FAILED, 10_000L, 8_000L, 9_500L);
 
-    StockRegimeResponse result = regimeInsightService.query(stock.getCode(), TODAY);
+    StockRegimeResponse result = regimeInsightService.query("000070", TODAY);
 
-    assertThat(result.regime()).isEqualTo(StockRegime.BREAKOUT_FAILED);
     // (9500 - 10000) / 10000 * 100 = -5.0
-    assertThat(result.changeRateFromReferenceLine()).isEqualByComparingTo(new BigDecimal("-5.0000"));
+    assertSoftly(softly -> {
+      softly.assertThat(result.regime()).isEqualTo(BREAKOUT_FAILED);
+      softly.assertThat(result.changeRateFromReferenceLine()).isEqualByComparingTo(new BigDecimal("-5.0000"));
+    });
   }
 
-  private Stock saveStock(String code, StockRegime regime, StockTrend trend) {
-    return stockRepository.save(Stock.of("테스트종목", code, regime, trend));
-  }
-
-  private void saveCandle(Stock stock, LocalDate date, long closePrice) {
-    String rawDate = date.format(DateTimeFormatter.BASIC_ISO_DATE);
-    stockCandleRepository.save(
-        StockDailyCandle.create(stock, rawDate, closePrice, closePrice, closePrice, closePrice, 100000L)
-    );
-  }
-
-  private void saveBase(Stock stock, long highPrice, long lowPrice) {
-    StockAnchorPoint high = stockAnchorPointRepository.save(
-        new StockAnchorPoint(highPrice, 100000L, TODAY.minusDays(10), StockAnchorPointType.HIGH, null, stock)
-    );
-    StockAnchorPoint low = stockAnchorPointRepository.save(
-        new StockAnchorPoint(lowPrice, 100000L, TODAY.minusDays(20), StockAnchorPointType.LOW, null, stock)
-    );
-    StockBase base = StockBase.init(high, low, 100000L);
-    stockBaseRepository.save(base);
+  private long saveStockWithBase(String code, StockRegime regime, long resistancePrice, long supportPrice,
+      long currentPrice) {
+    long stockId = analysisTestData.saveStock(code, regime);
+    analysisTestData.saveCandle(stockId, TODAY, currentPrice, 100_000L);
+    analysisTestData.saveBase(stockId, supportPrice, resistancePrice, TODAY.minusDays(20));
+    return stockId;
   }
 }

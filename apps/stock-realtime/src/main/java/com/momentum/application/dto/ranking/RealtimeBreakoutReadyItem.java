@@ -1,6 +1,6 @@
 package com.momentum.application.dto.ranking;
 
-import com.momentum.domain.score.StockRankScore;
+import com.momentum.infrastructure.query.RankedStockRow;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -12,14 +12,14 @@ public record RealtimeBreakoutReadyItem(
     BigDecimal fipScore
 ) {
 
-  public static List<RealtimeBreakoutReadyItem> from(List<StockRankScore> ranked) {
+  public static List<RealtimeBreakoutReadyItem> from(List<RankedStockRow> ranked) {
     return ranked.stream()
-        .map(score -> new RealtimeBreakoutReadyItem(
-            score.getStock().getCode(),
-            score.getStock().getName(),
+        .map(row -> new RealtimeBreakoutReadyItem(
+            row.stockName(),
+            row.stockCode(),
             null,
-            score.getMomentumScore().getValue(),
-            score.getFrogInPanScore().getValue()))
+            row.momentum(),
+            row.fip()))
         .toList();
   }
 }

@@ -2,7 +2,7 @@ package com.momentum.interfaces.api.snapshot;
 
 import com.momentum.application.SnapshotService;
 import com.momentum.domain.SnapshotJudgment;
-import com.momentum.domain.stock.StockRegime;
+import com.momentum.sharedkernel.StockRegime;
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateRequest;
 import com.momentum.interfaces.api.snapshot.SnapshotV1Dto.SnapshotCreateResponse;

@@ -3,7 +3,6 @@ package com.momentum.infrastructure.like;
 import com.momentum.domain.like.StockLike;
 import com.momentum.domain.like.StockLikeRepository;
 import com.momentum.domain.member.Member;
-import com.momentum.domain.stock.Stock;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +20,13 @@ public class StockLikeRepositoryImpl implements StockLikeRepository {
   }
 
   @Override
-  public Optional<StockLike> findByMemberAndStock(Member member, Stock stock) {
-    return stockLikeJpaRepository.findByMemberAndStock(member, stock);
+  public Optional<StockLike> findByMemberAndStockId(Member member, Long stockId) {
+    return stockLikeJpaRepository.findByMemberAndStockId(member, stockId);
   }
 
   @Override
   public List<StockLike> findAllByMember(Member member) {
-    return stockLikeJpaRepository.findAllByMemberWithStock(member);
+    return stockLikeJpaRepository.findAllByMemberOrderByCreatedAtDesc(member);
   }
 
   @Override

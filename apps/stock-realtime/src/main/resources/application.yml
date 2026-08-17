@@ -42,6 +42,16 @@ spring:
 spring:
   config:
     activate:
+      on-profile: test
+  # 분석 도메인 엔티티에 의존하지 않으므로, 테스트 스키마는 schema.sql 로 직접 만든다.
+  sql:
+    init:
+      mode: always
+
+---
+spring:
+  config:
+    activate:
       on-profile: dev
 
 ---

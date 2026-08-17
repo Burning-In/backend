@@ -1,9 +1,6 @@
 package com.momentum.application.insight;
 
-import com.momentum.domain.relativestrength.KospiRelativeStrength;
-import com.momentum.domain.relativestrength.KospiRelativeStrengthRepository;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRepository;
+import com.momentum.infrastructure.query.InsightQueryDao;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.RsResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,20 +12,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RsInsightService {
 
-  private final KospiRelativeStrengthRepository kospiRelativeStrengthRepository;
-  private final StockRepository stockRepository;
+  private final InsightQueryDao insightQueryDao;
 
   public RsResponse query(String stockCode, LocalDate at) {
-    Stock stock = findStock(stockCode);
-    KospiRelativeStrength rs = kospiRelativeStrengthRepository.findLatestByStock(stock)
-        .orElseThrow(() -> new NoSuchElementException("RS 데이터가 없습니다: " + stock.getName()));
+    int rsScore = insightQueryDao.findLatestRsScore(stockCode)
+        .orElseThrow(() -> new NoSuchElementException("RS 데이터가 없습니다: " + stockCode));
 
-    BigDecimal rsValue = BigDecimal.valueOf(rs.getRsScore());
+    BigDecimal rsValue = BigDecimal.valueOf(rsScore);
     return new RsResponse(rsValue, rsValue);
-  }
-
-  private Stock findStock(String stockCode) {
-    return stockRepository.findByStockCode(stockCode)
-        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
   }
 }

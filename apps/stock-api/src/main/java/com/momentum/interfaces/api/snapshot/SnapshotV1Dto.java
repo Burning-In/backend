@@ -1,7 +1,7 @@
 package com.momentum.interfaces.api.snapshot;
 
 import com.momentum.domain.SnapshotJudgment;
-import com.momentum.domain.stock.StockRegime;
+import com.momentum.sharedkernel.StockRegime;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

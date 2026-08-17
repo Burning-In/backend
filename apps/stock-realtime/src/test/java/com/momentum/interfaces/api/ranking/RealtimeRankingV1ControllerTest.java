@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.momentum.application.RealtimeRankingFacade;
-import com.momentum.domain.score.StockRankScoreRepository;
+import com.momentum.infrastructure.query.RealtimeRankingQueryDao;
 import com.momentum.infrastructure.sse.SseEmitterRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class RealtimeRankingV1ControllerTest {
   private MockMvc mockMvc;
 
   @MockitoBean
-  private StockRankScoreRepository stockRankScoreRepository;
+  private RealtimeRankingQueryDao realtimeRankingQueryDao;
 
   @Test
   @DisplayName("돌파 성공 랭킹 구독 시 비동기 SSE 연결이 시작된다")

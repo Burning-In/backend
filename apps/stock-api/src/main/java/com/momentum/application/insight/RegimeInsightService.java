@@ -1,18 +1,13 @@
 package com.momentum.application.insight;
 
-import com.momentum.domain.base.StockBaseRepository;
-import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
-import com.momentum.domain.stock.StockRepository;
-import com.momentum.domain.stockcandle.StockCandleRepository;
-import com.momentum.domain.stockcandle.StockDailyCandle;
+import com.momentum.sharedkernel.StockRegime;
+import com.momentum.infrastructure.query.InsightQueryDao;
+import com.momentum.infrastructure.query.InsightRows.RegimeRow;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.StockRegimeResponse;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,44 +15,40 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RegimeInsightService {
 
-  private final StockBaseRepository stockBaseRepository;
-  private final StockCandleRepository stockCandleRepository;
-  private final StockRepository stockRepository;
+  private final InsightQueryDao insightQueryDao;
 
   public StockRegimeResponse query(String stockCode, LocalDate at) {
-    Stock stock = findStock(stockCode);
-    StockDailyCandle candle = stockCandleRepository.findRecentCandle(stock, at)
-        .orElseThrow();
-    long currentPrice = candle.getClosePrice();
+    RegimeRow row = insightQueryDao.findRegime(stockCode, at)
+        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
 
-    Optional<StockBase> baseOpt = stockBaseRepository.findCurrentBaseWithLines(stock);
-    if (baseOpt.isEmpty() || stock.getStockRegime() == StockRegime.UNKNOWN) {
+    long currentPrice = row.currentPrice();
+    StockRegime regime = StockRegime.valueOf(row.stockRegime());
+    if (hasNoBase(row) || regime == StockRegime.UNKNOWN) {
       return new StockRegimeResponse(StockRegime.UNKNOWN, currentPrice, null, null, null);
     }
 
-    StockBase base = baseOpt.get();
-    long resistance = base.getHighestResistanceLine().getPrice();
-    long support = base.getLowestSupportLine().getPrice();
-    StockRegime regime = stock.getStockRegime();
-
-    long referenceLine;
-    if (regime == StockRegime.DOWNSIDE_BREAK) {
-      referenceLine = support;
-    } else {
-      referenceLine = resistance;
-    }
-    BigDecimal changeRate = changeRate(referenceLine, currentPrice);
+    long support = row.supportPrice();
+    long resistance = row.resistancePrice();
+    BigDecimal changeRate = changeRate(referenceLineOf(regime, support, resistance), currentPrice);
 
     return new StockRegimeResponse(regime, currentPrice, support, resistance, changeRate);
   }
 
-  private Stock findStock(String stockCode) {
-    return stockRepository.findByStockCode(stockCode)
-        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
+  private boolean hasNoBase(RegimeRow row) {
+    return row.supportPrice() == null || row.resistancePrice() == null;
+  }
+
+  private long referenceLineOf(StockRegime regime, long support, long resistance) {
+    if (regime == StockRegime.DOWNSIDE_BREAK) {
+      return support;
+    }
+    return resistance;
   }
 
   private BigDecimal changeRate(long base, long current) {
-    if (base == 0) return BigDecimal.ZERO;
+    if (base == 0) {
+      return BigDecimal.ZERO;
+    }
     return BigDecimal.valueOf((double) (current - base) / base * 100)
         .setScale(4, RoundingMode.HALF_UP);
   }

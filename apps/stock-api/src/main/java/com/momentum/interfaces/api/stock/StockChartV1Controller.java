@@ -1,7 +1,7 @@
 package com.momentum.interfaces.api.stock;
 
 import com.momentum.application.StockChartService;
-import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
+import com.momentum.sharedkernel.StockMovingAveragePeriod;
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.stock.StockChartV1Dto.BaseListResponse;
 import com.momentum.interfaces.api.stock.StockChartV1Dto.DailyCandleResponse;

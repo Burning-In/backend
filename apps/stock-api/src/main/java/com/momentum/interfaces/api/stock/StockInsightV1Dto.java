@@ -1,6 +1,6 @@
 package com.momentum.interfaces.api.stock;
 
-import com.momentum.domain.stock.StockRegime;
+import com.momentum.sharedkernel.StockRegime;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;

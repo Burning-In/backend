@@ -1,65 +1,67 @@
 package com.momentum.application;
 
-import com.momentum.domain.score.StockRankScore;
-import com.momentum.domain.score.StockRankScoreRepository;
-import com.momentum.domain.stock.TrackedStock;
-import com.momentum.domain.stock.StockRegime;
-import com.momentum.domain.stocktick.StockTick;
-import com.momentum.domain.stocktick.StockTickRepository;
+import com.momentum.sharedkernel.StockRegime;
+import com.momentum.infrastructure.query.RankedStockRow;
+import com.momentum.infrastructure.query.RankingQueryDao;
 import com.momentum.interfaces.api.rank.RankingV1Dto.BreakoutReadyResponse;
 import com.momentum.interfaces.api.rank.RankingV1Dto.BreakoutReadyResponse.BreakoutReadyItem;
 import com.momentum.interfaces.api.rank.RankingV1Dto.BreakoutSuccessResponse;
 import com.momentum.interfaces.api.rank.RankingV1Dto.BreakoutSuccessResponse.BreakoutSuccessItem;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class RankingService {
 
   private static final int RANKING_LIMIT = 50;
+  private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
-  private final StockRankScoreRepository stockRankScoreRepository;
-  private final StockTickRepository stockTickRepository;
+  private final RankingQueryDao rankingQueryDao;
 
-  @Transactional(readOnly = true)
   public BreakoutSuccessResponse getBreakoutSuccessRanking(LocalDateTime at) {
-    List<BreakoutSuccessItem> stocks = findRanked(StockRegime.BREAKOUT_SUCCESS, at).stream()
-        .map(score -> new BreakoutSuccessItem(
-            score.getStock().getName(),
-            score.getStock().getCode(),
-            getLastPrice(score.getStock().getCode(), at),
-            score.getMomentumScore().getValue(),
-            score.getFrogInPanScore().getValue()))
+    List<RankedStockRow> ranked = findRanked(StockRegime.BREAKOUT_SUCCESS, at);
+    Map<String, BigDecimal> prices = findLatestPrices(ranked, at);
+
+    List<BreakoutSuccessItem> stocks = ranked.stream()
+        .map(row -> new BreakoutSuccessItem(
+            row.stockName(),
+            row.stockCode(),
+            prices.get(row.stockCode()),
+            row.momentum(),
+            row.fip()))
         .toList();
     return new BreakoutSuccessResponse(stocks);
   }
 
-  @Transactional(readOnly = true)
   public BreakoutReadyResponse getBreakoutReadyRanking(LocalDateTime at) {
-    List<BreakoutReadyItem> stocks = findRanked(StockRegime.BREAKOUT_READY, at).stream()
-        .map(score -> new BreakoutReadyItem(
-            score.getStock().getName(),
-            score.getStock().getCode(),
-            getLastPrice(score.getStock().getCode(), at),
-            score.getMomentumScore().getValue(),
-            score.getFrogInPanScore().getValue()))
+    List<RankedStockRow> ranked = findRanked(StockRegime.BREAKOUT_READY, at);
+    Map<String, BigDecimal> prices = findLatestPrices(ranked, at);
+
+    List<BreakoutReadyItem> stocks = ranked.stream()
+        .map(row -> new BreakoutReadyItem(
+            row.stockName(),
+            row.stockCode(),
+            prices.get(row.stockCode()),
+            row.momentum(),
+            row.fip()))
         .toList();
     return new BreakoutReadyResponse(stocks);
   }
 
-  private List<StockRankScore> findRanked(StockRegime regime, LocalDateTime at) {
-    return stockRankScoreRepository.findLastStockRankScore(regime, at.toLocalDate(), RANKING_LIMIT);
+  private List<RankedStockRow> findRanked(StockRegime regime, LocalDateTime at) {
+    return rankingQueryDao.findRanked(regime.name(), at.toLocalDate(), RANKING_LIMIT);
   }
 
-  private BigDecimal getLastPrice(String code, LocalDateTime at) {
-    return stockTickRepository.findLatestTick(TrackedStock.fromCode(code), at)
-        .map(StockTick::getPrice)
-        .map(BigDecimal::valueOf)
-        .orElse(null);
+  private Map<String, BigDecimal> findLatestPrices(List<RankedStockRow> ranked, LocalDateTime at) {
+    List<String> stockCodes = ranked.stream()
+        .map(RankedStockRow::stockCode)
+        .toList();
+    return rankingQueryDao.findLatestPricesByStockCode(stockCodes, at.atZone(KST));
   }
 }

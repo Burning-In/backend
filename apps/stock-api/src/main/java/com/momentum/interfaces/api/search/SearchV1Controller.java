@@ -1,7 +1,7 @@
 package com.momentum.interfaces.api.search;
 
 import com.momentum.application.StockQueryService;
-import com.momentum.domain.stock.Stock;
+import com.momentum.infrastructure.query.StockMetaRow;
 import com.momentum.interfaces.api.ApiResponse;
 import com.momentum.interfaces.api.search.SearchV1Dto.StockSearchResponse;
 import java.util.List;
@@ -23,7 +23,7 @@ public class SearchV1Controller implements SearchV1ApiSpec {
   public ApiResponse<StockSearchResponse> searchStocks(
       @RequestParam(value = "query") String query
   ) {
-    List<Stock> stocks = stockQueryService.search(query);
+    List<StockMetaRow> stocks = stockQueryService.search(query);
     StockSearchResponse response = StockSearchResponse.from(stocks, null);
     return ApiResponse.success(response);
   }

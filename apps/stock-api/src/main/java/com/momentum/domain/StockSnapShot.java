@@ -1,14 +1,11 @@
 package com.momentum.domain;
 
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
+import com.momentum.sharedkernel.StockRegime;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,8 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockSnapShot extends BaseEntity {
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  private Stock stock;
+  private Long stockId;
 
   /**
    * 기록 시점의 레짐 (박제)
@@ -50,9 +46,9 @@ public class StockSnapShot extends BaseEntity {
   @Column(length = 2000)
   private String retrospective;
 
-  private StockSnapShot(Stock stock, StockRegime capturedRegime, long capturedPrice,
+  private StockSnapShot(Long stockId, StockRegime capturedRegime, long capturedPrice,
       SnapshotJudgment judgment, LocalDateTime recordedAt, String retrospective) {
-    this.stock = stock;
+    this.stockId = stockId;
     this.capturedRegime = capturedRegime;
     this.capturedPrice = capturedPrice;
     this.judgment = judgment;
@@ -60,9 +56,10 @@ public class StockSnapShot extends BaseEntity {
     this.retrospective = retrospective;
   }
 
-  public static StockSnapShot create(Stock stock, long capturedPrice, SnapshotJudgment judgment,
-      List<StockSnapShot> referencedSnapshots, LocalDateTime recordedAt, String retrospective) {
-    StockSnapShot snapshot = new StockSnapShot(stock, stock.getStockRegime(), capturedPrice,
+  public static StockSnapShot create(Long stockId, StockRegime capturedRegime, long capturedPrice,
+      SnapshotJudgment judgment, List<StockSnapShot> referencedSnapshots, LocalDateTime recordedAt,
+      String retrospective) {
+    StockSnapShot snapshot = new StockSnapShot(stockId, capturedRegime, capturedPrice,
         judgment, recordedAt, retrospective);
     referencedSnapshots.forEach(snapshot::addReference);
     return snapshot;
