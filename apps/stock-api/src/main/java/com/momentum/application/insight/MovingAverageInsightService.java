@@ -1,18 +1,9 @@
 package com.momentum.application.insight;
 
-import com.momentum.domain.movingaverage.StockMovingAverage;
-import com.momentum.domain.movingaverage.StockMovingAveragePeriod;
-import com.momentum.domain.movingaverage.StockMovingAverageRepository;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRepository;
-import com.momentum.domain.stockcandle.StockCandleRepository;
-import com.momentum.domain.stockcandle.StockDailyCandle;
+import com.momentum.infrastructure.query.MovingAverageQueryDao;
+import com.momentum.infrastructure.query.MovingAverageRow;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.MovingAverageResponse;
 import java.time.LocalDate;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,36 +11,26 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class MovingAverageInsightService {
 
-  private final StockMovingAverageRepository stockMovingAverageRepository;
-  private final StockCandleRepository stockCandleRepository;
-  private final StockRepository stockRepository;
+  private final MovingAverageQueryDao movingAverageQueryDao;
 
   public MovingAverageResponse query(String stockCode, LocalDate at) {
-    Stock stock = findStock(stockCode);
-    StockDailyCandle candle = stockCandleRepository.findRecentCandle(stock, at)
-        .orElseThrow();
-    long currentPrice = candle.getClosePrice();
-
-    List<StockMovingAverage> maList = stockMovingAverageRepository.findLatestByStock(stock, at);
-    Map<StockMovingAveragePeriod, Long> maMap = new EnumMap<>(StockMovingAveragePeriod.class);
-    maList.forEach(ma -> maMap.put(ma.getStockMovingAveragePeriod(), ma.getMa()));
-
-    Long ma50 = maMap.get(StockMovingAveragePeriod.MA_50);
-    Long ma150 = maMap.get(StockMovingAveragePeriod.MA_150);
-    Long ma200 = maMap.get(StockMovingAveragePeriod.MA_200);
-
-    boolean isAboveMa50 = ma50 != null && currentPrice > ma50;
-    boolean isMa50AboveMa150 = ma50 != null && ma150 != null && ma50 > ma150;
-    boolean isMa150AboveMa200 = ma150 != null && ma200 != null && ma150 > ma200;
+    MovingAverageRow row = movingAverageQueryDao.findByStockCode(stockCode, at);
 
     return new MovingAverageResponse(
-        currentPrice, ma50, ma150, ma200,
-        isAboveMa50, isMa50AboveMa150, isMa150AboveMa200
+        row.currentPrice(),
+        row.ma50(),
+        row.ma150(),
+        row.ma200(),
+        isAbove(row.currentPrice(), row.ma50()),
+        isAbove(row.ma50(), row.ma150()),
+        isAbove(row.ma150(), row.ma200())
     );
   }
 
-  private Stock findStock(String stockCode) {
-    return stockRepository.findByStockCode(stockCode)
-        .orElseThrow(() -> new NoSuchElementException("종목을 찾을 수 없습니다: " + stockCode));
+  private boolean isAbove(Long upper, Long lower) {
+    if (upper == null || lower == null) {
+      return false;
+    }
+    return upper > lower;
   }
 }

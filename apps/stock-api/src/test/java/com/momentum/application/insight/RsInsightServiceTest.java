@@ -1,20 +1,15 @@
 package com.momentum.application.insight;
 
+import static com.momentum.sharedkernel.StockRegime.UNKNOWN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import com.momentum.domain.relativestrength.Kospi;
-import com.momentum.domain.relativestrength.KospiRelativeStrength;
-import com.momentum.domain.relativestrength.KospiRelativeStrengthRepository;
-import com.momentum.domain.relativestrength.KospiRepository;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
-import com.momentum.domain.stock.StockRepository;
-import com.momentum.domain.stock.StockTrend;
 import com.momentum.interfaces.api.stock.StockInsightV1Dto.RsResponse;
+import com.momentum.sharedkernel.StockRegime;
+import com.momentum.support.AnalysisTestData;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,49 +22,58 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 class RsInsightServiceTest {
 
-  @Autowired RsInsightService rsInsightService;
-  @Autowired StockRepository stockRepository;
-  @Autowired KospiRepository kospiRepository;
-  @Autowired KospiRelativeStrengthRepository kospiRelativeStrengthRepository;
+  private static final String STOCK_CODE = "005930";
 
-  private Stock stock;
+  @Autowired RsInsightService rsInsightService;
+  @Autowired AnalysisTestData analysisTestData;
+
+  private long stockId;
 
   @BeforeEach
   void setUp() {
-    stock = stockRepository.save(Stock.of("삼성전자", "005930", StockRegime.UNKNOWN, StockTrend.UPTREND));
+    stockId = analysisTestData.saveStock(STOCK_CODE, UNKNOWN);
   }
 
   @Test
   @DisplayName("RS 점수 반환")
   void returnsRsScore() {
-    Kospi kospi = kospiRepository.save(new Kospi(2500L, LocalDate.now()));
-    kospiRelativeStrengthRepository.saveAll(List.of(KospiRelativeStrength.of(85, stock, kospi)));
+    analysisTestData.saveRelativeStrength(stockId, 85);
 
-    RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());
+    RsResponse result = rsInsightService.query(STOCK_CODE, LocalDate.now());
 
-    assertThat(result.rsValue()).isEqualByComparingTo(new BigDecimal("85"));
-    assertThat(result.percentileRank()).isEqualByComparingTo(new BigDecimal("85"));
+    assertSoftly(softly -> {
+      softly.assertThat(result.rsValue()).isEqualByComparingTo(new BigDecimal("85"));
+      softly.assertThat(result.percentileRank()).isEqualByComparingTo(new BigDecimal("85"));
+    });
   }
 
   @Test
   @DisplayName("RS 데이터 없으면 예외 발생")
   void throwsExceptionWhenNoRsData() {
-    assertThatThrownBy(() -> rsInsightService.query(stock.getCode(), LocalDate.now()))
+    assertThatThrownBy(() -> rsInsightService.query(STOCK_CODE, LocalDate.now()))
         .isInstanceOf(NoSuchElementException.class);
   }
 
   @Test
   @DisplayName("여러 RS 기록 중 최신 기록 반환")
   void returnsLatestRsWhenMultipleRecordsExist() {
-    Kospi oldKospi = kospiRepository.save(new Kospi(2400L, LocalDate.now().minusDays(30)));
-    Kospi newKospi = kospiRepository.save(new Kospi(2500L, LocalDate.now()));
-    kospiRelativeStrengthRepository.saveAll(List.of(
-        KospiRelativeStrength.of(50, stock, oldKospi),
-        KospiRelativeStrength.of(75, stock, newKospi)
-    ));
+    analysisTestData.saveRelativeStrength(stockId, 50);
+    analysisTestData.saveRelativeStrength(stockId, 75);
 
-    RsResponse result = rsInsightService.query(stock.getCode(), LocalDate.now());
+    RsResponse result = rsInsightService.query(STOCK_CODE, LocalDate.now());
 
     assertThat(result.rsValue()).isEqualByComparingTo(new BigDecimal("75"));
+  }
+
+  @Test
+  @DisplayName("다른 종목의 RS는 조회되지 않는다")
+  void ignoresOtherStockRs() {
+    long otherStockId = analysisTestData.saveStock("000660", UNKNOWN);
+    analysisTestData.saveRelativeStrength(otherStockId, 99);
+    analysisTestData.saveRelativeStrength(stockId, 40);
+
+    RsResponse result = rsInsightService.query(STOCK_CODE, LocalDate.now());
+
+    assertThat(result.rsValue()).isEqualByComparingTo(new BigDecimal("40"));
   }
 }

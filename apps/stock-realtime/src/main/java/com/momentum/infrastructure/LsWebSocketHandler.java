@@ -2,10 +2,16 @@ package com.momentum.infrastructure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.momentum.application.dto.StockTickInfo;
-import com.momentum.domain.stock.TrackedStock;
 import com.momentum.application.StockRealtimeFacade;
-import com.momentum.domain.stocktick.StockRealtimeRegimeService;
+import com.momentum.application.StockRealtimeRegimeService;
+import com.momentum.infrastructure.query.StockSubscriptionQueryDao;
+import com.momentum.infrastructure.query.StockTickWriteDao;
+import com.momentum.infrastructure.query.SubscriptionStockRow;
 import jakarta.annotation.PreDestroy;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,14 +26,20 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @RequiredArgsConstructor
 public class LsWebSocketHandler extends TextWebSocketHandler {
 
+  private static final DateTimeFormatter TRADE_TIME_FORMAT = DateTimeFormatter.ofPattern("HHmmss");
+
   @Value("${ls-investment.auth-token}")
   private String authToken;
 
   private final ObjectMapper objectMapper;
 
-  private WebSocketSession currentSession;
   private final StockRealtimeRegimeService stockRealtimeRegimeService;
   private final StockRealtimeFacade stockRealtimeFacade;
+  private final StockSubscriptionQueryDao stockSubscriptionQueryDao;
+  private final StockTickWriteDao stockTickWriteDao;
+
+  private WebSocketSession currentSession;
+  private List<SubscriptionStockRow> subscribedStocks = List.of();
 
 
   @Override
@@ -40,17 +52,20 @@ public class LsWebSocketHandler extends TextWebSocketHandler {
   }
 
   private void subscribeAll() throws Exception {
-    for (TrackedStock stock : TrackedStock.values()) {
+    subscribedStocks = stockSubscriptionQueryDao.findAll();
+    log.info("구독 대상 종목 {}건", subscribedStocks.size());
+
+    for (SubscriptionStockRow stock : subscribedStocks) {
 
       LsWsRequest request = LsWsRequest.subscribe(
           authToken,
-          stock.getCode()
+          stock.stockCode()
       );
 
       String payload = objectMapper.writeValueAsString(request);
       currentSession.sendMessage(new TextMessage(payload));
 
-      log.info("subscribe {}", stock);
+      log.info("subscribe {}", stock.stockName());
 
       Thread.sleep(100);
     }
@@ -67,11 +82,22 @@ public class LsWebSocketHandler extends TextWebSocketHandler {
         return;
       }
       StockTickInfo tickInfo = StockTickInfo.from(response);
+      saveTick(tickInfo);
       stockRealtimeFacade.broadcast(tickInfo);
       stockRealtimeRegimeService.resolveRealtimeRegime(tickInfo.stockCode(), tickInfo.currentPrice());
     } catch (Exception e) {
       log.warn("LS tick parse error payload={}", payload, e);
     }
+  }
+
+  private void saveTick(StockTickInfo tickInfo) {
+    LocalTime tradeTime = LocalTime.parse(tickInfo.tradeTime(), TRADE_TIME_FORMAT);
+    stockTickWriteDao.insert(
+        tickInfo.stockCode(),
+        LocalDate.now().atTime(tradeTime),
+        tickInfo.currentPrice(),
+        tickInfo.tradeVolume(),
+        tickInfo.accumulatedVolume());
   }
 
   @Override
@@ -112,20 +138,22 @@ public class LsWebSocketHandler extends TextWebSocketHandler {
 
       log.info("구독 해제 시작");
 
-      for (TrackedStock stock : TrackedStock.values()) {
+      for (SubscriptionStockRow stock : subscribedStocks) {
 
         LsWsRequest request =
             LsWsRequest.unsubscribe(
                 authToken,
-                stock.getCode()
+                stock.stockCode()
             );
 
         String payload = objectMapper.writeValueAsString(request);
 
         currentSession.sendMessage(new TextMessage(payload));
 
-        log.info("unsubscribe {}", stock);
+        log.info("unsubscribe {}", stock.stockName());
       }
+
+      subscribedStocks = List.of();
 
       currentSession.close(CloseStatus.NORMAL);
 

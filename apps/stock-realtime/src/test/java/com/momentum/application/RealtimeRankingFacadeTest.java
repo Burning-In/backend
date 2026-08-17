@@ -1,23 +1,21 @@
 package com.momentum.application;
 
-import static com.momentum.domain.stock.StockRegime.BREAKOUT_SUCCESS;
-import static com.momentum.domain.stock.StockRegime.DOWNSIDE_BREAK;
+import static com.momentum.sharedkernel.StockRegime.BREAKOUT_SUCCESS;
+import static com.momentum.sharedkernel.StockRegime.DOWNSIDE_BREAK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.momentum.application.dto.ranking.RealtimeBreakoutSuccessItem;
-import com.momentum.domain.score.StockRankScore;
-import com.momentum.domain.score.StockRankScoreRepository;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
-import com.momentum.domain.stock.StockTrend;
+import com.momentum.infrastructure.query.RankedStockRow;
+import com.momentum.infrastructure.query.RealtimeRankingQueryDao;
 import com.momentum.infrastructure.sse.SseEmitterRegistry;
-import java.time.LocalDate;
+import com.momentum.sharedkernel.StockRegime;
+import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +33,7 @@ class RealtimeRankingFacadeTest {
   private SseEmitterRegistry sseEmitterRegistry;
 
   @Mock
-  private StockRankScoreRepository stockRankScoreRepository;
+  private RealtimeRankingQueryDao realtimeRankingQueryDao;
 
   @InjectMocks
   private RealtimeRankingFacade realtimeRankingFacade;
@@ -65,14 +63,12 @@ class RealtimeRankingFacadeTest {
   }
 
   @Test
-  @DisplayName("updateRanking은 레짐 랭킹을 조회해 리포지토리 정렬 순서 그대로 ranking-update 이벤트로 전송한다") // 1차 필터, 2차 필터 검증 필요
+  @DisplayName("updateRanking은 레짐 랭킹을 조회해 쿼리 정렬 순서 그대로 ranking-update 이벤트로 전송한다")
   @SuppressWarnings("unchecked")
   void updateRankingBroadcastsRegimeRanking() {
-    // 정렬/필터/limit은 리포지토리(쿼리)가 담당 → 이미 정렬된 순서로 반환된다고 가정
-    StockRankScore first = score("종목B", "000050", BREAKOUT_SUCCESS);
-    StockRankScore second = score("종목A", "000040", BREAKOUT_SUCCESS);
-    when(stockRankScoreRepository.findLastStockRankScore(eq(BREAKOUT_SUCCESS), any(), anyLong()))
-        .thenReturn(List.of(first, second));
+    // 정렬/필터/limit은 쿼리가 담당 → 이미 정렬된 순서로 반환된다고 가정
+    when(realtimeRankingQueryDao.findRanked(eq(BREAKOUT_SUCCESS.name()), any(), anyInt()))
+        .thenReturn(List.of(row("종목B", "000050"), row("종목A", "000040")));
 
     realtimeRankingFacade.updateRanking(BREAKOUT_SUCCESS);
 
@@ -82,12 +78,14 @@ class RealtimeRankingFacadeTest {
     List<RealtimeBreakoutSuccessItem> response = (List<RealtimeBreakoutSuccessItem>) payload.getValue();
     assertThat(response).extracting(RealtimeBreakoutSuccessItem::stockCode)
         .containsExactly("000050", "000040");
+    assertThat(response).extracting(RealtimeBreakoutSuccessItem::stockName)
+        .containsExactly("종목B", "종목A");
   }
 
   @Test
   @DisplayName("랭킹 결과가 비어 있으면 broadcast하지 않는다")
   void updateRankingDoesNothingWhenEmpty() {
-    when(stockRankScoreRepository.findLastStockRankScore(eq(BREAKOUT_SUCCESS), any(), anyLong()))
+    when(realtimeRankingQueryDao.findRanked(eq(BREAKOUT_SUCCESS.name()), any(), anyInt()))
         .thenReturn(List.of());
 
     realtimeRankingFacade.updateRanking(BREAKOUT_SUCCESS);
@@ -100,12 +98,11 @@ class RealtimeRankingFacadeTest {
   void updateRankingDoesNothingForUntrackedRegime() {
     realtimeRankingFacade.updateRanking(DOWNSIDE_BREAK);
 
-    verify(stockRankScoreRepository, never()).findLastStockRankScore(any(), any(), anyLong());
+    verify(realtimeRankingQueryDao, never()).findRanked(any(), any(), anyInt());
     verify(sseEmitterRegistry, never()).broadcast(any(), any(), any());
   }
 
-  private StockRankScore score(String name, String code, StockRegime regime) {
-    Stock stock = Stock.of(name, code, regime, StockTrend.UPTREND);
-    return StockRankScore.create(List.of(12_000L, 10_000L), LocalDate.now(), stock);
+  private RankedStockRow row(String name, String code) {
+    return new RankedStockRow(name, code, BigDecimal.valueOf(0.2), BigDecimal.valueOf(0.1));
   }
 }

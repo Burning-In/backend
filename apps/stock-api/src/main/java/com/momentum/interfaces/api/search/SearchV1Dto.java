@@ -1,7 +1,7 @@
 package com.momentum.interfaces.api.search;
 
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
+import com.momentum.sharedkernel.StockRegime;
+import com.momentum.infrastructure.query.StockMetaRow;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -22,9 +22,13 @@ public class SearchV1Dto {
 
     }
 
-    public static StockSearchResponse from(List<Stock> stocks, List<BigDecimal> prices) {
+    public static StockSearchResponse from(List<StockMetaRow> stocks, List<BigDecimal> prices) {
       List<StockSearchItem> items = stocks.stream()
-          .map(stock -> new StockSearchItem(stock.getCode(), stock.getName(), null, stock.getStockRegime()))
+          .map(stock -> new StockSearchItem(
+              stock.stockCode(),
+              stock.stockName(),
+              null,
+              StockRegime.valueOf(stock.stockRegime())))
           .toList();
 
       return new StockSearchResponse(items);

@@ -2,7 +2,6 @@ package com.momentum.domain.like;
 
 import com.momentum.domain.BaseEntity;
 import com.momentum.domain.member.Member;
-import com.momentum.domain.stock.Stock;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
@@ -21,21 +20,20 @@ public class StockLike extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   private Member member;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  private Stock stock;
+  private Long stockId;
 
-  private StockLike(Member member, Stock stock) {
+  private StockLike(Member member, Long stockId) {
     this.member = member;
-    this.stock = stock;
+    this.stockId = stockId;
   }
 
-  public static StockLike create(Member member, Stock stock) {
-    return new StockLike(member, stock);
+  public static StockLike create(Member member, Long stockId) {
+    return new StockLike(member, stockId);
   }
 
   @Override
   protected void guard() {
-    if (member == null || stock == null) {
+    if (member == null || stockId == null) {
       throw new IllegalArgumentException("회원과 종목은 비어있을 수 없습니다.");
     }
   }

@@ -1,8 +1,8 @@
 package com.momentum.interfaces.api.stock;
 
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRegime;
-import com.momentum.domain.stock.StockTrend;
+import com.momentum.sharedkernel.StockRegime;
+import com.momentum.sharedkernel.StockTrend;
+import com.momentum.infrastructure.query.StockMetaRow;
 
 public class StockMetaV1Dto {
 
@@ -13,12 +13,12 @@ public class StockMetaV1Dto {
       StockTrend trend
   ) {
 
-    public static StockMetaResponse from(Stock stock) {
+    public static StockMetaResponse from(StockMetaRow stock) {
       return new StockMetaResponse(
-          stock.getCode(),
-          stock.getName(),
-          stock.getStockRegime(),
-          stock.getStockTrend());
+          stock.stockCode(),
+          stock.stockName(),
+          StockRegime.valueOf(stock.stockRegime()),
+          StockTrend.valueOf(stock.stockTrend()));
     }
   }
 }

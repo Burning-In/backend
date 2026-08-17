@@ -1,20 +1,11 @@
 package com.momentum.interfaces.api.stock;
 
-import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.HIGH;
-import static com.momentum.domain.anchorpoint.entity.StockAnchorPointType.LOW;
-import static com.momentum.domain.stock.StockRegime.BREAKOUT_READY;
+import static com.momentum.sharedkernel.StockRegime.BREAKOUT_READY;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.momentum.domain.base.StockBaseRepository;
-import com.momentum.domain.base.entity.StockBase;
-import com.momentum.domain.anchorpoint.entity.StockAnchorPoint;
-import com.momentum.domain.stock.Stock;
-import com.momentum.domain.stock.StockRepository;
-import com.momentum.domain.stock.StockTrend;
-import com.momentum.domain.stockcandle.StockCandleRepository;
-import com.momentum.domain.stockcandle.StockDailyCandle;
+import com.momentum.sharedkernel.StockRegime;
+import com.momentum.support.AnalysisTestData;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,19 +22,15 @@ class StockChartV1ControllerTest {
   @Autowired
   private MockMvcTester mockMvcTester;
   @Autowired
-  private StockRepository stockRepository;
-  @Autowired
-  private StockCandleRepository stockCandleRepository;
-  @Autowired
-  private StockBaseRepository stockBaseRepository;
+  private AnalysisTestData analysisTestData;
 
   @Test
   @DisplayName("일봉 조회 API 해피케이스")
   void getDailyCandle() {
-    Stock stock = saveStock("000520");
-    saveCandle(stock, LocalDate.of(2026, 5, 1), 100L);
-    saveCandle(stock, LocalDate.of(2026, 5, 2), 200L);
-    saveCandle(stock, LocalDate.of(2026, 5, 3), 300L);
+    long stockId = saveStock("000520");
+    saveCandle(stockId, LocalDate.of(2026, 5, 1), 100L);
+    saveCandle(stockId, LocalDate.of(2026, 5, 2), 200L);
+    saveCandle(stockId, LocalDate.of(2026, 5, 3), 300L);
 
     assertThat(mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/daily", "000520")
         .param("from", "2026-05-02")
@@ -56,12 +43,12 @@ class StockChartV1ControllerTest {
   @Test
   @DisplayName("이평선 조회 API 해피케이스 — 롤링 SMA")
   void getMovingAverages() {
-    Stock stock = saveStock("000080");
+    long stockId = saveStock("000080");
     LocalDate start = LocalDate.of(2026, 1, 1);
     for (int i = 0; i < 50; i++) {
-      saveCandle(stock, start.plusDays(i), 1_000L);   // index 0~49
+      saveCandle(stockId, start.plusDays(i), 1_000L);   // index 0~49
     }
-    saveCandle(stock, start.plusDays(50), 2_000L);     // index 50
+    saveCandle(stockId, start.plusDays(50), 2_000L);     // index 50
 
     var result = mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/moving-averages", "000080")
         .param("period", "MA_50")
@@ -77,8 +64,8 @@ class StockChartV1ControllerTest {
   @Test
   @DisplayName("베이스 조회 API 해피케이스")
   void getBases() {
-    Stock stock = saveStock("000540");
-    saveBase(stock, 10_000L, 8_000L);
+    long stockId = saveStock("000540");
+    saveBase(stockId, 10_000L, 8_000L);
 
     var result = mockMvcTester.get().uri("/api/v1/stocks/{code}/chart/bases", "000540")
         .param("from", "2000-01-01")
@@ -90,20 +77,15 @@ class StockChartV1ControllerTest {
     assertThat(result).bodyJson().extractingPath("$.data.bases[0].endDate").isNull();  // 유일 베이스 = 진행 중
   }
 
-  private Stock saveStock(String code) {
-    return stockRepository.save(Stock.of("종목" + code, code, BREAKOUT_READY, StockTrend.UPTREND));
+  private long saveStock(String code) {
+    return analysisTestData.saveStock(code, BREAKOUT_READY);
   }
 
-  private void saveCandle(Stock stock, LocalDate date, long close) {
-    stockCandleRepository.save(StockDailyCandle.create(
-        stock, date.format(DateTimeFormatter.BASIC_ISO_DATE), close, close, close, close, 1_000L));
+  private void saveCandle(long stockId, LocalDate date, long close) {
+    analysisTestData.saveCandle(stockId, date, close, 1_000L);
   }
 
-  private void saveBase(Stock stock, long resistancePrice, long supportPrice) {
-    StockAnchorPoint high = new StockAnchorPoint(resistancePrice, 100_000L, LocalDate.now().minusDays(10),
-        HIGH, null, stock);
-    StockAnchorPoint low = new StockAnchorPoint(supportPrice, 100_000L, LocalDate.now().minusDays(20),
-        LOW, null, stock);
-    stockBaseRepository.save(StockBase.init(high, low, 100_000L));
+  private void saveBase(long stockId, long resistancePrice, long supportPrice) {
+    analysisTestData.saveBase(stockId, supportPrice, resistancePrice, LocalDate.now());
   }
 }

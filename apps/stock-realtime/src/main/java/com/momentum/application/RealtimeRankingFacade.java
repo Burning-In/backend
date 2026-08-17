@@ -1,13 +1,13 @@
 package com.momentum.application;
 
-import static com.momentum.domain.stock.StockRegime.BREAKOUT_READY;
-import static com.momentum.domain.stock.StockRegime.BREAKOUT_SUCCESS;
+import static com.momentum.sharedkernel.StockRegime.BREAKOUT_READY;
+import static com.momentum.sharedkernel.StockRegime.BREAKOUT_SUCCESS;
 
 import com.momentum.application.dto.ranking.RealtimeBreakoutReadyItem;
 import com.momentum.application.dto.ranking.RealtimeBreakoutSuccessItem;
-import com.momentum.domain.score.StockRankScore;
-import com.momentum.domain.score.StockRankScoreRepository;
-import com.momentum.domain.stock.StockRegime;
+import com.momentum.sharedkernel.StockRegime;
+import com.momentum.infrastructure.query.RankedStockRow;
+import com.momentum.infrastructure.query.RealtimeRankingQueryDao;
 import com.momentum.infrastructure.sse.SseEmitterRegistry;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,9 +24,10 @@ public class RealtimeRankingFacade {
   private static final String BREAKOUT_READY_RANKING_KEY = RANKING_UPDATE_PREFIX + BREAKOUT_READY;
 
   private static final String RANKING_EVENT = "ranking-update";
+  private static final int RANKING_LIMIT = 50;
 
   private final SseEmitterRegistry sseEmitterRegistry;
-  private final StockRankScoreRepository stockRankScoreRepository;
+  private final RealtimeRankingQueryDao realtimeRankingQueryDao;
 
   public SseEmitter subscribeBreakoutSuccess() {
     return sseEmitterRegistry.create(BREAKOUT_SUCCESS_RANKING_KEY);
@@ -42,8 +43,9 @@ public class RealtimeRankingFacade {
       return;
     }
 
-    List<StockRankScore> ranked = stockRankScoreRepository.findLastStockRankScore(regime, LocalDate.now(), 50);
-    if (ranked == null || ranked.isEmpty()) {
+    List<RankedStockRow> ranked =
+        realtimeRankingQueryDao.findRanked(regime.name(), LocalDate.now(), RANKING_LIMIT);
+    if (ranked.isEmpty()) {
       return;
     }
     sseEmitterRegistry.broadcast(key, RANKING_EVENT, createItems(regime, ranked));
@@ -59,7 +61,7 @@ public class RealtimeRankingFacade {
     return null;
   }
 
-  private Object createItems(StockRegime regime, List<StockRankScore> ranked) {
+  private Object createItems(StockRegime regime, List<RankedStockRow> ranked) {
     if (regime.equals(BREAKOUT_SUCCESS)) {
       return RealtimeBreakoutSuccessItem.from(ranked);
     }
