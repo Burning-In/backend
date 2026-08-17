@@ -6,6 +6,9 @@ plugins {
 dependencies {
     // jpa
     api("org.springframework.boot:spring-boot-starter-data-jpa")
+    // 스키마 단일 출처 (db/migration)
+    api("org.flywaydb:flyway-core")
+    runtimeOnly("org.flywaydb:flyway-mysql")
     // querydsl
     api("com.querydsl:querydsl-jpa::jakarta")
     annotationProcessor("com.querydsl:querydsl-apt::jakarta")
