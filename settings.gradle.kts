@@ -7,6 +7,7 @@ include(
     ":core:stock",
     ":modules:jpa",
     ":supports:logging",
+    ":shared-kernel",
 )
 
 // configurations
